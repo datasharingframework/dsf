@@ -92,9 +92,8 @@ public class HistoryDaoTest extends AbstractDbTest
 			.disable(Feature.AUTO_CLOSE_TARGET).build();
 	private final OrganizationDao orgDao = new OrganizationDaoJdbc(defaultDataSource, permanentDeleteDataSource,
 			fhirContext, objectMapper);
-	private final HistoryDao dao = new HistoryDaoJdbc(defaultDataSource, fhirContext,
-			new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext, objectMapper,
-					DATABASE_USERS_GROUP),
+	private final HistoryDao dao = new HistoryDaoJdbc(defaultDataSource, new BinaryDaoJdbc(defaultDataSource,
+			permanentDeleteDataSource, fhirContext, objectMapper, DATABASE_USERS_GROUP),
 			new PgObjectFactoryImpl(fhirContext, objectMapper));
 	private final HistoryIdentityFilterFactory filterFactory = new HistoryIdentityFilterFactoryImpl();
 

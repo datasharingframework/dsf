@@ -26,7 +26,6 @@ import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionBindingComponent
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.fhir.dao.StructureDefinitionDao;
 import dev.dsf.fhir.event.EventGenerator;
@@ -35,7 +34,7 @@ import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.validation.SnapshotGenerator;
 import dev.dsf.fhir.validation.SnapshotGenerator.SnapshotWithValidationMessages;
 
-public class StructureDefinitionTaskProfileMigrationJob implements MigrationJob, InitializingBean
+public class StructureDefinitionTaskProfileMigrationJob implements MigrationJob
 {
 	private static final Logger logger = LoggerFactory.getLogger(StructureDefinitionTaskProfileMigrationJob.class);
 
@@ -69,23 +68,12 @@ public class StructureDefinitionTaskProfileMigrationJob implements MigrationJob,
 			SnapshotGenerator snapshotGenerator, ExceptionHandler exceptionHandler, EventHandler eventHandler,
 			EventGenerator eventGenerator)
 	{
-		this.dao = dao;
-		this.snapshotDao = snapshotDao;
-		this.snapshotGenerator = snapshotGenerator;
-		this.exceptionHandler = exceptionHandler;
-		this.eventHandler = eventHandler;
-		this.eventGenerator = eventGenerator;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(dao, "dao");
-		Objects.requireNonNull(snapshotDao, "snapshotDao");
-		Objects.requireNonNull(snapshotGenerator, "snapshotGenerator");
-		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
-		Objects.requireNonNull(eventHandler, "eventHandler");
-		Objects.requireNonNull(eventGenerator, "eventGenerator");
+		this.dao = Objects.requireNonNull(dao, "dao");
+		this.snapshotDao = Objects.requireNonNull(snapshotDao, "snapshotDao");
+		this.snapshotGenerator = Objects.requireNonNull(snapshotGenerator, "snapshotGenerator");
+		this.exceptionHandler = Objects.requireNonNull(exceptionHandler, "exceptionHandler");
+		this.eventHandler = Objects.requireNonNull(eventHandler, "eventHandler");
+		this.eventGenerator = Objects.requireNonNull(eventGenerator, "eventGenerator");
 	}
 
 	@Override

@@ -41,6 +41,30 @@ public class DeleteStructureDefinitionCommand extends DeleteCommand
 
 	private final StructureDefinitionDao snapshotDao;
 
+	/**
+	 * @param index
+	 * @param identity
+	 * @param returnType
+	 *            not <code>null</code>
+	 * @param bundle
+	 *            not <code>null</code>
+	 * @param entry
+	 *            not <code>null</code>
+	 * @param serverBase
+	 *            not <code>null</code>
+	 * @param authorizationHelper
+	 *            not <code>null</code>
+	 * @param responseGenerator
+	 *            not <code>null</code>
+	 * @param daoProvider
+	 *            not <code>null</code>
+	 * @param exceptionHandler
+	 *            not <code>null</code>
+	 * @param parameterConverter
+	 *            not <code>null</code>
+	 * @param eventGenerator
+	 *            not <code>null</code>
+	 */
 	public DeleteStructureDefinitionCommand(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
 			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper,
 			ResponseGenerator responseGenerator, DaoProvider daoProvider, ExceptionHandler exceptionHandler,

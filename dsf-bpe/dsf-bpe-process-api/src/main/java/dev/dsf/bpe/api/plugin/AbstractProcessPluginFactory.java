@@ -28,11 +28,10 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 
-public abstract class AbstractProcessPluginFactory implements ProcessPluginFactory, InitializingBean
+public abstract class AbstractProcessPluginFactory implements ProcessPluginFactory
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractProcessPluginFactory.class);
 
@@ -47,26 +46,30 @@ public abstract class AbstractProcessPluginFactory implements ProcessPluginFacto
 	protected final String serverBaseUrl;
 	private final Class<?> processPluginDefinitionType;
 
+	/**
+	 * @param apiVersion
+	 * @param apiClassLoader
+	 *            not <code>null</code>
+	 * @param apiApplicationContext
+	 *            not <code>null</code>
+	 * @param environment
+	 *            not <code>null</code>
+	 * @param serverBaseUrl
+	 *            not <code>null</code>
+	 * @param processPluginDefinitionType
+	 *            not <code>null</code>
+	 */
 	public AbstractProcessPluginFactory(int apiVersion, ClassLoader apiClassLoader,
 			ApplicationContext apiApplicationContext, ConfigurableEnvironment environment, String serverBaseUrl,
 			Class<?> processPluginDefinitionType)
 	{
 		this.apiVersion = apiVersion;
-		this.apiClassLoader = apiClassLoader;
-		this.apiApplicationContext = apiApplicationContext;
-		this.environment = environment;
-		this.serverBaseUrl = serverBaseUrl;
-		this.processPluginDefinitionType = processPluginDefinitionType;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(apiClassLoader, "apiClassLoader");
-		Objects.requireNonNull(apiApplicationContext, "apiApplicationContext");
-		Objects.requireNonNull(environment, "environment");
-		Objects.requireNonNull(serverBaseUrl, "serverBaseUrl");
-		Objects.requireNonNull(processPluginDefinitionType, "processPluginDefinitionType");
+		this.apiClassLoader = Objects.requireNonNull(apiClassLoader, "apiClassLoader");
+		this.apiApplicationContext = Objects.requireNonNull(apiApplicationContext, "apiApplicationContext");
+		this.environment = Objects.requireNonNull(environment, "environment");
+		this.serverBaseUrl = Objects.requireNonNull(serverBaseUrl, "serverBaseUrl");
+		this.processPluginDefinitionType = Objects.requireNonNull(processPluginDefinitionType,
+				"processPluginDefinitionType");
 	}
 
 	@Override

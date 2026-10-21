@@ -19,7 +19,6 @@ import java.security.Principal;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.thymeleaf.context.Context;
 
 import dev.dsf.bpe.ui.ThymeleafTemplateService;
@@ -28,7 +27,7 @@ import dev.dsf.common.auth.conf.Identity;
 import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.StreamingOutput;
 
-public abstract class AbstractService implements InitializingBean
+public abstract class AbstractService
 {
 	@jakarta.ws.rs.core.Context
 	private volatile SecurityContext securityContext;
@@ -36,17 +35,16 @@ public abstract class AbstractService implements InitializingBean
 	private final ThymeleafTemplateService templateService;
 	private final String htmlFragment;
 
+	/**
+	 * @param templateService
+	 *            not <code>null</code>
+	 * @param htmlFragment
+	 *            not <code>null</code>
+	 */
 	public AbstractService(ThymeleafTemplateService templateService, String htmlFragment)
 	{
-		this.templateService = templateService;
-		this.htmlFragment = htmlFragment;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(templateService, "templateService");
-		Objects.requireNonNull(htmlFragment, "htmlFragment");
+		this.templateService = Objects.requireNonNull(templateService, "templateService");
+		this.htmlFragment = Objects.requireNonNull(htmlFragment, "htmlFragment");
 	}
 
 	protected StreamingOutput write(String title, String heading, Consumer<Context> setValues)

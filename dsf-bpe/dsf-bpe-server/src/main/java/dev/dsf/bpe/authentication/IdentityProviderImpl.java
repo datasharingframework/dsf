@@ -24,7 +24,6 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.bpe.service.LocalOrganizationAndEndpointProvider;
 import dev.dsf.common.auth.conf.AbstractIdentityProvider;
@@ -34,27 +33,25 @@ import dev.dsf.common.auth.conf.PractitionerIdentityImpl;
 import dev.dsf.common.auth.conf.RoleConfig;
 import dev.dsf.common.auth.conf.X509CertificateWrapper;
 
-public class IdentityProviderImpl extends AbstractIdentityProvider<BpeServerRole>
-		implements IdentityProvider, InitializingBean
+public class IdentityProviderImpl extends AbstractIdentityProvider<BpeServerRole> implements IdentityProvider
 {
 	private static final Logger logger = LoggerFactory.getLogger(IdentityProviderImpl.class);
 
 	private final LocalOrganizationAndEndpointProvider organizationAndEndpointProvider;
 
+	/**
+	 * @param roleConfig
+	 *            not <code>null</code>
+	 * @param organizationAndEndpointProvider
+	 *            not <code>null</code>
+	 */
 	public IdentityProviderImpl(RoleConfig<BpeServerRole> roleConfig,
 			LocalOrganizationAndEndpointProvider organizationAndEndpointProvider)
 	{
 		super(roleConfig);
 
-		this.organizationAndEndpointProvider = organizationAndEndpointProvider;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		super.afterPropertiesSet();
-
-		Objects.requireNonNull(organizationAndEndpointProvider, "organizationAndEndpointProvider");
+		this.organizationAndEndpointProvider = Objects.requireNonNull(organizationAndEndpointProvider,
+				"organizationAndEndpointProvider");
 	}
 
 	@Override

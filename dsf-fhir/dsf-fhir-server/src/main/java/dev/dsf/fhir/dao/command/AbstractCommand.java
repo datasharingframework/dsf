@@ -15,6 +15,8 @@
  */
 package dev.dsf.fhir.dao.command;
 
+import java.util.Objects;
+
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.slf4j.Logger;
@@ -40,6 +42,22 @@ public abstract class AbstractCommand implements Command
 
 	protected final AuthorizationHelper authorizationHelper;
 
+	/**
+	 * @param transactionPriority
+	 * @param index
+	 * @param identity
+	 *            not <code>null</code>
+	 * @param returnType
+	 *            not <code>null</code>
+	 * @param bundle
+	 *            not <code>null</code>
+	 * @param entry
+	 *            not <code>null</code>
+	 * @param serverBase
+	 *            not <code>null</code>
+	 * @param authorizationHelper
+	 *            not <code>null</code>
+	 */
 	public AbstractCommand(int transactionPriority, int index, Identity identity, PreferReturnType returnType,
 			Bundle bundle, BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper)
 	{
@@ -47,13 +65,13 @@ public abstract class AbstractCommand implements Command
 
 		this.index = index;
 
-		this.identity = identity;
-		this.returnType = returnType;
-		this.bundle = bundle;
-		this.entry = entry;
-		this.serverBase = serverBase;
+		this.identity = Objects.requireNonNull(identity, "identity");
+		this.returnType = Objects.requireNonNull(returnType, "returnType");
+		this.bundle = Objects.requireNonNull(bundle, "bundle");
+		this.entry = Objects.requireNonNull(entry, "entry");
+		this.serverBase = Objects.requireNonNull(serverBase, "serverBase");
 
-		this.authorizationHelper = authorizationHelper;
+		this.authorizationHelper = Objects.requireNonNull(authorizationHelper, "authorizationHelper");
 	}
 
 	@Override

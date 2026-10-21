@@ -24,30 +24,28 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.validation.ValidationResult;
 import dev.dsf.bpe.v2.service.validation.FhirPackageIdentifier;
 import dev.dsf.bpe.v2.service.validation.ValidationService;
 
-public class ValidationServiceProviderImpl implements ValidationServiceProvider, InitializingBean
+public class ValidationServiceProviderImpl implements ValidationServiceProvider
 {
 	private static final Logger logger = LoggerFactory.getLogger(ValidationServiceProviderImpl.class);
 
 	private final boolean enabled;
 	private final FhirContext fhirContext;
 
+	/**
+	 * @param enabled
+	 * @param fhirContext
+	 *            not <code>null</code>
+	 */
 	public ValidationServiceProviderImpl(boolean enabled, FhirContext fhirContext)
 	{
 		this.enabled = enabled;
-		this.fhirContext = fhirContext;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(fhirContext, "fhirContext");
+		this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext");
 	}
 
 	@Override

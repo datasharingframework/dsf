@@ -15,6 +15,8 @@
  */
 package dev.dsf.fhir.dao.command;
 
+import java.util.Objects;
+
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Resource;
@@ -39,6 +41,36 @@ public abstract class AbstractCommandWithResource<R extends Resource, D extends 
 	protected final ValidationRules validationRules;
 	protected final ReferencesHelper<R> referencesHelper;
 
+	/**
+	 * @param transactionPriority
+	 * @param index
+	 * @param identity
+	 *            not <code>null</code>
+	 * @param returnType
+	 *            not <code>null</code>
+	 * @param bundle
+	 *            not <code>null</code>
+	 * @param entry
+	 *            not <code>null</code>
+	 * @param serverBase
+	 *            not <code>null</code>
+	 * @param authorizationHelper
+	 *            not <code>null</code>
+	 * @param resource
+	 *            not <code>null</code>
+	 * @param dao
+	 *            not <code>null</code>
+	 * @param exceptionHandler
+	 *            not <code>null</code>
+	 * @param parameterConverter
+	 *            not <code>null</code>
+	 * @param responseGenerator
+	 *            not <code>null</code>
+	 * @param referenceExtractor
+	 *            not <code>null</code>
+	 * @param referenceResolver
+	 *            not <code>null</code>
+	 */
 	public AbstractCommandWithResource(int transactionPriority, int index, Identity identity,
 			PreferReturnType returnType, Bundle bundle, BundleEntryComponent entry, String serverBase,
 			AuthorizationHelper authorizationHelper, R resource, D dao, ExceptionHandler exceptionHandler,
@@ -47,11 +79,11 @@ public abstract class AbstractCommandWithResource<R extends Resource, D extends 
 	{
 		super(transactionPriority, index, identity, returnType, bundle, entry, serverBase, authorizationHelper);
 
-		this.resource = resource;
-		this.dao = dao;
-		this.exceptionHandler = exceptionHandler;
-		this.parameterConverter = parameterConverter;
-		this.validationRules = validationRules;
+		this.resource = Objects.requireNonNull(resource, "resource");
+		this.dao = Objects.requireNonNull(dao, "dao");
+		this.exceptionHandler = Objects.requireNonNull(exceptionHandler, "exceptionHandler");
+		this.parameterConverter = Objects.requireNonNull(parameterConverter, "parameterConverter");
+		this.validationRules = Objects.requireNonNull(validationRules, "validationRules");
 
 		referencesHelper = new ReferencesHelperImpl<>(index, resource, serverBase, referenceExtractor,
 				referenceResolver, responseGenerator);

@@ -29,7 +29,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -132,9 +131,6 @@ public abstract class AbstractResourceServiceSecureTest<R extends Resource, S ex
 	{
 		resourceServiceSecure = createResourceServiceSecure();
 		resourceServiceSecure.setCurrentIdentityProvider(currentIdentityProvider);
-
-		Method afterPropertiesSet = resourceServiceSecure.getClass().getMethod("afterPropertiesSet");
-		afterPropertiesSet.invoke(resourceServiceSecure);
 
 		Identity identity = mock(Identity.class);
 		when(identity.getName()).thenReturn("Test Identity");

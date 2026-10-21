@@ -20,7 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import org.hl7.fhir.r4.model.Bundle;
@@ -28,7 +29,6 @@ import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.web.util.UriComponents;
@@ -42,9 +42,13 @@ import dev.dsf.bpe.client.dsf.ClientProvider;
 import dev.dsf.bpe.client.dsf.WebserviceClient;
 import dev.dsf.fhir.client.WebsocketClient;
 
-public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConnector, InitializingBean
+public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConnector
 {
 	private static final Logger logger = LoggerFactory.getLogger(LocalFhirConnectorImpl.class);
+
+	private final AtomicBoolean stopping = new AtomicBoolean();
+
+	private volatile WebsocketClient client;
 
 	private final Class<R> resourceType;
 	private final String resourceName;
@@ -54,23 +58,33 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 	private final Duration retrySleep;
 	private final int maxRetries;
 	private final Map<String, List<String>> subscriptionSearchParameter;
+	private final Executor connectExecutor;
 
 	public LocalFhirConnectorImpl(Class<R> resourceType, ClientProvider clientProvider,
 			SubscriptionHandlerFactory<R> subscriptionHandlerFactory, FhirContext fhirContext,
-			String subscriptionSearchParameter, Duration retrySleep, int maxRetries)
+			String subscriptionSearchParameter, Duration retrySleep, int maxRetries, Executor connectExecutor)
 	{
-		this.resourceType = resourceType;
-		this.resourceName = resourceType == null ? null : resourceType.getAnnotation(ResourceDef.class).name();
-		this.clientProvider = clientProvider;
-		this.subscriptionHandlerFactory = subscriptionHandlerFactory;
-		this.fhirContext = fhirContext;
+		this.resourceType = Objects.requireNonNull(resourceType, "resourceType");
+		this.resourceName = resourceType.getAnnotation(ResourceDef.class).name();
+		this.clientProvider = Objects.requireNonNull(clientProvider, "clientProvider");
+		this.subscriptionHandlerFactory = Objects.requireNonNull(subscriptionHandlerFactory,
+				"subscriptionHandlerFactory");
+		this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext");
 		this.subscriptionSearchParameter = parse(subscriptionSearchParameter, null);
-		this.retrySleep = retrySleep;
+		this.retrySleep = Objects.requireNonNull(retrySleep, "retrySleep");
 		this.maxRetries = maxRetries;
+
+		if (retrySleep.isNegative())
+			throw new IllegalArgumentException("retrySleepMillis negative");
+		// maxRetries < 0 => retry forever
+
+		this.connectExecutor = connectExecutor;
 	}
 
 	private Map<String, List<String>> parse(String queryParameters, String expectedPath)
 	{
+		Objects.requireNonNull(queryParameters, "queryParameters");
+
 		if (expectedPath != null && !expectedPath.isBlank())
 		{
 			UriComponents components = UriComponentsBuilder.fromUriString(queryParameters).build();
@@ -89,26 +103,14 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(resourceType, "resourceType");
-		Objects.requireNonNull(clientProvider, "clientProvider");
-		Objects.requireNonNull(subscriptionHandlerFactory, "subscriptionHandlerFactory");
-		Objects.requireNonNull(fhirContext, "fhirContext");
-		Objects.requireNonNull(subscriptionSearchParameter, "subscriptionSearchParameter");
-
-		if (retrySleep.isNegative())
-			throw new IllegalArgumentException("retrySleepMillis negative");
-
-		// maxRetries < 0 => retry forever
-	}
-
-	@Override
 	public void connect()
 	{
-		logger.debug("Retrieving Subscription and connecting to websocket");
+		if (stopping.get())
+			return;
 
-		CompletableFuture.supplyAsync(this::retrieveWebsocketSubscription, Executors.newSingleThreadExecutor())
+		logger.debug("Retrieving subscription and connecting to websocket");
+
+		CompletableFuture.supplyAsync(this::retrieveWebsocketSubscription, connectExecutor)
 				.thenApply(this::loadNewResources).thenAccept(this::connectWebsocket).exceptionally(this::onError);
 	}
 
@@ -252,8 +254,7 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 	{
 		try
 		{
-			WebsocketClient client = clientProvider.getWebsocketClient(this::connect,
-					subscription.getIdElement().getIdPart());
+			client = clientProvider.getWebsocketClient(this::connect, subscription.getIdElement().getIdPart());
 
 			EventType eventType = toEventType(subscription.getChannel().getPayload());
 			if (EventType.PING.equals(eventType))
@@ -307,6 +308,8 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 	@EventListener({ ContextClosedEvent.class })
 	public void onContextClosedEvent()
 	{
+		stopping.set(true);
+
 		clientProvider.disconnectAll();
 	}
 
@@ -348,5 +351,11 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 
 			return p;
 		};
+	}
+
+	@Override
+	public boolean isConnected()
+	{
+		return client != null && client.isConnected();
 	}
 }

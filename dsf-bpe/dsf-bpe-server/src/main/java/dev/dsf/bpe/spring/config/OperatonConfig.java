@@ -28,7 +28,6 @@ import org.operaton.bpm.engine.spring.ProcessEngineFactoryBean;
 import org.operaton.bpm.engine.spring.SpringProcessEngineConfiguration;
 import org.postgresql.Driver;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -50,9 +49,6 @@ public class OperatonConfig
 {
 	@Autowired
 	private PropertiesConfig propertiesConfig;
-
-	@Autowired
-	private ApplicationContext applicationContext;
 
 	@Autowired
 	private List<ProcessPluginFactory> processPluginFactories;
@@ -151,8 +147,7 @@ public class OperatonConfig
 	@Bean
 	public DelegateProvider delegateProvider()
 	{
-		return new DelegateProviderImpl(ClassLoader.getSystemClassLoader(), applicationContext,
-				dsfClientConfig.clientProvider().getWebserviceClient());
+		return new DelegateProviderImpl(dsfClientConfig.clientProvider().getWebserviceClient());
 	}
 
 	@Bean

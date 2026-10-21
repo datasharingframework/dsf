@@ -40,7 +40,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonArray;
@@ -70,7 +69,7 @@ import dev.dsf.fhir.search.parameters.ResourceId;
 import dev.dsf.fhir.search.parameters.ResourceLastUpdated;
 import dev.dsf.fhir.search.parameters.ResourceProfile;
 
-abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDao<R>, InitializingBean
+abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDao<R>
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractResourceDaoJdbc.class);
 
@@ -168,6 +167,30 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 		return new SearchQueryParameterFactory<>(parameterName, supplier, nameModifiers, null, null);
 	}
 
+	/**
+	 * @param dataSource
+	 *            not <code>null</code>
+	 * @param permanentDeleteDataSource
+	 *            not <code>null</code>
+	 * @param fhirContext
+	 *            not <code>null</code>
+	 * @param objectMapper
+	 *            not <code>null</code>
+	 * @param resourceType
+	 *            not <code>null</code>
+	 * @param resourceTable
+	 *            not <code>null</code>, not blank
+	 * @param resourceColumn
+	 *            not <code>null</code>, not blank
+	 * @param resourceIdColumn
+	 *            not <code>null</code>, not blank
+	 * @param userFilter
+	 *            not <code>null</code>
+	 * @param searchParameterFactories
+	 *            may be <code>null</code>
+	 * @param searchRevIncludeParameterFactories
+	 *            may be <code>null</code>
+	 */
 	AbstractResourceDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
 			ObjectMapper objectMapper, Class<R> resourceType, String resourceTable, String resourceColumn,
 			String resourceIdColumn, Function<Identity, SearchQueryIdentityFilter> userFilter,
@@ -180,25 +203,47 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 				userFilter, searchParameterFactories, searchRevIncludeParameterFactories);
 	}
 
+	/**
+	 * @param dataSource
+	 *            not <code>null</code>
+	 * @param permanentDeleteDataSource
+	 *            not <code>null</code>
+	 * @param resourceType
+	 *            not <code>null</code>
+	 * @param resourceTable
+	 *            not <code>null</code>
+	 * @param resourceColumn
+	 *            not <code>null</code>
+	 * @param resourceIdColumn
+	 *            not <code>null</code>
+	 * @param preparedStatementFactory
+	 *            not <code>null</code>
+	 * @param identityFilter
+	 *            not <code>null</code>
+	 * @param searchParameterFactories
+	 *            may be <code>null</code>
+	 * @param searchRevIncludeParameterFactories
+	 *            may be <code>null</code>
+	 */
 	AbstractResourceDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, Class<R> resourceType,
 			String resourceTable, String resourceColumn, String resourceIdColumn,
 			PreparedStatementFactory<R> preparedStatementFactory,
-			Function<Identity, SearchQueryIdentityFilter> userFilter,
+			Function<Identity, SearchQueryIdentityFilter> identityFilter,
 			List<SearchQueryParameterFactory<R>> searchParameterFactories,
 			List<SearchQueryRevIncludeParameterFactory> searchRevIncludeParameterFactories)
 	{
-		this.dataSource = dataSource;
-		this.permanentDeleteDataSource = permanentDeleteDataSource;
-		this.resourceType = resourceType;
-		resourceTypeName = Objects.requireNonNull(resourceType, "resourceType").getAnnotation(ResourceDef.class).name();
+		this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
+		this.permanentDeleteDataSource = Objects.requireNonNull(permanentDeleteDataSource, "permanentDeleteDataSource");
+		this.resourceType = Objects.requireNonNull(resourceType, "resourceType");
+		resourceTypeName = resourceType.getAnnotation(ResourceDef.class).name();
 
-		this.resourceTable = resourceTable;
-		this.resourceColumn = resourceColumn;
-		this.resourceIdColumn = resourceIdColumn;
+		this.resourceTable = Objects.requireNonNull(resourceTable, "resourceTable");
+		this.resourceColumn = Objects.requireNonNull(resourceColumn, "resourceColumn");
+		this.resourceIdColumn = Objects.requireNonNull(resourceIdColumn, "resourceIdColumn");
 
-		this.preparedStatementFactory = preparedStatementFactory;
+		this.preparedStatementFactory = Objects.requireNonNull(preparedStatementFactory, "preparedStatementFactory");
 
-		this.identityFilter = userFilter;
+		this.identityFilter = Objects.requireNonNull(identityFilter, "identityFilter");
 
 		if (searchParameterFactories != null)
 			this.searchParameterFactories.addAll(searchParameterFactories);
@@ -211,19 +256,6 @@ abstract class AbstractResourceDaoJdbc<R extends Resource> implements ResourceDa
 				() -> new ResourceLastUpdated<>(resourceType, resourceColumn));
 		resourceProfileFactory = new SearchQueryParameterFactory<>(ResourceProfile.PARAMETER_NAME,
 				() -> new ResourceProfile<>(resourceType, resourceColumn), ResourceProfile.getNameModifiers());
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(dataSource, "dataSource");
-		Objects.requireNonNull(permanentDeleteDataSource, "permanentDeleteDataSource");
-		Objects.requireNonNull(resourceType, "resourceType");
-		Objects.requireNonNull(resourceTable, "resourceTable");
-		Objects.requireNonNull(resourceColumn, "resourceColumn");
-		Objects.requireNonNull(resourceIdColumn, "resourceIdColumn");
-		Objects.requireNonNull(preparedStatementFactory, "preparedStatementFactory");
-		Objects.requireNonNull(identityFilter, "userFilter");
 	}
 
 	protected DataSource getDataSource()

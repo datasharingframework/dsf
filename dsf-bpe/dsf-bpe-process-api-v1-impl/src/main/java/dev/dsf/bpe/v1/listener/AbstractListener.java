@@ -28,24 +28,22 @@ import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.ParameterComponent;
 import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.ExecutionListener;
-import org.springframework.beans.factory.InitializingBean;
 
-public abstract class AbstractListener implements ExecutionListener, InitializingBean
+public abstract class AbstractListener implements ExecutionListener
 {
 	private final String serverBaseUrl;
 	private final Function<DelegateExecution, ListenerVariables> variablesFactory;
 
+	/**
+	 * @param serverBaseUrl
+	 *            not <code>null</code>
+	 * @param variablesFactory
+	 *            not <code>null</code>
+	 */
 	public AbstractListener(String serverBaseUrl, Function<DelegateExecution, ListenerVariables> variablesFactory)
 	{
-		this.serverBaseUrl = serverBaseUrl;
-		this.variablesFactory = variablesFactory;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(serverBaseUrl, "serverBaseUrl");
-		Objects.requireNonNull(variablesFactory, "variablesFactory");
+		this.serverBaseUrl = Objects.requireNonNull(serverBaseUrl, "serverBaseUrl");
+		this.variablesFactory = Objects.requireNonNull(variablesFactory, "variablesFactory");
 	}
 
 	@Override

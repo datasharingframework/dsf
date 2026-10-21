@@ -20,32 +20,33 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.hl7.fhir.r4.model.Organization;
-import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.common.auth.conf.OrganizationIdentityImpl;
 import dev.dsf.fhir.dao.OrganizationDao;
 import dev.dsf.fhir.help.ExceptionHandler;
 
-public class OrganizationProviderImpl implements OrganizationProvider, InitializingBean
+public class OrganizationProviderImpl implements OrganizationProvider
 {
 	private final ExceptionHandler exceptionHandler;
 	private final OrganizationDao dao;
 	private final String localOrganizationIdentifierValue;
 
+	/**
+	 * @param exceptionHandler
+	 *            not <code>null</code>
+	 * @param dao
+	 *            not <code>null</code>
+	 * @param localOrganizationIdentifierValue
+	 *            not <code>null</code>
+	 */
 	public OrganizationProviderImpl(ExceptionHandler exceptionHandler, OrganizationDao dao,
 			String localOrganizationIdentifierValue)
 	{
-		this.exceptionHandler = exceptionHandler;
-		this.dao = dao;
-		this.localOrganizationIdentifierValue = localOrganizationIdentifierValue;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(dao, "dao");
-		Objects.requireNonNull(localOrganizationIdentifierValue, "localOrganizationIdentifierValue");
+		this.exceptionHandler = Objects.requireNonNull(exceptionHandler, "exceptionHandler");
+		this.dao = Objects.requireNonNull(dao, "dao");
+		this.localOrganizationIdentifierValue = Objects.requireNonNull(localOrganizationIdentifierValue,
+				"localOrganizationIdentifierValue");
 	}
 
 	@Override

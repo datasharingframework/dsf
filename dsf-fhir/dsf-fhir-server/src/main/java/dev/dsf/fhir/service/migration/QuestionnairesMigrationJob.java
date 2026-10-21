@@ -26,13 +26,12 @@ import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.fhir.dao.QuestionnaireDao;
 import dev.dsf.fhir.event.EventGenerator;
 import dev.dsf.fhir.event.EventHandler;
 
-public class QuestionnairesMigrationJob implements MigrationJob, InitializingBean
+public class QuestionnairesMigrationJob implements MigrationJob
 {
 	private static final Logger logger = LoggerFactory.getLogger(QuestionnairesMigrationJob.class);
 
@@ -54,17 +53,9 @@ public class QuestionnairesMigrationJob implements MigrationJob, InitializingBea
 	 */
 	public QuestionnairesMigrationJob(QuestionnaireDao dao, EventHandler eventHandler, EventGenerator eventGenerator)
 	{
-		this.dao = dao;
-		this.eventHandler = eventHandler;
-		this.eventGenerator = eventGenerator;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(dao, "dao");
-		Objects.requireNonNull(eventHandler, "eventHandler");
-		Objects.requireNonNull(eventGenerator, "eventGenerator");
+		this.dao = Objects.requireNonNull(dao, "dao");
+		this.eventHandler = Objects.requireNonNull(eventHandler, "eventHandler");
+		this.eventGenerator = Objects.requireNonNull(eventGenerator, "eventGenerator");
 	}
 
 	@Override

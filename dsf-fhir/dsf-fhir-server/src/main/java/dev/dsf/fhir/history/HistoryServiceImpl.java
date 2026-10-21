@@ -23,7 +23,6 @@ import java.util.stream.Stream;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Resource;
-import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import dev.dsf.common.auth.conf.Identity;
@@ -47,7 +46,7 @@ import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
 
-public class HistoryServiceImpl implements HistoryService, InitializingBean
+public class HistoryServiceImpl implements HistoryService
 {
 	private final String serverBase;
 	private final int defaultPageCount;
@@ -58,30 +57,38 @@ public class HistoryServiceImpl implements HistoryService, InitializingBean
 	private final HistoryDao historyDao;
 	private final HistoryIdentityFilterFactory historyUserFilterFactory;
 
+	/**
+	 * @param serverBase
+	 *            not <code>null</code>
+	 * @param defaultPageCount
+	 *            <code>&gt;= 0</code>
+	 * @param parameterConverter
+	 *            not <code>null</code>
+	 * @param exceptionHandler
+	 *            not <code>null</code>
+	 * @param responseGenerator
+	 *            not <code>null</code>
+	 * @param referenceCleaner
+	 *            not <code>null</code>
+	 * @param historyDao
+	 *            not <code>null</code>
+	 * @param historyUserFilterFactory
+	 *            not <code>null</code>
+	 */
 	public HistoryServiceImpl(String serverBase, int defaultPageCount, ParameterConverter parameterConverter,
 			ExceptionHandler exceptionHandler, ResponseGenerator responseGenerator, ReferenceCleaner referenceCleaner,
 			HistoryDao historyDao, HistoryIdentityFilterFactory historyUserFilterFactory)
 	{
-		this.serverBase = serverBase;
-		this.defaultPageCount = defaultPageCount;
-		this.parameterConverter = parameterConverter;
-		this.exceptionHandler = exceptionHandler;
-		this.responseGenerator = responseGenerator;
-		this.referenceCleaner = referenceCleaner;
-		this.historyDao = historyDao;
-		this.historyUserFilterFactory = historyUserFilterFactory;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(serverBase, "serverBase");
-		Objects.requireNonNull(parameterConverter, "parameterConverter");
-		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
-		Objects.requireNonNull(responseGenerator, "responseGenerator");
-		Objects.requireNonNull(referenceCleaner, "referenceCleaner");
-		Objects.requireNonNull(historyDao, "historyDao");
-		Objects.requireNonNull(historyUserFilterFactory, "historyUserFilterFactory");
+		this.serverBase = Objects.requireNonNull(serverBase, "serverBase");
+		if (defaultPageCount < 0)
+			throw new IllegalArgumentException("defaultPageCount < 0");
+		this.defaultPageCount = Objects.requireNonNull(defaultPageCount, "defaultPageCount");
+		this.parameterConverter = Objects.requireNonNull(parameterConverter, "parameterConverter");
+		this.exceptionHandler = Objects.requireNonNull(exceptionHandler, "exceptionHandler");
+		this.responseGenerator = Objects.requireNonNull(responseGenerator, "responseGenerator");
+		this.referenceCleaner = Objects.requireNonNull(referenceCleaner, "referenceCleaner");
+		this.historyDao = Objects.requireNonNull(historyDao, "historyDao");
+		this.historyUserFilterFactory = Objects.requireNonNull(historyUserFilterFactory, "historyUserFilterFactory");
 	}
 
 	@Override

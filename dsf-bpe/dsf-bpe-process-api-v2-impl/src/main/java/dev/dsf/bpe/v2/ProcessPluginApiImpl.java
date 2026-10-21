@@ -17,8 +17,6 @@ package dev.dsf.bpe.v2;
 
 import java.util.Objects;
 
-import org.springframework.beans.factory.InitializingBean;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -41,7 +39,7 @@ import dev.dsf.bpe.v2.service.TaskHelper;
 import dev.dsf.bpe.v2.service.ValidationServiceProvider;
 import dev.dsf.bpe.v2.service.process.ProcessAuthorizationHelper;
 
-public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
+public class ProcessPluginApiImpl implements ProcessPluginApi
 {
 	private final ProcessPluginDefinition processPluginDefinition;
 	private final ProxyConfig proxyConfig;
@@ -65,6 +63,50 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	private final DataLogger dataLogger;
 	private final ValidationServiceProvider validationServiceProvider;
 
+	/**
+	 * @param processPluginDefinition
+	 *            not <code>null</code>
+	 * @param proxyConfig
+	 *            not <code>null</code>
+	 * @param endpointProvider
+	 *            not <code>null</code>
+	 * @param fhirContext
+	 *            not <code>null</code>
+	 * @param dsfClientProvider
+	 *            not <code>null</code>
+	 * @param fhirClientProvider
+	 *            not <code>null</code>
+	 * @param fhirClientConfigProvider
+	 *            not <code>null</code>
+	 * @param oidcClientProvider
+	 *            not <code>null</code>
+	 * @param mailService
+	 *            not <code>null</code>
+	 * @param mimeTypeService
+	 *            not <code>null</code>
+	 * @param objectMapper
+	 *            not <code>null</code>
+	 * @param organizationProvider
+	 *            not <code>null</code>
+	 * @param processAuthorizationHelper
+	 *            not <code>null</code>
+	 * @param questionnaireResponseHelper
+	 *            not <code>null</code>
+	 * @param readAccessHelper
+	 *            not <code>null</code>
+	 * @param taskHelper
+	 *            not <code>null</code>
+	 * @param compressionService
+	 *            not <code>null</code>
+	 * @param cryptoService
+	 *            not <code>null</code>
+	 * @param targetProvider
+	 *            not <code>null</code>
+	 * @param dataLogger
+	 *            not <code>null</code>
+	 * @param validationServiceProvider
+	 *            not <code>null</code>O
+	 */
 	public ProcessPluginApiImpl(ProcessPluginDefinition processPluginDefinition, ProxyConfig proxyConfig,
 			EndpointProvider endpointProvider, FhirContext fhirContext, DsfClientProvider dsfClientProvider,
 			FhirClientProvider fhirClientProvider, ClientConfigProvider fhirClientConfigProvider,
@@ -75,53 +117,28 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 			TaskHelper taskHelper, CompressionService compressionService, CryptoService cryptoService,
 			TargetProvider targetProvider, DataLogger dataLogger, ValidationServiceProvider validationServiceProvider)
 	{
-		this.processPluginDefinition = processPluginDefinition;
-		this.proxyConfig = proxyConfig;
-		this.endpointProvider = endpointProvider;
-		this.fhirContext = fhirContext;
-		this.dsfClientProvider = dsfClientProvider;
-		this.fhirClientProvider = fhirClientProvider;
-		this.fhirClientConfigProvider = fhirClientConfigProvider;
-		this.oidcClientProvider = oidcClientProvider;
-		this.mailService = mailService;
-		this.mimeTypeService = mimeTypeService;
-		this.objectMapper = objectMapper;
-		this.organizationProvider = organizationProvider;
-		this.processAuthorizationHelper = processAuthorizationHelper;
+		this.processPluginDefinition = Objects.requireNonNull(processPluginDefinition, "processPluginDefinition");
+		this.proxyConfig = Objects.requireNonNull(proxyConfig, "proxyConfig");
+		this.endpointProvider = Objects.requireNonNull(endpointProvider, "endpointProvider");
+		this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext");
+		this.dsfClientProvider = Objects.requireNonNull(dsfClientProvider, "dsfClientProvider");
+		this.fhirClientProvider = Objects.requireNonNull(fhirClientProvider, "fhirClientProvider");
+		this.fhirClientConfigProvider = Objects.requireNonNull(fhirClientConfigProvider, "fhirClientConfigProvider");
+		this.oidcClientProvider = Objects.requireNonNull(oidcClientProvider, "oidcClientProvider");
+		this.mailService = Objects.requireNonNull(mailService, "mailService");
+		this.mimeTypeService = Objects.requireNonNull(mimeTypeService, "mimeTypeService");
+		this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper");
+		this.organizationProvider = Objects.requireNonNull(organizationProvider, "organizationProvider");
+		this.processAuthorizationHelper = Objects.requireNonNull(processAuthorizationHelper,
+				"processAuthorizationHelper");
 		this.questionnaireResponseHelper = questionnaireResponseHelper;
-		this.readAccessHelper = readAccessHelper;
-		this.taskHelper = taskHelper;
-		this.compressionService = compressionService;
-		this.cryptoService = cryptoService;
-		this.targetProvider = targetProvider;
-		this.dataLogger = dataLogger;
-		this.validationServiceProvider = validationServiceProvider;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(processPluginDefinition, "processPluginDefinition");
-		Objects.requireNonNull(proxyConfig, "proxyConfig");
-		Objects.requireNonNull(endpointProvider, "endpointProvider");
-		Objects.requireNonNull(fhirContext, "fhirContext");
-		Objects.requireNonNull(dsfClientProvider, "dsfClientProvider");
-		Objects.requireNonNull(fhirClientProvider, "fhirClientProvider");
-		Objects.requireNonNull(fhirClientConfigProvider, "fhirClientConfigProvider");
-		Objects.requireNonNull(oidcClientProvider, "oidcClientProvider");
-		Objects.requireNonNull(mailService, "mailService");
-		Objects.requireNonNull(mimeTypeService, "mimeTypeService");
-		Objects.requireNonNull(objectMapper, "objectMapper");
-		Objects.requireNonNull(organizationProvider, "organizationProvider");
-		Objects.requireNonNull(processAuthorizationHelper, "processAuthorizationHelper");
-		Objects.requireNonNull(questionnaireResponseHelper, "questionnaireResponseHelper");
-		Objects.requireNonNull(readAccessHelper, "readAccessHelper");
-		Objects.requireNonNull(taskHelper, "taskHelper");
-		Objects.requireNonNull(compressionService, "compressionService");
-		Objects.requireNonNull(cryptoService, "cryptoService");
-		Objects.requireNonNull(targetProvider, "targetProvider");
-		Objects.requireNonNull(dataLogger, "dataLogger");
-		Objects.requireNonNull(validationServiceProvider, "validationServiceProvider");
+		this.readAccessHelper = Objects.requireNonNull(readAccessHelper, "readAccessHelper");
+		this.taskHelper = Objects.requireNonNull(taskHelper, "taskHelper");
+		this.compressionService = Objects.requireNonNull(compressionService, "compressionService");
+		this.cryptoService = Objects.requireNonNull(cryptoService, "cryptoService");
+		this.targetProvider = Objects.requireNonNull(targetProvider, "targetProvider");
+		this.dataLogger = Objects.requireNonNull(dataLogger, "dataLogger");
+		this.validationServiceProvider = Objects.requireNonNull(validationServiceProvider, "validationServiceProvider");
 	}
 
 	@Override

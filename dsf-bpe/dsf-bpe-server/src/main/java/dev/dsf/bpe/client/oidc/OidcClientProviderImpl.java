@@ -20,14 +20,12 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 
-import org.springframework.beans.factory.InitializingBean;
-
 import dev.dsf.bpe.api.client.oidc.OidcClient;
 import dev.dsf.bpe.api.config.FhirClientConfig.OidcAuthentication;
 import dev.dsf.bpe.api.service.BpeOidcClientProvider;
 import dev.dsf.common.config.ProxyConfig;
 
-public class OidcClientProviderImpl implements BpeOidcClientProvider, InitializingBean
+public class OidcClientProviderImpl implements BpeOidcClientProvider
 {
 	private final ProxyConfig proxyConfig;
 	private final String defaultDiscoveryPath;
@@ -43,51 +41,65 @@ public class OidcClientProviderImpl implements BpeOidcClientProvider, Initializi
 	private final Duration notBeforeIssuedAtExpiresAtLeeway;
 	private final boolean defaultVerifyAuthorizedParty;
 
+	/**
+	 * @param proxyConfig
+	 *            not <code>null</code>
+	 * @param defaultDiscoveryPath
+	 *            not <code>null</code>
+	 * @param defaultConnectTimeout
+	 *            not <code>null</code>, not negative, 0 represents infinity
+	 * @param defaultReadTimeout
+	 *            not <code>null</code>, not negative, 0 represents infinity
+	 * @param defaultTrustedStore
+	 *            not <code>null</code>
+	 * @param defaultEnableDebugLogging
+	 * @param userAgent
+	 *            not <code>null</code>
+	 * @param cacheEnabled
+	 * @param cacheTimeoutConfigurationResource
+	 *            not <code>null</code>, not negative
+	 * @param cacheTimeoutJwksResource
+	 *            not <code>null</code>, not negative
+	 * @param cacheTimeoutAccessTokenBeforeExpiration
+	 *            not <code>null</code>, not negative
+	 * @param notBeforeIssuedAtExpiresAtLeeway
+	 *            not <code>null</code>, not negative
+	 * @param defaultVerifyAuthorizedParty
+	 */
 	public OidcClientProviderImpl(ProxyConfig proxyConfig, String defaultDiscoveryPath, Duration defaultConnectTimeout,
 			Duration defaultReadTimeout, KeyStore defaultTrustedStore, boolean defaultEnableDebugLogging,
 			String userAgent, boolean cacheEnabled, Duration cacheTimeoutConfigurationResource,
 			Duration cacheTimeoutJwksResource, Duration cacheTimeoutAccessTokenBeforeExpiration,
 			Duration notBeforeIssuedAtExpiresAtLeeway, boolean defaultVerifyAuthorizedParty)
 	{
-		this.proxyConfig = proxyConfig;
-		this.defaultDiscoveryPath = defaultDiscoveryPath;
-		this.defaultConnectTimeout = defaultConnectTimeout;
-		this.defaultReadTimeout = defaultReadTimeout;
-		this.defaultTrustedStore = defaultTrustedStore;
+		this.proxyConfig = Objects.requireNonNull(proxyConfig, "proxyConfig");
+		this.defaultDiscoveryPath = Objects.requireNonNull(defaultDiscoveryPath, "defaultDiscoveryPath");
+		this.defaultConnectTimeout = Objects.requireNonNull(defaultConnectTimeout, "defaultConnectTimeout");
+		if (defaultConnectTimeout.isNegative())
+			throw new IllegalArgumentException("defaultConnectTimeout negative");
+		this.defaultReadTimeout = Objects.requireNonNull(defaultReadTimeout, "defaultReadTimeout");
+		if (defaultReadTimeout.isNegative())
+			throw new IllegalArgumentException("defaultReadTimeout negative");
+		this.defaultTrustedStore = Objects.requireNonNull(defaultTrustedStore, "defaultTrustedStore");
 		this.defaultEnableDebugLogging = defaultEnableDebugLogging;
-		this.userAgent = userAgent;
+		this.userAgent = Objects.requireNonNull(userAgent, "userAgent");
 		this.cacheEnabled = cacheEnabled;
-		this.cacheTimeoutConfigurationResource = cacheTimeoutConfigurationResource;
-		this.cacheTimeoutJwksResource = cacheTimeoutJwksResource;
-		this.cacheTimeoutAccessTokenBeforeExpiration = cacheTimeoutAccessTokenBeforeExpiration;
-		this.notBeforeIssuedAtExpiresAtLeeway = notBeforeIssuedAtExpiresAtLeeway;
-		this.defaultVerifyAuthorizedParty = defaultVerifyAuthorizedParty;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(proxyConfig, "proxyConfig");
-		Objects.requireNonNull(defaultConnectTimeout, "defaultConnectTimeout");
-		Objects.requireNonNull(defaultReadTimeout, "defaultReadTimeout");
-		Objects.requireNonNull(defaultTrustedStore, "defaultTrustedStore");
-		Objects.requireNonNull(userAgent, "userAgent");
-
-		Objects.requireNonNull(cacheTimeoutConfigurationResource, "cacheTimeoutConfigurationResource");
+		this.cacheTimeoutConfigurationResource = Objects.requireNonNull(cacheTimeoutConfigurationResource,
+				"cacheTimeoutConfigurationResource");
 		if (cacheTimeoutConfigurationResource.isNegative())
 			throw new IllegalArgumentException("cacheTimeoutConfigurationResource negative");
-
-		Objects.requireNonNull(cacheTimeoutJwksResource, "cacheTimeoutJwksResource");
+		this.cacheTimeoutJwksResource = Objects.requireNonNull(cacheTimeoutJwksResource, "cacheTimeoutJwksResource");
 		if (cacheTimeoutJwksResource.isNegative())
 			throw new IllegalArgumentException("cacheTimeoutJwksResource negative");
-
-		Objects.requireNonNull(cacheTimeoutAccessTokenBeforeExpiration, "cacheTimeoutAccessTokenBeforeExpiration");
+		this.cacheTimeoutAccessTokenBeforeExpiration = Objects.requireNonNull(cacheTimeoutAccessTokenBeforeExpiration,
+				"cacheTimeoutAccessTokenBeforeExpiration");
 		if (cacheTimeoutAccessTokenBeforeExpiration.isNegative())
 			throw new IllegalArgumentException("cacheTimeoutAccessTokenBeforeExpiration negative");
-
-		Objects.requireNonNull(notBeforeIssuedAtExpiresAtLeeway, "notBeforeIssuedAtExpiresAtLeeway");
+		this.notBeforeIssuedAtExpiresAtLeeway = Objects.requireNonNull(notBeforeIssuedAtExpiresAtLeeway,
+				"notBeforeIssuedAtExpiresAtLeeway");
 		if (notBeforeIssuedAtExpiresAtLeeway.isNegative())
 			throw new IllegalArgumentException("notBeforeIssuedAtExpiresAtLeeway negative");
+		this.defaultVerifyAuthorizedParty = defaultVerifyAuthorizedParty;
 	}
 
 	@Override

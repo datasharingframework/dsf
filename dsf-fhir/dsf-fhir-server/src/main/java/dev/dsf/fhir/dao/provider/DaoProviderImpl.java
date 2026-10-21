@@ -51,7 +51,6 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import dev.dsf.fhir.dao.ActivityDefinitionDao;
@@ -83,7 +82,7 @@ import dev.dsf.fhir.dao.SubscriptionDao;
 import dev.dsf.fhir.dao.TaskDao;
 import dev.dsf.fhir.dao.ValueSetDao;
 
-public class DaoProviderImpl implements DaoProvider, InitializingBean
+public class DaoProviderImpl implements DaoProvider
 {
 	private final DataSource dataSource;
 	private final ActivityDefinitionDao activityDefinitionDao;
@@ -119,6 +118,66 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 	private final Map<Class<? extends Resource>, ResourceDao<?>> daosByResourceClass = new HashMap<>();
 	private final Map<String, ResourceDao<?>> daosByResourceTypeName = new HashMap<>();
 
+	/**
+	 * @param dataSource
+	 *            not <code>null</code>
+	 * @param activityDefinitionDao
+	 *            not <code>null</code>
+	 * @param binaryDao
+	 *            not <code>null</code>
+	 * @param bundleDao
+	 *            not <code>null</code>
+	 * @param codeSystemDao
+	 *            not <code>null</code>
+	 * @param documentReferenceDao
+	 *            not <code>null</code>
+	 * @param endpointDao
+	 *            not <code>null</code>
+	 * @param groupDao
+	 *            not <code>null</code>
+	 * @param healthcareServiceDao
+	 *            not <code>null</code>
+	 * @param libraryDao
+	 *            not <code>null</code>
+	 * @param locationDao
+	 *            not <code>null</code>
+	 * @param measureDao
+	 *            not <code>null</code>
+	 * @param measureReportDao
+	 *            not <code>null</code>
+	 * @param namingSystemDao
+	 *            not <code>null</code>
+	 * @param organizationDao
+	 *            not <code>null</code>
+	 * @param organizationAffiliationDao
+	 *            not <code>null</code>
+	 * @param patientDao
+	 *            not <code>null</code>
+	 * @param practitionerDao
+	 *            not <code>null</code>
+	 * @param practitionerRoleDao
+	 *            not <code>null</code>
+	 * @param provenanceDao
+	 *            not <code>null</code>
+	 * @param questionnaireDao
+	 *            not <code>null</code>
+	 * @param questionnaireResponseDao
+	 *            not <code>null</code>
+	 * @param researchStudyDao
+	 *            not <code>null</code>
+	 * @param structureDefinitionDao
+	 *            not <code>null</code>
+	 * @param structureDefinitionSnapshotDao
+	 *            not <code>null</code>
+	 * @param subscriptionDao
+	 *            not <code>null</code>
+	 * @param taskDao
+	 *            not <code>null</code>
+	 * @param valueSetDao
+	 *            not <code>null</code>
+	 * @param readAccessDao
+	 *            not <code>null</code>
+	 */
 	public DaoProviderImpl(DataSource dataSource, ActivityDefinitionDao activityDefinitionDao, BinaryDao binaryDao,
 			BundleDao bundleDao, CodeSystemDao codeSystemDao, DocumentReferenceDao documentReferenceDao,
 			EndpointDao endpointDao, GroupDao groupDao, HealthcareServiceDao healthcareServiceDao,
@@ -131,36 +190,38 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 			StructureDefinitionDao structureDefinitionSnapshotDao, SubscriptionDao subscriptionDao, TaskDao taskDao,
 			ValueSetDao valueSetDao, ReadAccessDao readAccessDao)
 	{
-		this.dataSource = dataSource;
-		this.activityDefinitionDao = activityDefinitionDao;
-		this.binaryDao = binaryDao;
-		this.bundleDao = bundleDao;
-		this.codeSystemDao = codeSystemDao;
-		this.documentReferenceDao = documentReferenceDao;
-		this.endpointDao = endpointDao;
-		this.groupDao = groupDao;
-		this.healthcareServiceDao = healthcareServiceDao;
-		this.libraryDao = libraryDao;
-		this.locationDao = locationDao;
-		this.measureDao = measureDao;
-		this.measureReportDao = measureReportDao;
-		this.namingSystemDao = namingSystemDao;
-		this.organizationDao = organizationDao;
-		this.organizationAffiliationDao = organizationAffiliationDao;
-		this.patientDao = patientDao;
-		this.practitionerDao = practitionerDao;
-		this.practitionerRoleDao = practitionerRoleDao;
-		this.provenanceDao = provenanceDao;
-		this.questionnaireDao = questionnaireDao;
-		this.questionnaireResponseDao = questionnaireResponseDao;
-		this.researchStudyDao = researchStudyDao;
-		this.structureDefinitionDao = structureDefinitionDao;
-		this.structureDefinitionSnapshotDao = structureDefinitionSnapshotDao;
-		this.subscriptionDao = subscriptionDao;
-		this.taskDao = taskDao;
-		this.valueSetDao = valueSetDao;
+		this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
+		this.activityDefinitionDao = Objects.requireNonNull(activityDefinitionDao, "activityDefinitionDao");
+		this.binaryDao = Objects.requireNonNull(binaryDao, "binaryDao");
+		this.bundleDao = Objects.requireNonNull(bundleDao, "bundleDao");
+		this.codeSystemDao = Objects.requireNonNull(codeSystemDao, "codeSystemDao");
+		this.documentReferenceDao = Objects.requireNonNull(documentReferenceDao, "documentReferenceDao");
+		this.endpointDao = Objects.requireNonNull(endpointDao, "endpointDao");
+		this.groupDao = Objects.requireNonNull(groupDao, "groupDao");
+		this.healthcareServiceDao = Objects.requireNonNull(healthcareServiceDao, "healthcareServiceDao");
+		this.libraryDao = Objects.requireNonNull(libraryDao, "libraryDao");
+		this.locationDao = Objects.requireNonNull(locationDao, "locationDao");
+		this.measureDao = Objects.requireNonNull(measureDao, "measureDao");
+		this.measureReportDao = Objects.requireNonNull(measureReportDao, "measureReportDao");
+		this.namingSystemDao = Objects.requireNonNull(namingSystemDao, "namingSystemDao");
+		this.organizationDao = Objects.requireNonNull(organizationDao, "organizationDao");
+		this.organizationAffiliationDao = Objects.requireNonNull(organizationAffiliationDao,
+				"organizationAffiliationDao");
+		this.patientDao = Objects.requireNonNull(patientDao, "patientDao");
+		this.practitionerDao = Objects.requireNonNull(practitionerDao, "practitionerDao");
+		this.practitionerRoleDao = Objects.requireNonNull(practitionerRoleDao, "practitionerRoleDao");
+		this.provenanceDao = Objects.requireNonNull(provenanceDao, "provenanceDao");
+		this.questionnaireDao = Objects.requireNonNull(questionnaireDao, "questionnaireDao");
+		this.questionnaireResponseDao = Objects.requireNonNull(questionnaireResponseDao, "questionnaireResponseDao");
+		this.researchStudyDao = Objects.requireNonNull(researchStudyDao, "researchStudyDao");
+		this.structureDefinitionDao = Objects.requireNonNull(structureDefinitionDao, "structureDefinitionDao");
+		this.structureDefinitionSnapshotDao = Objects.requireNonNull(structureDefinitionSnapshotDao,
+				"structureDefinitionSnapshotDao");
+		this.subscriptionDao = Objects.requireNonNull(subscriptionDao, "subscriptionDao");
+		this.taskDao = Objects.requireNonNull(taskDao, "taskDao");
+		this.valueSetDao = Objects.requireNonNull(valueSetDao, "valueSetDao");
 
-		this.readAccessDao = readAccessDao;
+		this.readAccessDao = Objects.requireNonNull(readAccessDao, "readAccessDao");
 
 		daosByResourceClass.put(ActivityDefinition.class, activityDefinitionDao);
 		daosByResourceClass.put(Binary.class, binaryDao);
@@ -190,38 +251,6 @@ public class DaoProviderImpl implements DaoProvider, InitializingBean
 		daosByResourceClass.put(ValueSet.class, valueSetDao);
 
 		daosByResourceClass.forEach((k, v) -> daosByResourceTypeName.put(k.getAnnotation(ResourceDef.class).name(), v));
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(activityDefinitionDao, "activityDefinitionDao");
-		Objects.requireNonNull(binaryDao, "binaryDao");
-		Objects.requireNonNull(bundleDao, "bundleDao");
-		Objects.requireNonNull(codeSystemDao, "codeSystemDao");
-		Objects.requireNonNull(documentReferenceDao, "documentReferenceDao");
-		Objects.requireNonNull(endpointDao, "endpointDao");
-		Objects.requireNonNull(groupDao, "groupDao");
-		Objects.requireNonNull(healthcareServiceDao, "healthcareServiceDao");
-		Objects.requireNonNull(libraryDao, "libraryDao");
-		Objects.requireNonNull(locationDao, "locationDao");
-		Objects.requireNonNull(measureDao, "measureDao");
-		Objects.requireNonNull(measureReportDao, "measureReportDao");
-		Objects.requireNonNull(namingSystemDao, "namingSystemDao");
-		Objects.requireNonNull(organizationDao, "organizationDao");
-		Objects.requireNonNull(organizationAffiliationDao, "organizationAffiliationDao");
-		Objects.requireNonNull(patientDao, "patientDao");
-		Objects.requireNonNull(practitionerDao, "practitionerDao");
-		Objects.requireNonNull(practitionerRoleDao, "practitionerRoleDao");
-		Objects.requireNonNull(provenanceDao, "provenanceDao");
-		Objects.requireNonNull(questionnaireDao, "questionnaireDao");
-		Objects.requireNonNull(questionnaireResponseDao, "questionnaireResponseDao");
-		Objects.requireNonNull(researchStudyDao, "researchStudyDao");
-		Objects.requireNonNull(structureDefinitionDao, "structureDefinitionDao");
-		Objects.requireNonNull(structureDefinitionSnapshotDao, "structureDefinitionSnapshotDao");
-		Objects.requireNonNull(subscriptionDao, "subscriptionDao");
-		Objects.requireNonNull(taskDao, "taskDao");
-		Objects.requireNonNull(valueSetDao, "valueSetDao");
 	}
 
 	@Override

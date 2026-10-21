@@ -71,14 +71,6 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		super.afterPropertiesSet();
-
-		executeLargeObjectUnlink();
-	}
-
-	@Override
 	protected PreparedStatementFactoryBinary getPreparedStatementFactory()
 	{
 		return (PreparedStatementFactoryBinary) super.getPreparedStatementFactory();

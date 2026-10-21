@@ -28,12 +28,11 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
 import dev.dsf.bpe.api.plugin.ProcessPluginFactory;
 
-public class ProcessPluginLoaderImpl implements ProcessPluginLoader, InitializingBean
+public class ProcessPluginLoaderImpl implements ProcessPluginLoader
 {
 	private static final Logger logger = LoggerFactory.getLogger(ProcessPluginLoaderImpl.class);
 
@@ -42,6 +41,14 @@ public class ProcessPluginLoaderImpl implements ProcessPluginLoader, Initializin
 	private final Path pluginDirectory;
 	private final List<Path> explodedPluginDirectories = new ArrayList<>();
 
+	/**
+	 * @param processPluginFactories
+	 *            may be <code>null</code>
+	 * @param pluginDirectory
+	 *            not <code>null</code>
+	 * @param explodedPluginDirectories
+	 *            may be <code>null</code>
+	 */
 	public ProcessPluginLoaderImpl(Collection<? extends ProcessPluginFactory> processPluginFactories,
 			Path pluginDirectory, Collection<? extends Path> explodedPluginDirectories)
 	{
@@ -51,15 +58,9 @@ public class ProcessPluginLoaderImpl implements ProcessPluginLoader, Initializin
 			this.processPluginFactories.sort(Comparator.comparingInt(ProcessPluginFactory::getApiVersion).reversed());
 		}
 
-		this.pluginDirectory = pluginDirectory;
+		this.pluginDirectory = Objects.requireNonNull(pluginDirectory, "pluginDirectory");
 		if (explodedPluginDirectories != null)
 			this.explodedPluginDirectories.addAll(explodedPluginDirectories);
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(pluginDirectory, "pluginDirectory");
 	}
 
 	@Override

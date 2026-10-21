@@ -35,7 +35,6 @@ import org.operaton.bpm.engine.RepositoryService;
 import org.operaton.bpm.engine.repository.Deployment;
 import org.operaton.bpm.engine.repository.ProcessDefinition;
 import org.operaton.bpm.model.bpmn.BpmnModelInstance;
-import org.springframework.beans.factory.InitializingBean;
 import org.thymeleaf.context.Context;
 
 import dev.dsf.bpe.ui.ThymeleafTemplateService;
@@ -51,18 +50,24 @@ import jakarta.ws.rs.core.StreamingOutput;
 
 @RolesAllowed("ADMIN")
 @Path(ProcessService.PATH)
-public class ProcessService extends AbstractService implements InitializingBean
+public class ProcessService extends AbstractService
 {
 	public static final String PATH = "Process";
 
 	private final RepositoryService repositoryService;
 	private final TransformerFactory transformerFactory;
 
+	/**
+	 * @param templateService
+	 *            not <code>null</code>
+	 * @param repositoryService
+	 *            not <code>null</code>
+	 */
 	public ProcessService(ThymeleafTemplateService templateService, RepositoryService repositoryService)
 	{
 		super(templateService, "Process");
 
-		this.repositoryService = repositoryService;
+		this.repositoryService = Objects.requireNonNull(repositoryService, "repositoryService");
 
 		transformerFactory = TransformerFactory.newInstance();
 		transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
@@ -76,14 +81,6 @@ public class ProcessService extends AbstractService implements InitializingBean
 		{
 			throw new RuntimeException(e);
 		}
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		super.afterPropertiesSet();
-
-		Objects.requireNonNull(repositoryService, "repositoryService");
 	}
 
 	@GET

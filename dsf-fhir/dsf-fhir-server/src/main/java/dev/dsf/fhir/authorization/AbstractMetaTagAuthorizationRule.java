@@ -42,6 +42,22 @@ public abstract class AbstractMetaTagAuthorizationRule<R extends Resource, D ext
 
 	private final ReadAccessDao readAccessDao;
 
+	/**
+	 * @param resourceType
+	 *            not <code>null</code>
+	 * @param daoProvider
+	 *            not <code>null</code>
+	 * @param serverBase
+	 *            not <code>null</code>
+	 * @param referenceResolver
+	 *            not <code>null</code>
+	 * @param organizationProvider
+	 *            not <code>null</code>
+	 * @param readAccessHelper
+	 *            not <code>null</code>
+	 * @param parameterConverter
+	 *            not <code>null</code>
+	 */
 	public AbstractMetaTagAuthorizationRule(Class<R> resourceType, DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
 			ReadAccessHelper readAccessHelper, ParameterConverter parameterConverter)

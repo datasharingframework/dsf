@@ -49,6 +49,14 @@ public class LargeObjectManagerJdbc implements LargeObjectManager
 
 	private final List<Long> createdOids = new ArrayList<>();
 
+	/**
+	 * @param permanentDeleteDataSource
+	 *            not <code>null</code>
+	 * @param dbUsersGroup
+	 *            not <code>null</code>
+	 * @param connection
+	 *            not <code>null</code>
+	 */
 	public LargeObjectManagerJdbc(DataSource permanentDeleteDataSource, String dbUsersGroup, Connection connection)
 	{
 		this.permanentDeleteDataSource = Objects.requireNonNull(permanentDeleteDataSource, "permanentDeleteDataSource");

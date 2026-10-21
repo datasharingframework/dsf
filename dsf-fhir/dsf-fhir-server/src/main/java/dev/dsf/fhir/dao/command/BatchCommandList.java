@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -50,16 +51,36 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 	private final EventHandler eventHandler;
 	private final ResponseGenerator responseGenerator;
 
-	public BatchCommandList(DataSource dataSource, DataSource permanentDeleteDataSource, String selectUpdateUser,
+	/**
+	 * @param dataSource
+	 *            not <code>null</code>
+	 * @param permanentDeleteDataSource
+	 *            not <code>null</code>
+	 * @param dbUsersGroup
+	 *            not <code>null</code>
+	 * @param exceptionHandler
+	 *            not <code>null</code>
+	 * @param commands
+	 *            not <code>null</code>
+	 * @param validationHelper
+	 *            not <code>null</code>
+	 * @param snapshotGenerator
+	 *            not <code>null</code>
+	 * @param eventHandler
+	 *            not <code>null</code>
+	 * @param responseGenerator
+	 *            not <code>null</code>
+	 */
+	public BatchCommandList(DataSource dataSource, DataSource permanentDeleteDataSource, String dbUsersGroup,
 			ExceptionHandler exceptionHandler, List<? extends Command> commands, ValidationHelper validationHelper,
 			SnapshotGenerator snapshotGenerator, EventHandler eventHandler, ResponseGenerator responseGenerator)
 	{
-		super(dataSource, permanentDeleteDataSource, selectUpdateUser, exceptionHandler, commands, (_, _) -> 0);
+		super(dataSource, permanentDeleteDataSource, dbUsersGroup, exceptionHandler, commands, (_, _) -> 0);
 
-		this.validationHelper = validationHelper;
-		this.snapshotGenerator = snapshotGenerator;
-		this.eventHandler = eventHandler;
-		this.responseGenerator = responseGenerator;
+		this.validationHelper = Objects.requireNonNull(validationHelper, "validationHelper");
+		this.snapshotGenerator = Objects.requireNonNull(snapshotGenerator, "snapshotGenerator");
+		this.eventHandler = Objects.requireNonNull(eventHandler, "eventHandler");
+		this.responseGenerator = Objects.requireNonNull(responseGenerator, "responseGenerator");
 	}
 
 	@Override

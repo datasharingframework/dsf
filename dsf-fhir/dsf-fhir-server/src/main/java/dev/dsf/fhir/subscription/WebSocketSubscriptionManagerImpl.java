@@ -38,7 +38,6 @@ import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
@@ -51,15 +50,13 @@ import dev.dsf.fhir.dao.SubscriptionDao;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.event.Event;
 import dev.dsf.fhir.event.EventHandler;
-import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.search.Matcher;
 import jakarta.websocket.CloseReason;
 import jakarta.websocket.CloseReason.CloseCodes;
 import jakarta.websocket.RemoteEndpoint.Async;
 import jakarta.websocket.Session;
 
-public class WebSocketSubscriptionManagerImpl
-		implements WebSocketSubscriptionManager, EventHandler, InitializingBean, DisposableBean
+public class WebSocketSubscriptionManagerImpl implements WebSocketSubscriptionManager, EventHandler, DisposableBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(WebSocketSubscriptionManagerImpl.class);
 
@@ -153,7 +150,6 @@ public class WebSocketSubscriptionManagerImpl
 
 	private final DaoProvider daoProvider;
 	private final SubscriptionDao subscriptionDao;
-	private final ExceptionHandler exceptionHandler;
 	private final MatcherFactory matcherFactory;
 	private final FhirContext fhirContext;
 	private final AuthorizationRuleProvider authorizationRuleProvider;
@@ -163,26 +159,24 @@ public class WebSocketSubscriptionManagerImpl
 	private final ReadWriteMap<Class<? extends Resource>, List<SubscriptionAndMatcher>> matchersByResource = new ReadWriteMap<>();
 	private final ReadWriteMap<String, Set<SessionIdAndRemoteAsync>> asyncRemotesBySubscriptionIdPart = new ReadWriteMap<>();
 
-	public WebSocketSubscriptionManagerImpl(DaoProvider daoProvider, ExceptionHandler exceptionHandler,
-			MatcherFactory matcherFactory, FhirContext fhirContext, AuthorizationRuleProvider authorizationRuleProvider)
+	/**
+	 * @param daoProvider
+	 *            not <code>null</code>
+	 * @param matcherFactory
+	 *            not <code>null</code>
+	 * @param fhirContext
+	 *            not <code>null</code>
+	 * @param authorizationRuleProvider
+	 *            not <code>null</code>
+	 */
+	public WebSocketSubscriptionManagerImpl(DaoProvider daoProvider, MatcherFactory matcherFactory,
+			FhirContext fhirContext, AuthorizationRuleProvider authorizationRuleProvider)
 	{
-		this.daoProvider = daoProvider;
+		this.daoProvider = Objects.requireNonNull(daoProvider, "daoProvider");
 		this.subscriptionDao = daoProvider.getSubscriptionDao();
-		this.exceptionHandler = exceptionHandler;
-		this.matcherFactory = matcherFactory;
-		this.fhirContext = fhirContext;
-		this.authorizationRuleProvider = authorizationRuleProvider;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(daoProvider, "daoProvider");
-		Objects.requireNonNull(subscriptionDao, "subscriptionDao");
-		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
-		Objects.requireNonNull(matcherFactory, "matcherFactory");
-		Objects.requireNonNull(fhirContext, "fhirContext");
-		Objects.requireNonNull(authorizationRuleProvider, "authorizationRuleProvider");
+		this.matcherFactory = Objects.requireNonNull(matcherFactory, "matcherFactory");
+		this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext");
+		this.authorizationRuleProvider = Objects.requireNonNull(authorizationRuleProvider, "authorizationRuleProvider");
 	}
 
 	private void refreshMatchers()

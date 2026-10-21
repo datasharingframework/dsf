@@ -25,7 +25,6 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.common.auth.conf.AbstractIdentityProvider;
 import dev.dsf.common.auth.conf.Identity;
@@ -35,8 +34,7 @@ import dev.dsf.common.auth.conf.PractitionerIdentityImpl;
 import dev.dsf.common.auth.conf.RoleConfig;
 import dev.dsf.common.auth.conf.X509CertificateWrapper;
 
-public class IdentityProviderImpl extends AbstractIdentityProvider<FhirServerRole>
-		implements IdentityProvider, InitializingBean
+public class IdentityProviderImpl extends AbstractIdentityProvider<FhirServerRole> implements IdentityProvider
 {
 	private static final Logger logger = LoggerFactory.getLogger(IdentityProviderImpl.class);
 
@@ -44,22 +42,25 @@ public class IdentityProviderImpl extends AbstractIdentityProvider<FhirServerRol
 	private final EndpointProvider endpointProvider;
 	private final String localOrganizationIdentifierValue;
 
+	/**
+	 * @param roleConfig
+	 *            not <code>null</code>
+	 * @param organizationProvider
+	 *            not <code>null</code>
+	 * @param endpointProvider
+	 *            not <code>null</code>
+	 * @param localOrganizationIdentifierValue
+	 *            not <code>null</code>
+	 */
 	public IdentityProviderImpl(RoleConfig<FhirServerRole> roleConfig, OrganizationProvider organizationProvider,
 			EndpointProvider endpointProvider, String localOrganizationIdentifierValue)
 	{
 		super(roleConfig);
 
-		this.organizationProvider = organizationProvider;
-		this.endpointProvider = endpointProvider;
-		this.localOrganizationIdentifierValue = localOrganizationIdentifierValue;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(organizationProvider, "organizationProvider");
-		Objects.requireNonNull(endpointProvider, "endpointProvider");
-		Objects.requireNonNull(localOrganizationIdentifierValue, "localOrganizationIdentifierValue");
+		this.organizationProvider = Objects.requireNonNull(organizationProvider, "organizationProvider");
+		this.endpointProvider = Objects.requireNonNull(endpointProvider, "endpointProvider");
+		this.localOrganizationIdentifierValue = Objects.requireNonNull(localOrganizationIdentifierValue,
+				"localOrganizationIdentifierValue");
 	}
 
 	@Override

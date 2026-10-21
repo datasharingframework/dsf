@@ -28,8 +28,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.springframework.beans.factory.InitializingBean;
-
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
@@ -48,7 +46,7 @@ import dev.dsf.bpe.config.FhirClientConfigYaml.BearerAuth;
 import dev.dsf.bpe.config.FhirClientConfigYaml.CertificateAuth;
 import dev.dsf.bpe.config.FhirClientConfigYaml.OidcAuth;
 
-public class FhirClientConfigYamlReaderImpl implements InitializingBean, FhirClientConfigYamlReader
+public class FhirClientConfigYamlReaderImpl implements FhirClientConfigYamlReader
 {
 	@FunctionalInterface
 	private static interface SupplierWithIOException<T>
@@ -82,28 +80,34 @@ public class FhirClientConfigYamlReaderImpl implements InitializingBean, FhirCli
 	private final String defaultOidcDiscoveryPath;
 	private final boolean defaultOidcVerifyAuthorizedParty;
 
+	/**
+	 * @param defaultTestConnectionOnStartup
+	 *            not <code>null</code>
+	 * @param defaultEnableDebugLogging
+	 *            not <code>null</code>
+	 * @param defaultConnectTimeout
+	 *            not <code>null</code>
+	 * @param defaultReadTimeout
+	 *            not <code>null</code>
+	 * @param defaultTrustStore
+	 *            not <code>null</code>
+	 * @param defaultOidcDiscoveryPath
+	 *            not <code>null</code>
+	 * @param defaultOidcVerifyAuthorizedParty
+	 */
 	public FhirClientConfigYamlReaderImpl(boolean defaultTestConnectionOnStartup, boolean defaultEnableDebugLogging,
 			Duration defaultConnectTimeout, Duration defaultReadTimeout, KeyStore defaultTrustStore,
 			String defaultOidcDiscoveryPath, boolean defaultOidcVerifyAuthorizedParty)
 	{
 		this.defaultTestConnectionOnStartup = defaultTestConnectionOnStartup;
 		this.defaultEnableDebugLogging = defaultEnableDebugLogging;
-		this.defaultConnectTimeout = defaultConnectTimeout;
-		this.defaultReadTimeout = defaultReadTimeout;
-		this.defaultTrustStore = defaultTrustStore;
-		this.defaultOidcDiscoveryPath = defaultOidcDiscoveryPath != null && !defaultOidcDiscoveryPath.startsWith("/")
-				? ("/" + defaultOidcDiscoveryPath)
+		this.defaultConnectTimeout = Objects.requireNonNull(defaultConnectTimeout, "defaultConnectTimeout");
+		this.defaultReadTimeout = Objects.requireNonNull(defaultReadTimeout, "defaultReadTimeout");
+		this.defaultTrustStore = Objects.requireNonNull(defaultTrustStore, "defaultTrustStore");
+		Objects.requireNonNull(defaultOidcDiscoveryPath, "defaultOidcDiscoveryPath");
+		this.defaultOidcDiscoveryPath = !defaultOidcDiscoveryPath.startsWith("/") ? ("/" + defaultOidcDiscoveryPath)
 				: defaultOidcDiscoveryPath;
 		this.defaultOidcVerifyAuthorizedParty = defaultOidcVerifyAuthorizedParty;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(defaultConnectTimeout, "defaultConnectTimeout");
-		Objects.requireNonNull(defaultReadTimeout, "defaultReadTimeout");
-		Objects.requireNonNull(defaultTrustStore, "defaultTrustStore");
-		Objects.requireNonNull(defaultOidcDiscoveryPath, "defaultOidcDiscoveryPath");
 	}
 
 	@Override

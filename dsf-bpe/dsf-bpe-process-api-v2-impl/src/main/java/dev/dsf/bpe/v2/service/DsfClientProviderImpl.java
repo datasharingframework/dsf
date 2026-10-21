@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.bpe.api.config.BpeProxyConfig;
@@ -37,7 +36,7 @@ import dev.dsf.bpe.v2.client.dsf.DsfClientJersey;
 import dev.dsf.bpe.v2.client.dsf.ReferenceCleaner;
 import dev.dsf.bpe.v2.client.fhir.ClientConfig;
 
-public class DsfClientProviderImpl implements DsfClientProvider, InitializingBean, DisposableBean
+public class DsfClientProviderImpl implements DsfClientProvider, DisposableBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(DsfClientProviderImpl.class);
 
@@ -54,29 +53,33 @@ public class DsfClientProviderImpl implements DsfClientProvider, InitializingBea
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(8,
 			r -> new Thread(r, "dsf-client-async-scheduler"));
 
+	/**
+	 * @param fhirContext
+	 *            not <code>null</code>
+	 * @param referenceCleaner
+	 *            not <code>null</code>
+	 * @param dsfClientConfig
+	 *            not <code>null</code>
+	 * @param proxyConfig
+	 *            not <code>null</code>
+	 * @param oidcClientProvider
+	 *            not <code>null</code>
+	 * @param userAgent
+	 *            not <code>null</code>
+	 * @param configProvider
+	 *            not <code>null</code>
+	 */
 	public DsfClientProviderImpl(FhirContext fhirContext, ReferenceCleaner referenceCleaner,
 			DsfClientConfig dsfClientConfig, BpeProxyConfig proxyConfig, OidcClientProvider oidcClientProvider,
 			String userAgent, ClientConfigProvider configProvider)
 	{
-		this.fhirContext = fhirContext;
-		this.referenceCleaner = referenceCleaner;
-		this.dsfClientConfig = dsfClientConfig;
-		this.proxyConfig = proxyConfig;
-		this.oidcClientProvider = oidcClientProvider;
-		this.userAgent = userAgent;
-		this.configProvider = configProvider;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(fhirContext, "fhirContext");
-		Objects.requireNonNull(referenceCleaner, "referenceCleaner");
-		Objects.requireNonNull(dsfClientConfig, "dsfClientConfig");
-		Objects.requireNonNull(proxyConfig, "proxyConfig");
-		Objects.requireNonNull(oidcClientProvider, "oidcClientProvider");
-		Objects.requireNonNull(userAgent, "userAgent");
-		Objects.requireNonNull(configProvider, "configProvider");
+		this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext");
+		this.referenceCleaner = Objects.requireNonNull(referenceCleaner, "referenceCleaner");
+		this.dsfClientConfig = Objects.requireNonNull(dsfClientConfig, "dsfClientConfig");
+		this.proxyConfig = Objects.requireNonNull(proxyConfig, "proxyConfig");
+		this.oidcClientProvider = Objects.requireNonNull(oidcClientProvider, "oidcClientProvider");
+		this.userAgent = Objects.requireNonNull(userAgent, "userAgent");
+		this.configProvider = Objects.requireNonNull(configProvider, "configProvider");
 	}
 
 	@Override

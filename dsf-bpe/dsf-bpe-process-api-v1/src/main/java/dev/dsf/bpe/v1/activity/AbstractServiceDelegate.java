@@ -28,7 +28,6 @@ import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -50,7 +49,7 @@ import dev.dsf.bpe.v1.variables.Variables;
  *
  * @see ProcessPluginDefinition#getSpringConfigurations()
  */
-public abstract class AbstractServiceDelegate implements JavaDelegate, InitializingBean
+public abstract class AbstractServiceDelegate implements JavaDelegate
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractServiceDelegate.class);
 
@@ -62,13 +61,7 @@ public abstract class AbstractServiceDelegate implements JavaDelegate, Initializ
 	 */
 	public AbstractServiceDelegate(ProcessPluginApi api)
 	{
-		this.api = api;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(api, "api");
+		this.api = Objects.requireNonNull(api, "api");
 	}
 
 	@Override

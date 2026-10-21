@@ -33,7 +33,6 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -44,7 +43,7 @@ import dev.dsf.fhir.dao.StructureDefinitionDao;
 import dev.dsf.fhir.dao.ValueSetDao;
 import dev.dsf.fhir.function.SupplierWithSqlException;
 
-public class ValidationSupportWithFetchFromDb implements IValidationSupport, InitializingBean
+public class ValidationSupportWithFetchFromDb implements IValidationSupport
 {
 	private static final Logger logger = LoggerFactory.getLogger(ValidationSupportWithFetchFromDb.class);
 
@@ -57,29 +56,35 @@ public class ValidationSupportWithFetchFromDb implements IValidationSupport, Ini
 	private final MeasureDao measureDao;
 	private final QuestionnaireDao questionnaireDao;
 
+	/**
+	 * @param context
+	 *            not <code>null</code>
+	 * @param structureDefinitionDao
+	 *            not <code>null</code>
+	 * @param structureDefinitionSnapshotDao
+	 *            not <code>null</code>
+	 * @param codeSystemDao
+	 *            not <code>null</code>
+	 * @param valueSetDao
+	 *            not <code>null</code>
+	 * @param measureDao
+	 *            not <code>null</code>
+	 * @param questionnaireDao
+	 *            not <code>null</code>
+	 */
 	public ValidationSupportWithFetchFromDb(FhirContext context, StructureDefinitionDao structureDefinitionDao,
 			StructureDefinitionDao structureDefinitionSnapshotDao, CodeSystemDao codeSystemDao, ValueSetDao valueSetDao,
 			MeasureDao measureDao, QuestionnaireDao questionnaireDao)
 	{
-		this.context = context;
+		this.context = Objects.requireNonNull(context, "context");
 
-		this.structureDefinitionDao = structureDefinitionDao;
-		this.structureDefinitionSnapshotDao = structureDefinitionSnapshotDao;
-		this.codeSystemDao = codeSystemDao;
-		this.valueSetDao = valueSetDao;
-		this.measureDao = measureDao;
-		this.questionnaireDao = questionnaireDao;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(structureDefinitionDao, "structureDefinitionDao");
-		Objects.requireNonNull(structureDefinitionSnapshotDao, "structureDefinitionSnapshotDao");
-		Objects.requireNonNull(codeSystemDao, "codeSystemDao");
-		Objects.requireNonNull(valueSetDao, "valueSetDao");
-		Objects.requireNonNull(measureDao, "measureDao");
-		Objects.requireNonNull(questionnaireDao, "questionnaireDao");
+		this.structureDefinitionDao = Objects.requireNonNull(structureDefinitionDao, "structureDefinitionDao");
+		this.structureDefinitionSnapshotDao = Objects.requireNonNull(structureDefinitionSnapshotDao,
+				"structureDefinitionSnapshotDao");
+		this.codeSystemDao = Objects.requireNonNull(codeSystemDao, "codeSystemDao");
+		this.valueSetDao = Objects.requireNonNull(valueSetDao, "valueSetDao");
+		this.measureDao = Objects.requireNonNull(measureDao, "measureDao");
+		this.questionnaireDao = Objects.requireNonNull(questionnaireDao, "questionnaireDao");
 	}
 
 	@Override

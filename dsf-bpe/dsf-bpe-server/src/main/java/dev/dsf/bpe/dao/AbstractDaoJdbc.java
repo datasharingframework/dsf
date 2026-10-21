@@ -19,20 +19,16 @@ import java.util.Objects;
 
 import javax.sql.DataSource;
 
-import org.springframework.beans.factory.InitializingBean;
-
-public abstract class AbstractDaoJdbc implements InitializingBean
+public abstract class AbstractDaoJdbc
 {
 	protected final DataSource dataSource;
 
+	/**
+	 * @param dataSource
+	 *            not <code>null</code>
+	 */
 	public AbstractDaoJdbc(DataSource dataSource)
 	{
-		this.dataSource = dataSource;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(dataSource, "dataSource");
+		this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
 	}
 }

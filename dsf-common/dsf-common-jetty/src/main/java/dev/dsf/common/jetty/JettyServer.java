@@ -336,7 +336,7 @@ public final class JettyServer
 			protected void generateResponse(Request request, Response response, int code, String message,
 					Throwable cause, Callback callback) throws IOException
 			{
-				logger.info("Error {}: {}", code, message);
+				logger.debug("Error respone status {}: {}", code, message);
 				callback.succeeded();
 			}
 		};

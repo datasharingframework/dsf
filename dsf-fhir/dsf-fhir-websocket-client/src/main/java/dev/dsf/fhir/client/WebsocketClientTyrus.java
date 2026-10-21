@@ -179,6 +179,12 @@ public class WebsocketClientTyrus implements WebsocketClient
 		}
 	}
 
+	@Override
+	public boolean isConnected()
+	{
+		return connection != null && connection.isOpen();
+	}
+
 	private ClientEndpointConfig createConfig(String userAgentValue)
 	{
 		if (userAgentValue == null || userAgentValue.isBlank())

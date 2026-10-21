@@ -20,7 +20,6 @@ import java.util.Optional;
 
 import org.operaton.bpm.engine.RepositoryService;
 import org.operaton.bpm.engine.repository.ProcessDefinition;
-import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -28,27 +27,27 @@ import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
 import dev.dsf.bpe.plugin.ProcessPluginManager;
 
-public abstract class AbstractResourceHandler implements InitializingBean
+public abstract class AbstractResourceHandler
 {
 	protected final RepositoryService repositoryService;
 
 	private final ProcessPluginManager processPluginManager;
 	private final FhirContext fhirContext;
 
+	/**
+	 * @param repositoryService
+	 *            not <code>null</code>
+	 * @param processPluginManager
+	 *            not <code>null</code>
+	 * @param fhirContext
+	 *            not <code>null</code>
+	 */
 	public AbstractResourceHandler(RepositoryService repositoryService, ProcessPluginManager processPluginManager,
 			FhirContext fhirContext)
 	{
-		this.repositoryService = repositoryService;
-		this.processPluginManager = processPluginManager;
-		this.fhirContext = fhirContext;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(repositoryService, "repositoryService");
-		Objects.requireNonNull(processPluginManager, "processPluginManager");
-		Objects.requireNonNull(fhirContext, "fhirContext");
+		this.repositoryService = Objects.requireNonNull(repositoryService, "repositoryService");
+		this.processPluginManager = Objects.requireNonNull(processPluginManager, "processPluginManager");
+		this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext");
 	}
 
 	protected final IParser newJsonParser()

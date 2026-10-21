@@ -44,12 +44,11 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.common.auth.DsfOpenIdCredentials;
 import dev.dsf.common.auth.conf.RoleConfig.Mapping;
 
-public abstract class AbstractIdentityProvider<R extends DsfRole> implements IdentityProvider, InitializingBean
+public abstract class AbstractIdentityProvider<R extends DsfRole> implements IdentityProvider
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractIdentityProvider.class);
 
@@ -64,7 +63,7 @@ public abstract class AbstractIdentityProvider<R extends DsfRole> implements Ide
 	 */
 	public AbstractIdentityProvider(RoleConfig<R> roleConfig)
 	{
-		this.roleConfig = roleConfig;
+		this.roleConfig = Objects.requireNonNull(roleConfig, "roleConfig");
 
 		thumbprints = roleConfig.getEntries().stream().map(Mapping::getThumbprints).flatMap(List::stream).distinct()
 				.collect(Collectors.toUnmodifiableSet());
@@ -80,12 +79,6 @@ public abstract class AbstractIdentityProvider<R extends DsfRole> implements Ide
 		{
 			throw new RuntimeException(e);
 		}
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(roleConfig, "roleConfig");
 	}
 
 	@Override

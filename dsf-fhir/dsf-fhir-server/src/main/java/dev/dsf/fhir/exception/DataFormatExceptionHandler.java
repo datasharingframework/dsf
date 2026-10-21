@@ -22,7 +22,6 @@ import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.parser.DataFormatException;
 import dev.dsf.fhir.help.ResponseGenerator;
@@ -32,21 +31,19 @@ import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 
 @Provider
-public class DataFormatExceptionHandler implements ExceptionMapper<DataFormatException>, InitializingBean
+public class DataFormatExceptionHandler implements ExceptionMapper<DataFormatException>
 {
 	private static final Logger logger = LoggerFactory.getLogger(DataFormatExceptionHandler.class);
 
 	private final ResponseGenerator responseGenerator;
 
+	/**
+	 * @param responseGenerator
+	 *            not <code>null</code>
+	 */
 	public DataFormatExceptionHandler(ResponseGenerator responseGenerator)
 	{
-		this.responseGenerator = responseGenerator;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(responseGenerator, "responseGenerator");
+		this.responseGenerator = Objects.requireNonNull(responseGenerator, "responseGenerator");
 	}
 
 	@Override
