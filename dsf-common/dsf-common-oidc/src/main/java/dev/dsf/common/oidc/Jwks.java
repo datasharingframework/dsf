@@ -59,46 +59,56 @@ public class Jwks
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static record JwksKey(@JsonProperty("kid") String kid, @JsonProperty("kty") String kty,
 			@JsonProperty("alg") String alg, @JsonProperty("crv") String crv, @JsonProperty("use") String use,
-			@JsonProperty("n") String n, @JsonProperty("e") String e, @JsonProperty("x") String x,
-			@JsonProperty("y") String y)
+			@JsonProperty("key_ops") List<String> keyOps, @JsonProperty("n") String n, @JsonProperty("e") String e,
+			@JsonProperty("x") String x, @JsonProperty("y") String y)
 	{
 		@JsonCreator
 		public JwksKey(@JsonProperty("kid") String kid, @JsonProperty("kty") String kty,
 				@JsonProperty("alg") String alg, @JsonProperty("crv") String crv, @JsonProperty("use") String use,
-				@JsonProperty("n") String n, @JsonProperty("e") String e, @JsonProperty("x") String x,
-				@JsonProperty("y") String y)
+				@JsonProperty("key_ops") List<String> keyOps, @JsonProperty("n") String n, @JsonProperty("e") String e,
+				@JsonProperty("x") String x, @JsonProperty("y") String y)
 		{
 			this.kid = kid;
 			this.kty = kty;
 			this.alg = alg;
 			this.crv = crv;
 			this.use = use;
+			this.keyOps = keyOps == null ? List.of() : List.copyOf(keyOps);
 			this.n = n;
 			this.e = e;
 			this.x = x;
 			this.y = y;
 		}
 
+		public boolean isSignatureVerifyKey()
+		{
+			boolean useOk = use == null || "sig".equals(use);
+			boolean keyOpsOk = keyOps.isEmpty() || keyOps.contains("verify");
+
+			return useOk && keyOpsOk;
+		}
+
 		/**
 		 * @return algorithm for the enclosed key material
+		 * @param jwtAlg
 		 * @throws JwksException
 		 *             if {@link Algorithm} can't be created or is not supported for the enclosed key material
 		 */
-		public Optional<Algorithm> toAlgorithm() throws JwksException
+		public Optional<Algorithm> toAlgorithm(String jwtAlg) throws JwksException
 		{
 			return Optional.ofNullable(switch (kty)
 			{
-				case "RSA" -> toRsaAlgorithm();
-				case "EC" -> toEcdsaAlgorithm();
+				case "RSA" -> toRsaAlgorithm(jwtAlg);
+				case "EC" -> toEcdsaAlgorithm(jwtAlg);
 
 				default -> {
-					logger.warn("JWKS kty property value '{}' not one of 'RSA' or 'EC'", kty);
+					logger.warn("JWKS kty property value not one of 'RSA' or 'EC'");
 					yield null;
 				}
 			});
 		}
 
-		private Algorithm toRsaAlgorithm()
+		private Algorithm toRsaAlgorithm(String jwtAlg)
 		{
 			RSAPublicKey key = toRsaPublicKey(n, e);
 
@@ -107,20 +117,42 @@ public class Jwks
 
 			RSAKeyProvider keyProvider = toRsaKeyProvider(key, kid);
 
-			return switch (alg)
+			if (alg != null && alg.equals(jwtAlg))
 			{
-				case "RS256" -> Algorithm.RSA256(keyProvider);
-				case "RS384" -> Algorithm.RSA384(keyProvider);
-				case "RS512" -> Algorithm.RSA512(keyProvider);
+				return switch (alg)
+				{
+					case "RS256" -> Algorithm.RSA256(keyProvider);
+					case "RS384" -> Algorithm.RSA384(keyProvider);
+					case "RS512" -> Algorithm.RSA512(keyProvider);
 
-				default -> {
-					logger.warn("JWKS alg property value '{}' not one of 'RS256', 'RS384' or 'RS512'", alg);
-					yield null;
-				}
-			};
+					default -> {
+						logger.warn("JWKS alg property value not one of 'RS256', 'RS384' or 'RS512'");
+						yield null;
+					}
+				};
+			}
+			else if (alg == null && jwtAlg != null)
+			{
+				return switch (jwtAlg)
+				{
+					case "RS256" -> Algorithm.RSA256(keyProvider);
+					case "RS384" -> Algorithm.RSA384(keyProvider);
+					case "RS512" -> Algorithm.RSA512(keyProvider);
+
+					default -> {
+						logger.warn("JWT alg property value not one of 'RS256', 'RS384' or 'RS512'");
+						yield null;
+					}
+				};
+			}
+			else
+			{
+				logger.warn("JWT and JWKS alg property value not the same");
+				return null;
+			}
 		}
 
-		private Algorithm toEcdsaAlgorithm()
+		private Algorithm toEcdsaAlgorithm(String jwtAlg)
 		{
 			ECPublicKey key = toEcPublicKey(x, y, crv);
 
@@ -129,17 +161,40 @@ public class Jwks
 
 			ECDSAKeyProvider keyProvider = toEcKeyProvider(key, kid);
 
-			return switch (alg)
+			if (alg != null && alg.equals(jwtAlg))
 			{
-				case "ES256" -> Algorithm.ECDSA256(keyProvider);
-				case "ES384" -> Algorithm.ECDSA384(keyProvider);
-				case "ES512" -> Algorithm.ECDSA512(keyProvider);
+				return switch (alg)
+				{
+					case "ES256" -> Algorithm.ECDSA256(keyProvider);
+					case "ES384" -> Algorithm.ECDSA384(keyProvider);
+					case "ES512" -> Algorithm.ECDSA512(keyProvider);
 
-				default -> {
-					logger.warn("JWKS alg property value '{}' not one of 'ES256', 'ES384' or 'ES512'", alg);
-					yield null;
-				}
-			};
+					default -> {
+						logger.warn("JWKS alg property value not one of 'ES256', 'ES384' or 'ES512'");
+						yield null;
+					}
+				};
+			}
+			else if (alg == null && jwtAlg != null)
+			{
+
+				return switch (jwtAlg)
+				{
+					case "ES256" -> Algorithm.ECDSA256(keyProvider);
+					case "ES384" -> Algorithm.ECDSA384(keyProvider);
+					case "ES512" -> Algorithm.ECDSA512(keyProvider);
+
+					default -> {
+						logger.warn("JWT alg property value not one of 'ES256', 'ES384' or 'ES512'");
+						yield null;
+					}
+				};
+			}
+			else
+			{
+				logger.warn("JWT and JWKS alg property value not the same");
+				return null;
+			}
 		}
 
 		private RSAKeyProvider toRsaKeyProvider(RSAPublicKey key, String kid)
@@ -235,7 +290,7 @@ public class Jwks
 				case "P-521" -> toEcPublicKey(xCoordinate, yCoordinate, new ECGenParameterSpec("secp521r1"));
 
 				default -> {
-					logger.warn("JWKS crv property value '{}' not one of 'P-256', 'P-384' or 'P-521'", crv);
+					logger.warn("JWKS crv property value not one of 'P-256', 'P-384' or 'P-521'");
 					yield null;
 				}
 			};

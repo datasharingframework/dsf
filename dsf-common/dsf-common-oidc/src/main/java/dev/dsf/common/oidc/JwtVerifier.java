@@ -20,7 +20,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 
 public interface JwtVerifier
 {
-	DecodedJWT verifyBackchannelLogout(String token) throws JWTVerificationException, OidcClientException;
+	DecodedJWT verifyBackchannelLogoutToken(String token) throws JWTVerificationException, OidcClientException;
 
 	DecodedJWT verifyBearerToken(String token) throws JWTVerificationException, OidcClientException;
 }
