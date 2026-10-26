@@ -40,6 +40,7 @@ import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
 import org.hl7.fhir.r4.model.Task.TaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -74,7 +75,7 @@ import jakarta.ws.rs.core.Response.StatusType;
  *
  * @see ProcessPluginDefinition#getSpringConfigurations()
  */
-public abstract class AbstractTaskMessageSend implements JavaDelegate
+public abstract class AbstractTaskMessageSend implements JavaDelegate, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractTaskMessageSend.class);
 
@@ -91,7 +92,13 @@ public abstract class AbstractTaskMessageSend implements JavaDelegate
 	 */
 	public AbstractTaskMessageSend(ProcessPluginApi api)
 	{
-		this.api = Objects.requireNonNull(api, "api");
+		this.api = api;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		Objects.requireNonNull(api, "api");
 	}
 
 	/**

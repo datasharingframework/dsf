@@ -28,6 +28,7 @@ import org.operaton.bpm.engine.delegate.DelegateExecution;
 import org.operaton.bpm.engine.delegate.JavaDelegate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -49,7 +50,7 @@ import dev.dsf.bpe.v1.variables.Variables;
  *
  * @see ProcessPluginDefinition#getSpringConfigurations()
  */
-public abstract class AbstractServiceDelegate implements JavaDelegate
+public abstract class AbstractServiceDelegate implements JavaDelegate, InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractServiceDelegate.class);
 
@@ -61,7 +62,13 @@ public abstract class AbstractServiceDelegate implements JavaDelegate
 	 */
 	public AbstractServiceDelegate(ProcessPluginApi api)
 	{
-		this.api = Objects.requireNonNull(api, "api");
+		this.api = api;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception
+	{
+		Objects.requireNonNull(api, "api");
 	}
 
 	@Override
