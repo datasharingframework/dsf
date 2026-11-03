@@ -44,13 +44,13 @@
 		<jersey.version>3.1.11</jersey.version>
 		<tyrus.version>2.2.2</tyrus.version>
 		<spring.version>6.2.19</spring.version>
-		<jackson.version>2.21.5</jackson.version>
+		<jackson.version>2.21.7</jackson.version>
 		<operaton.version>1.1.1</operaton.version>
 		<hapi.fhir.version.v1>5.1.0</hapi.fhir.version.v1>
 		<hapi.fhir.version.v2>8.4.2</hapi.fhir.version.v2>
 		<hapi.fhir.org.hl7.version.v2>6.5.27</hapi.fhir.org.hl7.version.v2>
 		<hapi.fhir.version>8.4.2</hapi.fhir.version>
-		<bouncycastle.version>1.84</bouncycastle.version>
+		<bouncycastle.version>1.85</bouncycastle.version>
 		<crypto-utils.version.v1>3.8.0</crypto-utils.version.v1>
 		<crypto-utils.version.v2>5.2.1</crypto-utils.version.v2>
 		<crypto-utils.version>5.2.1</crypto-utils.version>
