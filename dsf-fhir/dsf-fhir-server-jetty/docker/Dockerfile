@@ -23,7 +23,7 @@ RUN chown root:2101 ./ && \
     chmod 1775 ./log
 
 
-FROM docker.io/azul/zulu-openjdk:25-jre-headless@sha256:c9a6fbc5152d0cbf14bc729caaec6e3168493f598c1e2b8b95b648d6a7cf225e
+FROM docker.io/azul/zulu-openjdk:25-jre-headless@sha256:e912718b7b297f315a82ecead0e43a284bbd69c1791a55f8663739736f36b6f9
 LABEL org.opencontainers.image.source=https://github.com/datasharingframework/dsf
 LABEL org.opencontainers.image.description="DSF FHIR Server"
 LABEL org.opencontainers.image.licenses="Apache License, Version 2.0"
