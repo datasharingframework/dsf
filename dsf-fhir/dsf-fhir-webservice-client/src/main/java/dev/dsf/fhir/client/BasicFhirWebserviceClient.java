@@ -30,7 +30,7 @@ public interface BasicFhirWebserviceClient extends PreferReturnResource
 {
 	void delete(Class<? extends Resource> resourceClass, String id);
 
-	void deleteConditionaly(Class<? extends Resource> resourceClass, Map<String, List<String>> criteria);
+	void deleteConditionally(Class<? extends Resource> resourceClass, Map<String, List<String>> criteria);
 
 	void deletePermanently(Class<? extends Resource> resourceClass, String id);
 
@@ -176,6 +176,8 @@ public interface BasicFhirWebserviceClient extends PreferReturnResource
 	Bundle searchWithStrictHandling(Class<? extends Resource> resourceType, Map<String, List<String>> parameters);
 
 	CapabilityStatement getConformance();
+
+	StructureDefinition getSnapshot(String id);
 
 	StructureDefinition generateSnapshot(String url);
 

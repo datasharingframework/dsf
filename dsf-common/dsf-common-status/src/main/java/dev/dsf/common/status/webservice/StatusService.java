@@ -79,9 +79,9 @@ public class StatusService implements InitializingBean
 			String errorMessage = getErrorMessage(e);
 
 			logger.debug("Error while accessing DB", e);
-			logger.error("Error while accessing DB: {}", errorMessage);
+			logger.error("Error while accessing DB: {} - {}", e.getClass().getName(), errorMessage);
 
-			return Response.serverError().entity(errorMessage).build();
+			return Response.serverError().build();
 		}
 	}
 

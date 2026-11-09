@@ -26,6 +26,8 @@ import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.Subscription;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.SubscriptionDao;
 import dev.dsf.fhir.search.filter.SubscriptionIdentityFilter;
@@ -36,10 +38,11 @@ import dev.dsf.fhir.search.parameters.SubscriptionType;
 
 public class SubscriptionDaoJdbc extends AbstractResourceDaoJdbc<Subscription> implements SubscriptionDao
 {
-	public SubscriptionDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
+	public SubscriptionDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
+			ObjectMapper objectMapper)
 	{
-		super(dataSource, permanentDeleteDataSource, fhirContext, Subscription.class, "subscriptions", "subscription",
-				"subscription_id", SubscriptionIdentityFilter::new,
+		super(dataSource, permanentDeleteDataSource, fhirContext, objectMapper, Subscription.class, "subscriptions",
+				"subscription", "subscription_id", SubscriptionIdentityFilter::new,
 				List.of(factory(SubscriptionCriteria.PARAMETER_NAME, SubscriptionCriteria::new,
 						SubscriptionCriteria.getNameModifiers()),
 						factory(SubscriptionPayload.PARAMETER_NAME, SubscriptionPayload::new,

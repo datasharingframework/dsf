@@ -21,6 +21,8 @@ import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.HealthcareService;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.HealthcareServiceDao;
 import dev.dsf.fhir.search.filter.HealthcareServiceIdentityFilter;
@@ -31,10 +33,11 @@ import dev.dsf.fhir.search.parameters.HealthcareServiceName;
 public class HealthcareServiceDaoJdbc extends AbstractResourceDaoJdbc<HealthcareService> implements HealthcareServiceDao
 {
 	public HealthcareServiceDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource,
-			FhirContext fhirContext)
+			FhirContext fhirContext, ObjectMapper objectMapper)
 	{
-		super(dataSource, permanentDeleteDataSource, fhirContext, HealthcareService.class, "healthcare_services",
-				"healthcare_service", "healthcare_service_id", HealthcareServiceIdentityFilter::new,
+		super(dataSource, permanentDeleteDataSource, fhirContext, objectMapper, HealthcareService.class,
+				"healthcare_services", "healthcare_service", "healthcare_service_id",
+				HealthcareServiceIdentityFilter::new,
 				List.of(factory(HealthcareServiceActive.PARAMETER_NAME, HealthcareServiceActive::new),
 						factory(HealthcareServiceName.PARAMETER_NAME, HealthcareServiceName::new,
 								HealthcareServiceName.getNameModifiers()),

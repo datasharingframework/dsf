@@ -36,6 +36,8 @@ public abstract class AbstractIdentity implements Identity
 	private final Set<DsfRole> dsfRoles = new HashSet<>();
 	private final X509CertificateWrapper certificate;
 
+	private final String organizationIdentifierValue;
+
 	/**
 	 * @param localIdentity
 	 *            <code>true</code> if this is a local identity
@@ -59,6 +61,34 @@ public abstract class AbstractIdentity implements Identity
 			this.dsfRoles.addAll(dsfRoles);
 
 		this.certificate = certificate;
+
+		this.organizationIdentifierValue = getIdentifierValue(organization::getIdentifier,
+				ORGANIZATION_IDENTIFIER_SYSTEM).orElseThrow();
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return Objects.hash(organizationIdentifierValue);
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+
+		return Objects.equals(organizationIdentifierValue, ((AbstractIdentity) obj).organizationIdentifierValue);
+	}
+
+	@Override
+	public boolean isNotExpired()
+	{
+		return certificate != null && certificate.isNotExpired();
 	}
 
 	@Override
@@ -74,9 +104,9 @@ public abstract class AbstractIdentity implements Identity
 	}
 
 	@Override
-	public Optional<String> getOrganizationIdentifierValue()
+	public String getOrganizationIdentifierValue()
 	{
-		return getIdentifierValue(organization::getIdentifier, ORGANIZATION_IDENTIFIER_SYSTEM);
+		return organizationIdentifierValue;
 	}
 
 	protected Optional<String> getIdentifierValue(Supplier<List<Identifier>> identifiers, String identifierSystem)

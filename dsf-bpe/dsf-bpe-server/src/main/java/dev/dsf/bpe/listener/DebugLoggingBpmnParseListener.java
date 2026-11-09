@@ -101,11 +101,11 @@ public class DebugLoggingBpmnParseListener implements BpmnParseListener, Initial
 			{
 				if (logVariables)
 					logger.warn(
-							"Process variable debug logging enabled. This should only be activated during process plugin development. WARNNING: Confidential information may be leaked via the debug log!");
+							"Process variable debug logging enabled. This should only be activated during process plugin development. WARNING: Confidential information may be leaked via the debug log!");
 
 				if (logVariablesLocal)
 					logger.warn(
-							"Process local variable debug logging enabled. This should only be activated during process plugin development. WARNNING: Confidential information may be leaked via the debug log!");
+							"Process local variable debug logging enabled. This should only be activated during process plugin development. WARNING: Confidential information may be leaked via the debug log!");
 			}
 			else
 				logger.warn(

@@ -46,16 +46,18 @@ import org.springframework.core.env.PropertiesPropertySource;
 
 import de.hsheilbronn.mi.utils.crypto.cert.CertificateValidator;
 import de.hsheilbronn.mi.utils.crypto.io.PemReader;
-import dev.dsf.common.config.AbstractCertificateConfig;
+import dev.dsf.common.config.AbstractCertificateAndProxyConfig;
 import dev.dsf.common.config.ProxyConfig;
 import dev.dsf.common.config.ProxyConfigImpl;
+import dev.dsf.common.config.network.HostSpecParser.HostSpec;
+import dev.dsf.common.db.migration.DbMigratorConfig;
 import dev.dsf.common.docker.secrets.DockerSecretsPropertySourceFactory;
 import dev.dsf.common.documentation.Documentation;
 import dev.dsf.common.ui.theme.Theme;
 
 @Configuration
 @PropertySource(value = "file:conf/config.properties", encoding = "UTF-8", ignoreResourceNotFound = true)
-public class PropertiesConfig extends AbstractCertificateConfig implements InitializingBean
+public class PropertiesConfig extends AbstractCertificateAndProxyConfig implements InitializingBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(PropertiesConfig.class);
 
@@ -245,6 +247,16 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
+		if (!DbMigratorConfig.POSTGRES_UNQUOTED_IDENTIFIER.matcher(dbUsersGroup).matches())
+			throw new RuntimeException("Property 'dev.dsf.fhir.db.user.group' value not matching "
+					+ DbMigratorConfig.POSTGRES_UNQUOTED_IDENTIFIER_STRING);
+		if (!DbMigratorConfig.POSTGRES_UNQUOTED_IDENTIFIER.matcher(dbUsername).matches())
+			throw new RuntimeException("Property 'dev.dsf.fhir.db.user.username' value not matching "
+					+ DbMigratorConfig.POSTGRES_UNQUOTED_IDENTIFIER_STRING);
+		if (!DbMigratorConfig.POSTGRES_UNQUOTED_IDENTIFIER.matcher(dbPermanentDeleteUsername).matches())
+			throw new RuntimeException("Property 'dev.dsf.fhir.db.user.permanent.delete.username' value not matching "
+					+ DbMigratorConfig.POSTGRES_UNQUOTED_IDENTIFIER_STRING);
+
 		URL url = new URI(serverBaseUrl).toURL();
 		if (!List.of("http", "https").contains(url.getProtocol()))
 		{
@@ -409,6 +421,8 @@ public class PropertiesConfig extends AbstractCertificateConfig implements Initi
 	@Bean
 	public ProxyConfig proxyConfig()
 	{
+		List<HostSpec> proxyNoProxy = parseHostSpecList("dev.dsf.proxy.noProxy", this.proxyNoProxy);
+
 		return new ProxyConfigImpl(proxyUrl, proxyUsername, proxyPassword, proxyNoProxy);
 	}
 

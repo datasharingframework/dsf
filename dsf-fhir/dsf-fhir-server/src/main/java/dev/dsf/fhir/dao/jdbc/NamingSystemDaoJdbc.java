@@ -25,9 +25,13 @@ import java.util.Optional;
 
 import javax.sql.DataSource;
 
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.NamingSystem;
+import org.hl7.fhir.r4.model.NamingSystem.NamingSystemIdentifierType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.NamingSystemDao;
@@ -40,10 +44,11 @@ public class NamingSystemDaoJdbc extends AbstractResourceDaoJdbc<NamingSystem> i
 {
 	private static final Logger logger = LoggerFactory.getLogger(NamingSystemDaoJdbc.class);
 
-	public NamingSystemDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
+	public NamingSystemDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
+			ObjectMapper objectMapper)
 	{
-		super(dataSource, permanentDeleteDataSource, fhirContext, NamingSystem.class, "naming_systems", "naming_system",
-				"naming_system_id", NamingSystemIdentityFilter::new,
+		super(dataSource, permanentDeleteDataSource, fhirContext, objectMapper, NamingSystem.class, "naming_systems",
+				"naming_system", "naming_system_id", NamingSystemIdentityFilter::new,
 				List.of(factory(NamingSystemDate.PARAMETER_NAME, NamingSystemDate::new),
 						factory(NamingSystemName.PARAMETER_NAME, NamingSystemName::new,
 								NamingSystemName.getNameModifiers()),
@@ -96,12 +101,13 @@ public class NamingSystemDaoJdbc extends AbstractResourceDaoJdbc<NamingSystem> i
 		if (uniqueIdValue == null || uniqueIdValue.isBlank())
 			return false;
 
-		final String namingSystem = "{\"uniqueId\":[{\"type\":\"uri\",\"value\":\"" + uniqueIdValue + "\"}]}";
+		NamingSystem n = new NamingSystem();
+		n.addUniqueId().setType(NamingSystemIdentifierType.URI).setValue(uniqueIdValue);
 
 		try (PreparedStatement statement = connection.prepareStatement(
-				"SELECT count(*) FROM current_naming_systems WHERE naming_system->>'status' IN ('draft', 'active') AND naming_system @> ?::jsonb"))
+				"SELECT count(*) FROM current_naming_systems WHERE naming_system->>'status' IN ('draft', 'active') AND naming_system @> ?"))
 		{
-			statement.setString(1, namingSystem);
+			statement.setObject(1, getPreparedStatementFactory().resourceToPgObject(n));
 
 			try (ResultSet result = statement.executeQuery())
 			{
@@ -122,13 +128,14 @@ public class NamingSystemDaoJdbc extends AbstractResourceDaoJdbc<NamingSystem> i
 		if (uniqueIdValue == null || uniqueIdValue.isBlank())
 			return false;
 
-		final String namingSystem = "{\"uniqueId\":[{\"modifierExtension\":[{\"url\":\"http://dsf.dev/fhir/StructureDefinition/extension-check-logical-reference\",\"valueBoolean\":true}],"
-				+ "\"value\":\"" + uniqueIdValue + "\"}]}";
+		NamingSystem n = new NamingSystem();
+		n.addUniqueId().setValue(uniqueIdValue).addModifierExtension(
+				"http://dsf.dev/fhir/StructureDefinition/extension-check-logical-reference", new BooleanType(true));
 
 		try (PreparedStatement statement = connection.prepareStatement(
-				"SELECT count(*) FROM current_naming_systems WHERE naming_system->>'status' IN ('draft', 'active') AND naming_system @> ?::jsonb"))
+				"SELECT count(*) FROM current_naming_systems WHERE naming_system->>'status' IN ('draft', 'active') AND naming_system @> ?"))
 		{
-			statement.setString(1, namingSystem);
+			statement.setObject(1, getPreparedStatementFactory().resourceToPgObject(n));
 
 			try (ResultSet result = statement.executeQuery())
 			{

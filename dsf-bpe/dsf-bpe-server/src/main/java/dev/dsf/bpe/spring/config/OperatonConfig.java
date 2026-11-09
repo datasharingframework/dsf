@@ -18,6 +18,8 @@ package dev.dsf.bpe.spring.config;
 import java.io.IOException;
 import java.util.List;
 
+import javax.sql.DataSource;
+
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.operaton.bpm.engine.ProcessEngine;
 import org.operaton.bpm.engine.impl.jobexecutor.DefaultJobExecutor;
@@ -41,6 +43,7 @@ import dev.dsf.bpe.engine.FallbackSerializerFactoryImpl;
 import dev.dsf.bpe.engine.MultiVersionSpringProcessEngineConfiguration;
 import dev.dsf.bpe.listener.DebugLoggingBpmnParseListener;
 import dev.dsf.bpe.listener.DefaultBpmnParseListener;
+import dev.dsf.common.db.logging.DataSourceWithLogger;
 
 @Configuration
 public class OperatonConfig
@@ -70,7 +73,7 @@ public class OperatonConfig
 	}
 
 	@Bean
-	public BasicDataSource engineDataSource()
+	public DataSource engineDataSource()
 	{
 		BasicDataSource dataSource = new BasicDataSource();
 		dataSource.setDriverClassName(Driver.class.getName());
@@ -80,7 +83,8 @@ public class OperatonConfig
 
 		dataSource.setTestOnBorrow(true);
 		dataSource.setValidationQuery("SELECT 1");
-		return dataSource;
+
+		return propertiesConfig.getDebugLogMessageDbStatement() ? new DataSourceWithLogger(dataSource) : dataSource;
 	}
 
 	private String toString(char[] password)

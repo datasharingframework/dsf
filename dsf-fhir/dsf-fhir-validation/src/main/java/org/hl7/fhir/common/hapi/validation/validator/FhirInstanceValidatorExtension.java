@@ -41,6 +41,6 @@ public class FhirInstanceValidatorExtension extends FhirInstanceValidator
 	@Override
 	protected List<ValidationMessage> validate(IValidationContext<?> validationContext)
 	{
-		return ValidationWrapperExtension.create(resourceFetcher).validate(workerContext, validationContext);
+		return ValidatorWrapperExtension.create(resourceFetcher).validate(workerContext, validationContext);
 	}
 }

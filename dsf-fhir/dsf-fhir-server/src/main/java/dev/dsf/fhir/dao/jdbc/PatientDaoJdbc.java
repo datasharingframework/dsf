@@ -21,6 +21,8 @@ import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.Patient;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.PatientDao;
 import dev.dsf.fhir.search.filter.PatientIdentityFilter;
@@ -29,10 +31,11 @@ import dev.dsf.fhir.search.parameters.PatientIdentifier;
 
 public class PatientDaoJdbc extends AbstractResourceDaoJdbc<Patient> implements PatientDao
 {
-	public PatientDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
+	public PatientDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
+			ObjectMapper objectMapper)
 	{
-		super(dataSource, permanentDeleteDataSource, fhirContext, Patient.class, "patients", "patient", "patient_id",
-				PatientIdentityFilter::new,
+		super(dataSource, permanentDeleteDataSource, fhirContext, objectMapper, Patient.class, "patients", "patient",
+				"patient_id", PatientIdentityFilter::new,
 				List.of(factory(PatientActive.PARAMETER_NAME, PatientActive::new),
 						factory(PatientIdentifier.PARAMETER_NAME, PatientIdentifier::new,
 								PatientIdentifier.getNameModifiers())),

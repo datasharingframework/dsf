@@ -42,6 +42,7 @@ import org.eclipse.jetty.client.ProxyConfiguration.Proxy;
 import org.eclipse.jetty.client.transport.HttpClientTransportOverHTTP;
 import org.eclipse.jetty.ee11.servlet.SessionHandler;
 import org.eclipse.jetty.ee11.webapp.WebAppContext;
+import org.eclipse.jetty.http.HttpCookie.SameSite;
 import org.eclipse.jetty.http.HttpField;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.io.ClientConnector;
@@ -81,6 +82,11 @@ import dev.dsf.common.auth.DsfSecurityHandler;
 import dev.dsf.common.auth.StatusPortAuthenticator;
 import dev.dsf.common.buildinfo.BuildInfoReader;
 import dev.dsf.common.buildinfo.BuildInfoReaderImpl;
+import dev.dsf.common.config.network.DynamicHostnameMatcher;
+import dev.dsf.common.config.network.HostSpecParser.HostSpec;
+import dev.dsf.common.config.network.InetSocketAddressMatcher;
+import dev.dsf.common.config.network.InetSocketAddressMatcherList;
+import dev.dsf.common.config.network.StaticCidrMatcher;
 import dev.dsf.common.docker.secrets.DockerSecretsPropertySourceFactory;
 import dev.dsf.common.documentation.Documentation;
 import dev.dsf.common.jetty.HttpClientWithGetRetry;
@@ -91,10 +97,11 @@ import dev.dsf.common.oidc.BaseOidcClientWithCache;
 import dev.dsf.common.oidc.JwtVerifier;
 import dev.dsf.common.oidc.JwtVerifierImpl;
 import jakarta.servlet.ServletContainerInitializer;
+import jakarta.servlet.SessionCookieConfig;
 
 @Configuration
 @PropertySource(value = "file:conf/jetty.properties", encoding = "UTF-8", ignoreResourceNotFound = true)
-public abstract class AbstractJettyConfig extends AbstractCertificateConfig
+public abstract class AbstractJettyConfig extends AbstractCertificateAndProxyConfig
 {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractJettyConfig.class);
 
@@ -121,6 +128,18 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 	@Documentation(description = "Name of HTTP header with client certificate from reverse proxy")
 	@Value("${dev.dsf.server.auth.client.certificate.header:X-ClientCert}")
 	private String clientCertificateHeaderName;
+
+	@Documentation(description = "Defines allowed source IPs for the reverse proxy, supported definitions: by hostname - resolved periodically (see *DEV_DSF_SERVER_AUTH_TRUST_REVERSE_PROXY_HOSTNAME_REFRESH_TIMEOUT*), by single IPv4 or IPv6 address, by IPv4 CIDR or IPv6 CIDR network; comma or space separated list, YAML block scalars supported; use `"
+			+ HOST_SPEC_LIST_DISABLED
+			+ "` to allow all incoming IP addresses", example = "proxy, ingress.cluster.local, 192.168.1.1, 192.168.1.0/24, [2001:db8::1], [2001:db8::/32]", recommendation = "In Kubernetes deployments set `"
+					+ HOST_SPEC_LIST_DISABLED
+					+ "` and use [Network Policies](https://kubernetes.io/docs/concepts/services-networking/network-policies)")
+	@Value("#{'${dev.dsf.server.auth.trust.reverse.proxy:proxy}'.trim().split('[,\\s]+')}")
+	private List<String> trustedReverseProxies;
+
+	@Documentation(description = "Refresh timeout after which a trusted reverse proxy hostname is re-resolved", recommendation = "The refresh timeout should be chosen according to the acceptable stale-authorization window and e.g. the expected reverse-proxy replacement time; users may also need to change the Java [networkaddress.cache...](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/net/doc-files/net-properties.html#address-cache-heading) security properties")
+	@Value("${dev.dsf.server.auth.trust.reverse.proxy.hostname.refresh.timeout:PT10S}")
+	private String trustedReverseProxiesRefreshTimeout;
 
 	@Documentation(description = "Folder with PEM encoded files (*.crt, *.pem) or a single PEM encoded file with one or more trusted full CA chains to validate client certificates for https connections from local and remote clients", recommendation = "Add file to default folder via bind mount or use docker secret file to configure", example = "/run/secrets/app_client_trust_certificates.pem")
 	@Value("${dev.dsf.server.auth.trust.client.certificate.cas:ca/client_ca_chains}")
@@ -162,6 +181,14 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 	@Value("${dev.dsf.server.auth.oidc.provider.discovery.path:/.well-known/openid-configuration}")
 	private String oidcProviderDiscoveryPath;
 
+	@Documentation(description = "OIDC provider client cache timeout of the 'openid-configuration' discovery resource")
+	@Value("${dev.dsf.server.auth.oidc.provider.client.cache.timeout.configuration.resource:PT1H}")
+	private String oidcProviderClientCacheConfigurationResourceTimeout;
+
+	@Documentation(description = "OIDC provider client cache timeout of the jwks resource")
+	@Value("${dev.dsf.server.auth.oidc.provider.client.cache.timeout.jwks.resource:PT1H}")
+	private String oidcProviderClientCacheJwksResourceTimeout;
+
 	@Documentation(description = "OIDC provider client connect timeout")
 	@Value("${dev.dsf.server.auth.oidc.provider.client.timeout.connect:PT5S}")
 	private String oidcProviderClientTimeoutConnect;
@@ -202,6 +229,10 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 	@Value("${dev.dsf.server.auth.oidc.back.channel.logout.path:/back-channel-logout}")
 	private String oidcBackChannelPath;
 
+	@Documentation(description = "Maximum inactivity period after which the server session for OIDC logins is invalidated; the access token may expire earlier, resulting in earlier session invalidation")
+	@Value("${dev.dsf.server.auth.oidc.session.timeout:PT30M}")
+	private String oidcSessionTimeout;
+
 	@Documentation(description = "Forward (http/https) proxy url, use *DEV_DSF_BPE_PROXY_NOPROXY* to list domains that do not require a forward proxy", example = "http://proxy.foo:8080")
 	@Value("${dev.dsf.proxy.url:#{null}}")
 	private String proxyUrl;
@@ -214,7 +245,7 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 	@Value("${dev.dsf.proxy.password:#{null}}")
 	private char[] proxyPassword;
 
-	@Documentation(description = "Forward proxy no-proxy list, entries will match exactly or against (one level) sub-domains, if no port is specified - all ports are matched; comma or space separated list, YAML block scalars supported", example = "foo.bar, test.com:8080")
+	@Documentation(description = "Forward proxy no-proxy list: Target URLs will match exact domains `example.com`, against one level sub-domains `*.example.com`, one or more level sub-domains `**.example.com`, against IP-addresses and CIDR Networks if the target URL is specified as IP-address (IPv6 in square brackets), if no port is specified - all ports are matched; comma or space separated list, YAML block scalars supported", example = "sub.exact.com:80, *.one.level.wildcard.com, **.multilevel.com:443, 192.168.1.1, 192.168.1.0/24:80, [2001:db8::1]:443, [2001:db8::/32]")
 	@Value("#{'${dev.dsf.proxy.noProxy:}'.trim().split('[,\\s]+')}")
 	private List<String> proxyNoProxy;
 
@@ -226,7 +257,39 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 
 	protected final Function<Server, ServerConnector> httpApiConnector()
 	{
-		return JettyServer.httpConnector(apiHost, apiPort, clientCertificateHeaderName);
+		return JettyServer.httpConnector(apiHost, apiPort, clientCertificateHeaderName, createTrustedProxyMatcher());
+	}
+
+	private InetSocketAddressMatcher createTrustedProxyMatcher()
+	{
+		if (trustedReverseProxies.size() == 1 && HOST_SPEC_LIST_DISABLED.equals(trustedReverseProxies.get(0)))
+		{
+			logger.warn("Trusted reverse proxy matcher disabled");
+			return InetSocketAddressMatcher.ALL;
+		}
+
+		Duration trustedReverseProxiesDnsRefreshTimeout = Duration.parse(trustedReverseProxiesRefreshTimeout);
+		List<HostSpec> trustedReverseProxies = parseHostSpecList("dev.dsf.server.auth.trust.reverse.proxy",
+				this.trustedReverseProxies);
+
+		InetSocketAddressMatcher matcher = new InetSocketAddressMatcherList(
+				trustedReverseProxies.stream().map(toMatcher(trustedReverseProxiesDnsRefreshTimeout)));
+
+		logger.info("Trusted reverse proxy matcher config: {}", matcher.toString());
+		return matcher;
+	}
+
+	private Function<HostSpec, InetSocketAddressMatcher> toMatcher(Duration trustedReverseProxiesDnsRefreshTimeout)
+	{
+		return hostSpec ->
+		{
+			if (hostSpec.isIp())
+				return StaticCidrMatcher.of(hostSpec);
+			else if (hostSpec.isDomain())
+				return DynamicHostnameMatcher.of(trustedReverseProxiesDnsRefreshTimeout, hostSpec);
+			else
+				throw new IllegalArgumentException("hostSpec not supported");
+		};
 	}
 
 	protected final Function<Server, ServerConnector> httpsApiConnector()
@@ -307,6 +370,15 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 	private void configureSecurityHandler(WebAppContext webAppContext, Supplier<Integer> statusPortSupplier)
 	{
 		SessionHandler sessionHandler = webAppContext.getSessionHandler();
+		sessionHandler.setSameSite(SameSite.LAX);
+		sessionHandler.setMaxInactiveInterval(oidcSessionTimeout());
+		sessionHandler.setSessionIdPathParameterName(null);
+		sessionHandler.setRefreshCookieAge(Math.min(oidcSessionTimeout() / 2, 600));
+
+		SessionCookieConfig sessionCookieConfig = sessionHandler.getSessionCookieConfig();
+		sessionCookieConfig.setSecure(true);
+		sessionCookieConfig.setHttpOnly(true);
+
 		DsfLoginService dsfLoginService = new DsfLoginService(webAppContext);
 
 		OpenIdConfiguration openIdConfiguration = null;
@@ -318,7 +390,7 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 		if (oidcAuthorizationCodeFlowEnabled || oidcBearerTokenEnabled || oidcBackChannelLogoutEnabled)
 		{
 			openIdConfiguration = new OpenIdConfiguration.Builder(oidcProviderRealmBaseUrl, oidcClientId,
-					oidcClientSecret).httpClient(createOidcClient()).build();
+					oidcClientSecret).logoutWhenIdTokenIsExpired(true).httpClient(createOidcClient()).build();
 
 			if (oidcAuthorizationCodeFlowEnabled)
 			{
@@ -375,6 +447,7 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 		SecurityHandler securityHandler = new DsfSecurityHandler(dsfLoginService, delegatingAuthenticator,
 				openIdConfiguration);
 		securityHandler.setSessionRenewedOnAuthentication(true);
+		securityHandler.setSessionMaxInactiveIntervalOnAuthentication(oidcSessionTimeout());
 
 		webAppContext.setSecurityHandler(securityHandler);
 
@@ -407,24 +480,50 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 		char[] keyStorePassword = UUID.randomUUID().toString().toCharArray();
 		KeyStore keyStore = oidcProviderClientKeyStore(keyStorePassword);
 
-		return new BaseOidcClientWithCache(new BaseOidcClientJersey(oidcProviderRealmBaseUrl, oidcProviderDiscoveryPath,
-				trustStore, keyStore, keyStore == null ? null : keyStorePassword, proxyUrl, proxyUsername,
-				proxyPassword, buildInfoReader().getUserAgentValue(), oidcProviderClientTimeoutConnect(),
-				oidcProviderClientTimeoutRead(), false));
+		return new BaseOidcClientWithCache(getOidcProviderClientCacheConfigurationResourceTimeout(),
+				getOidcProviderClientCacheJwksResourceTimeout(),
+				new BaseOidcClientJersey(oidcProviderRealmBaseUrl, oidcProviderDiscoveryPath, trustStore, keyStore,
+						keyStore == null ? null : keyStorePassword, proxyUrl, proxyUsername, proxyPassword,
+						buildInfoReader().getUserAgentValue(), oidcProviderClientTimeoutConnect(),
+						oidcProviderClientTimeoutRead(), false));
 	}
 
-	@Bean
-	@Lazy
-	public Duration oidcProviderClientTimeoutRead()
+	private Duration getOidcProviderClientCacheConfigurationResourceTimeout()
 	{
-		return Duration.parse(oidcProviderClientTimeoutRead);
+		return assertPositive(Duration.parse(oidcProviderClientCacheConfigurationResourceTimeout));
 	}
 
-	@Bean
-	@Lazy
-	public Duration oidcProviderClientTimeoutConnect()
+	private Duration getOidcProviderClientCacheJwksResourceTimeout()
 	{
-		return Duration.parse(oidcProviderClientTimeoutConnect);
+		return assertPositive(Duration.parse(oidcProviderClientCacheJwksResourceTimeout));
+	}
+
+	private Duration oidcProviderClientTimeoutRead()
+	{
+		return assertPositive(Duration.parse(oidcProviderClientTimeoutRead));
+	}
+
+	private Duration oidcProviderClientTimeoutConnect()
+	{
+		return assertPositive(Duration.parse(oidcProviderClientTimeoutConnect));
+	}
+
+	private int oidcSessionTimeout()
+	{
+		long seconds = assertPositive(Duration.parse(oidcSessionTimeout)).getSeconds();
+
+		if (seconds >= Integer.MAX_VALUE)
+			seconds = Integer.MAX_VALUE;
+
+		return (int) seconds;
+	}
+
+	private Duration assertPositive(Duration duration)
+	{
+		if (duration != null && duration.isNegative())
+			throw new IllegalArgumentException("configured duration is negative");
+		else
+			return duration;
 	}
 
 	private Proxy oidcClientProxy()
@@ -453,6 +552,8 @@ public abstract class AbstractJettyConfig extends AbstractCertificateConfig
 	@Lazy
 	public ProxyConfig proxyConfig()
 	{
+		List<HostSpec> proxyNoProxy = parseHostSpecList("dev.dsf.proxy.noProxy", this.proxyNoProxy);
+
 		return new ProxyConfigImpl(proxyUrl, proxyUsername, proxyPassword, proxyNoProxy);
 	}
 

@@ -47,13 +47,7 @@ public class MessageSendTaskDelegate extends AbstractMessageDelegate<MessageSend
 		// do not stop process execution
 		catch (ErrorBoundaryEvent event)
 		{
-			MessageSendTaskErrorHandler handler = delegate.getErrorHandler();
-			if (handler != null)
-				event = handler.handleErrorBoundaryEvent(api, variables, event);
-
-			if (event != null)
-				throw new BpmnError(event.getErrorCode(), event.getErrorMessage(), event);
-			// else, do nothing if event was absorbed by error handler
+			handleErrorBoundaryEvent(variables, event);
 		}
 		// stop process execution if exception not absorbed by error handler
 		catch (Exception exception)
@@ -62,10 +56,25 @@ public class MessageSendTaskDelegate extends AbstractMessageDelegate<MessageSend
 			if (handler != null)
 				exception = handler.handleException(api, variables, sendTaskValues, exception);
 
-			if (exception != null)
+			// do not stop process execution if exception translated to error boundary event
+			if (exception instanceof ErrorBoundaryEvent event)
+				handleErrorBoundaryEvent(variables, event);
+
+			else if (exception != null)
 				execution.getProcessEngine().getRuntimeService().deleteProcessInstance(execution.getProcessInstanceId(),
 						exception.getMessage());
 			// else, do nothing if exception was absorbed by error handler
 		}
+	}
+
+	private void handleErrorBoundaryEvent(Variables variables, ErrorBoundaryEvent event)
+	{
+		MessageSendTaskErrorHandler handler = delegate.getErrorHandler();
+		if (handler != null)
+			event = handler.handleErrorBoundaryEvent(api, variables, event);
+
+		// do nothing if event was absorbed by error handler
+		if (event != null)
+			throw new BpmnError(event.getErrorCode(), event.getErrorMessage(), event);
 	}
 }

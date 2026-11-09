@@ -18,6 +18,7 @@ package dev.dsf.common.db.migration;
 import java.io.ByteArrayOutputStream;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -134,8 +135,8 @@ public final class DbMigrator
 							logger.warn("Unlocking DB for migration ...");
 							unlockCommand.execute();
 
-							Arrays.stream(output.toString().split("[\r\n]+")).filter(row -> !row.isBlank())
-									.forEach(row -> logger.debug("{}", row));
+							Arrays.stream(output.toString(StandardCharsets.UTF_8).split("[\r\n]+"))
+									.filter(row -> !row.isBlank()).forEach(row -> logger.debug("{}", row));
 							logger.warn("Unlocking DB for migration [Done]");
 						}
 
@@ -156,8 +157,8 @@ public final class DbMigrator
 						logger.info("Executing DB migration ...");
 						updateCommand.execute();
 
-						Arrays.stream(output.toString().split("[\r\n]+")).filter(row -> !row.isBlank())
-								.forEach(row -> logger.debug("{}", row));
+						Arrays.stream(output.toString(StandardCharsets.UTF_8).split("[\r\n]+"))
+								.filter(row -> !row.isBlank()).forEach(row -> logger.debug("{}", row));
 						logger.info("Executing DB migration [Done]");
 					}
 				}
@@ -214,6 +215,10 @@ public final class DbMigrator
 				}
 				catch (InterruptedException e1)
 				{
+					logger.warn("Thread interrupted; not trying again");
+					Thread.currentThread().interrupt();
+					e.addSuppressed(e1);
+					throw e;
 				}
 				retryOnConnectException(--times, run);
 			}
@@ -226,19 +231,28 @@ public final class DbMigrator
 				}
 				catch (InterruptedException e1)
 				{
+					logger.warn("Thread interrupted; not trying again");
+					Thread.currentThread().interrupt();
+					e.addSuppressed(e1);
+					throw e;
 				}
 				retryOnConnectException(--times, run);
 			}
-			else if (cause instanceof PSQLException p
+			else if (cause instanceof PSQLException p && p.getServerErrorMessage() != null
 					&& POSTGRES_TRY_AGAIN_ERROR_MESSAGES.contains(p.getServerErrorMessage().getMessage()) && times > 1)
 			{
-				logger.warn("PSQLException ({}): trying again in 5s", p.getServerErrorMessage().getMessage());
+				logger.warn("PSQLException ({}): trying again in 5s",
+						p.getServerErrorMessage() != null ? p.getServerErrorMessage().getMessage() : "?");
 				try
 				{
 					Thread.sleep(5_000);
 				}
 				catch (InterruptedException e1)
 				{
+					logger.warn("Thread interrupted; not trying again");
+					Thread.currentThread().interrupt();
+					e.addSuppressed(e1);
+					throw e;
 				}
 				retryOnConnectException(--times, run);
 			}

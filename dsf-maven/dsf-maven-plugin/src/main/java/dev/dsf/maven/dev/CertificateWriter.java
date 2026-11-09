@@ -17,7 +17,6 @@ package dev.dsf.maven.dev;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyStore;
 import java.util.List;
@@ -31,29 +30,28 @@ import de.hsheilbronn.mi.utils.crypto.io.KeyStoreWriter;
 import de.hsheilbronn.mi.utils.crypto.io.PemWriter;
 import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
 import dev.dsf.maven.dev.CertificateGenerator.CertificateAndPrivateKey;
+import dev.dsf.maven.exception.RuntimeIOException;
 
 public class CertificateWriter extends AbstractIo
 {
 	private static final Logger logger = LoggerFactory.getLogger(CertificateWriter.class);
 
-	private final Path projectBasedir;
 	private final CertificateGenerator generator;
-	private final char[] privateKeyPassword;
 
-	public CertificateWriter(Path projectBasedir, CertificateGenerator generator, char[] privateKeyPassword)
+	public CertificateWriter(Path projectBasedir, char[] privateKeyPassword, CertificateGenerator generator)
 	{
-		this.projectBasedir = Objects.requireNonNull(projectBasedir, "projectBasedir");
+		super(projectBasedir, privateKeyPassword);
+
 		this.generator = Objects.requireNonNull(generator, "generator");
-		this.privateKeyPassword = Objects.requireNonNull(privateKeyPassword, "privateKeyPassword");
 	}
 
-	public void write(List<Cert> certs)
+	public void write(List<Cert> certs) throws RuntimeIOException
 	{
 		if (certs != null)
 			certs.forEach(this::write);
 	}
 
-	private void write(Cert cert)
+	private void write(Cert cert) throws RuntimeIOException
 	{
 		Optional<CertificateAndPrivateKey> certificateAndPrivateKey = generator
 				.getCertificateAndPrivateKey(cert.getCn());
@@ -64,11 +62,11 @@ public class CertificateWriter extends AbstractIo
 			else if (target.getFileName().toString().endsWith(".crt"))
 				toRuntimeException(() -> writeCertificate(cert.getCn(), capk, target));
 			else if (target.getFileName().toString().endsWith(".key"))
-				toRuntimeException(() -> writePrivateKey(cert.getCn(), capk, target));
+				toRuntimeException(() -> writePrivateKey("cn", cert.getCn(), capk.privateKey(), target));
 			else if (target.getFileName().toString().endsWith(".key.plain"))
-				toRuntimeException(() -> writePrivateKeyPlain(cert.getCn(), capk, target));
+				toRuntimeException(() -> writePrivateKeyPlain("cn", cert.getCn(), capk.privateKey(), target));
 			else if (target.getFileName().toString().endsWith(".key.password"))
-				toRuntimeException(() -> writePassword(cert.getCn(), target));
+				toRuntimeException(() -> writePassword("cn", cert.getCn(), target));
 			else if (target.getFileName().toString().endsWith(".p12"))
 				toRuntimeException(() -> writePkcs12(cert.getCn(), capk, target));
 			else
@@ -76,7 +74,7 @@ public class CertificateWriter extends AbstractIo
 		}));
 	}
 
-	public void write(RootCa rootCa)
+	public void write(RootCa rootCa) throws RuntimeIOException
 	{
 		if (rootCa == null)
 			return;
@@ -87,12 +85,14 @@ public class CertificateWriter extends AbstractIo
 				toRuntimeException(() -> writeRootCa(target));
 			else if (target.getFileName().toString().endsWith(".jks"))
 				toRuntimeException(() -> writeRootCaJks(target));
+			else if (target.getFileName().toString().endsWith(".p12"))
+				toRuntimeException(() -> writeRootCaPkcs12(target));
 			else
 				logger.warn("RootCa target filetype not supported: {}", target.getFileName());
 		});
 	}
 
-	public void write(IssuingCa issuingCa)
+	public void write(IssuingCa issuingCa) throws RuntimeIOException
 	{
 		if (issuingCa == null)
 			return;
@@ -103,12 +103,14 @@ public class CertificateWriter extends AbstractIo
 				toRuntimeException(() -> writeIssuingCa(target));
 			else if (target.getFileName().toString().endsWith(".jks"))
 				toRuntimeException(() -> writeIssuingCaJks(target));
+			else if (target.getFileName().toString().endsWith(".p12"))
+				toRuntimeException(() -> writeIssuingCaPkcs12(target));
 			else
 				logger.warn("IssuingCa target filetype not supported: {}", target.getFileName());
 		});
 	}
 
-	public void write(CaChain caChain)
+	public void write(CaChain caChain) throws RuntimeIOException
 	{
 		if (caChain == null)
 			return;
@@ -119,6 +121,8 @@ public class CertificateWriter extends AbstractIo
 				toRuntimeException(() -> writeCaChain(target));
 			else if (target.getFileName().toString().endsWith(".jks"))
 				toRuntimeException(() -> writeCaChainJks(target));
+			else if (target.getFileName().toString().endsWith(".p12"))
+				toRuntimeException(() -> writeCaChainPkcs12(target));
 			else
 				logger.warn("CaChain target filetype not supported: {}", target.getFileName());
 		});
@@ -136,27 +140,6 @@ public class CertificateWriter extends AbstractIo
 		logger.info("Writing certificate (cn: {}) and issuingCa to {}", cn, projectBasedir.relativize(target));
 
 		PemWriter.writeCertificates(List.of(capk.certificate(), generator.getIssuingCaCertificate()), true, target);
-	}
-
-	private void writePrivateKey(String cn, CertificateAndPrivateKey capk, Path target) throws IOException
-	{
-		logger.info("Writing private-key encrypted (cn: {}) to {}", cn, projectBasedir.relativize(target));
-
-		PemWriter.writePrivateKey(capk.privateKey()).asPkcs8().encryptedAes128(privateKeyPassword).toFile(target);
-	}
-
-	private void writePrivateKeyPlain(String cn, CertificateAndPrivateKey capk, Path target) throws IOException
-	{
-		logger.info("Writing private-key unencrypted (cn: {}) to {}", cn, projectBasedir.relativize(target));
-
-		PemWriter.writePrivateKey(capk.privateKey()).asPkcs8().notEncrypted().toFile(target);
-	}
-
-	private void writePassword(String cn, Path target) throws IOException
-	{
-		logger.info("Writing key password (cn: {}) to {}", cn, projectBasedir.relativize(target));
-
-		Files.writeString(target, new String(privateKeyPassword));
 	}
 
 	private void writePkcs12(String cn, CertificateAndPrivateKey capk, Path target) throws IOException
@@ -213,6 +196,34 @@ public class CertificateWriter extends AbstractIo
 	private void writeCaChainJks(Path target) throws IOException
 	{
 		KeyStore keyStore = KeyStoreCreator.jksForTrustedCertificates(generator.getIssuingCaCertificate(),
+				generator.getRootCaCertificate());
+
+		logger.info("Writing caChain to {}", projectBasedir.relativize(target));
+
+		KeyStoreWriter.write(keyStore, privateKeyPassword, target);
+	}
+
+	private void writeRootCaPkcs12(Path target) throws IOException
+	{
+		KeyStore keyStore = KeyStoreCreator.pkcs12ForTrustedCertificates(generator.getRootCaCertificate());
+
+		logger.info("Writing rootCa to {}", projectBasedir.relativize(target));
+
+		KeyStoreWriter.write(keyStore, privateKeyPassword, target);
+	}
+
+	private void writeIssuingCaPkcs12(Path target) throws IOException
+	{
+		KeyStore keyStore = KeyStoreCreator.pkcs12ForTrustedCertificates(generator.getIssuingCaCertificate());
+
+		logger.info("Writing issuingCa to {}", projectBasedir.relativize(target));
+
+		KeyStoreWriter.write(keyStore, privateKeyPassword, target);
+	}
+
+	private void writeCaChainPkcs12(Path target) throws IOException
+	{
+		KeyStore keyStore = KeyStoreCreator.pkcs12ForTrustedCertificates(generator.getIssuingCaCertificate(),
 				generator.getRootCaCertificate());
 
 		logger.info("Writing caChain to {}", projectBasedir.relativize(target));

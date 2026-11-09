@@ -21,6 +21,8 @@ import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.Task;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.TaskDao;
 import dev.dsf.fhir.search.filter.TaskIdentityFilter;
@@ -32,9 +34,10 @@ import dev.dsf.fhir.search.parameters.TaskStatus;
 
 public class TaskDaoJdbc extends AbstractResourceDaoJdbc<Task> implements TaskDao
 {
-	public TaskDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext)
+	public TaskDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
+			ObjectMapper objectMapper)
 	{
-		super(dataSource, permanentDeleteDataSource, fhirContext, Task.class, "tasks", "task", "task_id",
+		super(dataSource, permanentDeleteDataSource, fhirContext, objectMapper, Task.class, "tasks", "task", "task_id",
 				TaskIdentityFilter::new,
 				List.of(factory(TaskAuthoredOn.PARAMETER_NAME, TaskAuthoredOn::new),
 						factory(TaskIdentifier.PARAMETER_NAME, TaskIdentifier::new, TaskIdentifier.getNameModifiers()),

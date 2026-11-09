@@ -144,7 +144,7 @@ public class WebsocketClientTyrus implements WebsocketClient
 	public void connect()
 	{
 		if (manager != null)
-			throw new IllegalStateException("Allready connecting/connected");
+			throw new IllegalStateException("Already connecting/connected");
 
 		closed = false;
 
@@ -187,7 +187,7 @@ public class WebsocketClientTyrus implements WebsocketClient
 		ClientEndpointConfig.Configurator configurator = new ClientEndpointConfig.Configurator()
 		{
 			@Override
-			public void beforeRequest(Map<String, java.util.List<String>> headers)
+			public void beforeRequest(Map<String, List<String>> headers)
 			{
 				headers.put(HttpHeaders.USER_AGENT, List.of(userAgentValue));
 			}

@@ -133,7 +133,7 @@ public class MultiVersionBpmnParse extends BpmnParse
 		else
 		{
 			TaskListener taskListener = super.parseTaskListener(taskListenerElement, taskElementId);
-			logger.debug("Not modifying {} in BPMN element with id '{}", taskListener.getClass().getName(),
+			logger.debug("Not modifying {} in BPMN element with id '{}'", taskListener.getClass().getName(),
 					getElementId(taskListenerElement));
 			return taskListener;
 		}
@@ -149,7 +149,7 @@ public class MultiVersionBpmnParse extends BpmnParse
 			List<FieldDeclaration> fieldDeclarations = parseFieldDeclarations(executionListenerElement);
 
 			logger.debug("Modifying {} for {} in BPMN element with id '{}'",
-					MultiVersionClassDelegateTaskListener.class.getName(), className,
+					MultiVersionClassDelegateExecutionListener.class.getName(), className,
 					getElementId(executionListenerElement));
 			return new MultiVersionClassDelegateExecutionListener(className, fieldDeclarations, delegateProvider);
 		}

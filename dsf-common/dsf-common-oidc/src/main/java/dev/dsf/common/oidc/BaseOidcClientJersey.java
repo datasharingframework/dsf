@@ -24,7 +24,7 @@ import java.util.logging.Level;
 import javax.net.ssl.SSLContext;
 
 import org.glassfish.jersey.SslConfigurator;
-import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
+import org.glassfish.jersey.apache5.connector.Apache5ConnectorProvider;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.logging.LoggingFeature;
@@ -104,7 +104,7 @@ public class BaseOidcClientJersey implements BaseOidcClient
 			builder = builder.sslContext(sslContext);
 
 		ClientConfig config = new ClientConfig();
-		config.connectorProvider(new ApacheConnectorProvider());
+		config.connectorProvider(new Apache5ConnectorProvider());
 		config.property(ClientProperties.PROXY_URI, proxySchemeHostPort);
 		config.property(ClientProperties.PROXY_USERNAME, proxyUserName);
 		config.property(ClientProperties.PROXY_PASSWORD, proxyPassword == null ? null : String.valueOf(proxyPassword));
@@ -167,7 +167,12 @@ public class BaseOidcClientJersey implements BaseOidcClient
 	{
 		Objects.requireNonNull(configuration, "configuration");
 
-		Response response = client.target(configuration.jwksUri()).request(MediaType.APPLICATION_JSON_TYPE).get();
+		String jwksUri = configuration.jwksUri();
+		if (jwksUri == null || !jwksUri.startsWith("https://"))
+			throw new OidcClientException(
+					"JWKS URL from OIDC configuration resource is null or does not start with 'https://'");
+
+		Response response = client.target(jwksUri).request(MediaType.APPLICATION_JSON_TYPE).get();
 
 		if (response.getStatus() == Status.OK.getStatusCode())
 		{

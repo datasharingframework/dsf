@@ -122,23 +122,23 @@ public class ResourceReference
 		/**
 		 * temporary url in RelatedArtifact starting with <code>urn:uuid:</code>
 		 */
-		RELATED_ARTEFACT_TEMPORARY_URL,
+		RELATED_ARTIFACT_TEMPORARY_URL,
 		/**
 		 * conditional url in RelatedArtifact
 		 */
-		RELATED_ARTEFACT_CONDITIONAL_URL,
+		RELATED_ARTIFACT_CONDITIONAL_URL,
 		/**
 		 * literal url in RelatedArtifact to a resource on this server
 		 */
-		RELATED_ARTEFACT_LITERAL_INTERNAL_URL,
+		RELATED_ARTIFACT_LITERAL_INTERNAL_URL,
 		/**
 		 * literal url in RelatedArtifact to a resource on an external server
 		 */
-		RELATED_ARTEFACT_LITERAL_EXTERNAL_URL,
+		RELATED_ARTIFACT_LITERAL_EXTERNAL_URL,
 		/**
 		 * unknown url in RelatedArtifact
 		 */
-		RELATED_ARTEFACT_UNKNOWN_URL,
+		RELATED_ARTIFACT_UNKNOWN_URL,
 		/**
 		 * temporary url in Attachment starting with <code>urn:uuid:</code>
 		 */
@@ -262,7 +262,7 @@ public class ResourceReference
 		else if (hasCanonical())
 			return canonical.getValue();
 		else
-			throw new IllegalArgumentException("reference, related artefact, attachment or canonical not set");
+			throw new IllegalArgumentException("reference, related artifact, attachment or canonical not set");
 	}
 
 	public List<Class<? extends Resource>> getReferenceTypes()
@@ -280,11 +280,11 @@ public class ResourceReference
 	 *
 	 * @param localServerBase
 	 *            not <code>null</code>
-	 * @return one of this priority list: {@link ReferenceType#RELATED_ARTEFACT_TEMPORARY_URL},
-	 *         {@link ReferenceType#RELATED_ARTEFACT_LITERAL_INTERNAL_URL},
-	 *         {@link ReferenceType#RELATED_ARTEFACT_LITERAL_EXTERNAL_URL},
-	 *         {@link ReferenceType#RELATED_ARTEFACT_CONDITIONAL_URL},
-	 *         {@link ReferenceType#RELATED_ARTEFACT_UNKNOWN_URL}, {@link ReferenceType#ATTACHMENT_TEMPORARY_URL},
+	 * @return one of this priority list: {@link ReferenceType#RELATED_ARTIFACT_TEMPORARY_URL},
+	 *         {@link ReferenceType#RELATED_ARTIFACT_LITERAL_INTERNAL_URL},
+	 *         {@link ReferenceType#RELATED_ARTIFACT_LITERAL_EXTERNAL_URL},
+	 *         {@link ReferenceType#RELATED_ARTIFACT_CONDITIONAL_URL},
+	 *         {@link ReferenceType#RELATED_ARTIFACT_UNKNOWN_URL}, {@link ReferenceType#ATTACHMENT_TEMPORARY_URL},
 	 *         {@link ReferenceType#ATTACHMENT_LITERAL_INTERNAL_URL},
 	 *         {@link ReferenceType#ATTACHMENT_LITERAL_EXTERNAL_URL}, {@link ReferenceType#ATTACHMENT_CONDITIONAL_URL},
 	 *         {@link ReferenceType#ATTACHMENT_UNKNOWN_URL}, {@link ReferenceType#TEMPORARY},
@@ -301,24 +301,24 @@ public class ResourceReference
 			{
 				Matcher tempIdRefMatcher = TEMP_ID_PATTERN.matcher(relatedArtifact.getUrl());
 				if (tempIdRefMatcher.matches())
-					return ReferenceType.RELATED_ARTEFACT_TEMPORARY_URL;
+					return ReferenceType.RELATED_ARTIFACT_TEMPORARY_URL;
 
 				Matcher idRefMatcher = ID_PATTERN.matcher(relatedArtifact.getUrl());
 				if (idRefMatcher.matches())
 				{
 					IdType id = new IdType(relatedArtifact.getUrl());
 					if (!id.isAbsolute() || localServerBase.equals(id.getBaseUrl()))
-						return ReferenceType.RELATED_ARTEFACT_LITERAL_INTERNAL_URL;
+						return ReferenceType.RELATED_ARTIFACT_LITERAL_INTERNAL_URL;
 					else
-						return ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL;
+						return ReferenceType.RELATED_ARTIFACT_LITERAL_EXTERNAL_URL;
 				}
 
 				Matcher conditionalRefMatcher = CONDITIONAL_REF_PATTERN.matcher(relatedArtifact.getUrl());
 				if (conditionalRefMatcher.matches())
-					return ReferenceType.RELATED_ARTEFACT_CONDITIONAL_URL;
+					return ReferenceType.RELATED_ARTIFACT_CONDITIONAL_URL;
 			}
 
-			return ReferenceType.RELATED_ARTEFACT_UNKNOWN_URL;
+			return ReferenceType.RELATED_ARTIFACT_UNKNOWN_URL;
 		}
 		else if (attachment != null)
 		{
@@ -383,7 +383,7 @@ public class ResourceReference
 				return ReferenceType.UNKNOWN;
 		}
 		else
-			throw new IllegalStateException("Either reference, related artefact, attachment or canonical expected");
+			throw new IllegalStateException("Either reference, related artifact, attachment or canonical expected");
 	}
 
 	public String getLocation()
@@ -395,14 +395,14 @@ public class ResourceReference
 	 * @param localServerBase
 	 *            not <code>null</code>
 	 * @return empty String if the type of this {@link ResourceReference} is not {@link ReferenceType#LITERAL_EXTERNAL},
-	 *         {@link ReferenceType#RELATED_ARTEFACT_LITERAL_EXTERNAL_URL} or
+	 *         {@link ReferenceType#RELATED_ARTIFACT_LITERAL_EXTERNAL_URL} or
 	 *         {@link ReferenceType#ATTACHMENT_LITERAL_EXTERNAL_URL}
 	 */
 	public String getServerBase(String localServerBase)
 	{
 		Objects.requireNonNull(localServerBase, "localServerBase");
 
-		if (EnumSet.of(ReferenceType.LITERAL_EXTERNAL, ReferenceType.RELATED_ARTEFACT_LITERAL_EXTERNAL_URL,
+		if (EnumSet.of(ReferenceType.LITERAL_EXTERNAL, ReferenceType.RELATED_ARTIFACT_LITERAL_EXTERNAL_URL,
 				ReferenceType.ATTACHMENT_LITERAL_EXTERNAL_URL).contains(getType(localServerBase)))
 			return new IdType(getValue()).getBaseUrl();
 		else

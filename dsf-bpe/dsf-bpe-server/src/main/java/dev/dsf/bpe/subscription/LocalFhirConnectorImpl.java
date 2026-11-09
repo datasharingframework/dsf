@@ -81,10 +81,10 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 		}
 		else
 		{
-			UriComponents componentes = UriComponentsBuilder
+			UriComponents components = UriComponentsBuilder
 					.fromUriString(queryParameters.startsWith("?") ? queryParameters : "?" + queryParameters).build();
 
-			return componentes.getQueryParams();
+			return components.getQueryParams();
 		}
 	}
 
@@ -153,6 +153,10 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 					}
 					catch (InterruptedException e1)
 					{
+						logger.warn("Thread interrupted; not trying again");
+						Thread.currentThread().interrupt();
+						e.addSuppressed(e1);
+						throw e;
 					}
 				}
 
@@ -184,6 +188,10 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 				}
 				catch (InterruptedException e1)
 				{
+					logger.warn("Thread interrupted; not trying again");
+					Thread.currentThread().interrupt();
+					e.addSuppressed(e1);
+					throw e;
 				}
 			}
 		}
@@ -292,7 +300,7 @@ public class LocalFhirConnectorImpl<R extends Resource> implements LocalFhirConn
 			case Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW -> EventType.JSON;
 			case Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW -> EventType.XML;
 
-			default -> throw new RuntimeException("Unsupportet subscription.payload " + payload);
+			default -> throw new RuntimeException("Unsupported subscription.payload " + payload);
 		};
 	}
 

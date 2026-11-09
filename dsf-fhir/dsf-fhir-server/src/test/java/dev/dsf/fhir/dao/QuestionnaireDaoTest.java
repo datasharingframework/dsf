@@ -30,7 +30,10 @@ public class QuestionnaireDaoTest extends AbstractReadAccessDaoTest<Questionnair
 
 	public QuestionnaireDaoTest()
 	{
-		super(Questionnaire.class, QuestionnaireDaoJdbc::new);
+		super(Questionnaire.class,
+				(dataSource, permanentDeleteDataSource, fhirContext, objectMapper) -> new QuestionnaireDaoJdbc(
+						dataSource, permanentDeleteDataSource, fhirContext, objectMapper,
+						ReadByUrlDaoTest.createReadByUrlDao()));
 	}
 
 	@Override

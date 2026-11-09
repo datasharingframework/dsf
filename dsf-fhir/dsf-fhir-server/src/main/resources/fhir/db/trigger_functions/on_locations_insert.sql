@@ -16,6 +16,7 @@
 
 CREATE OR REPLACE FUNCTION on_locations_insert() RETURNS TRIGGER AS $$
 BEGIN
+	UPDATE locations SET current = false WHERE location_id = NEW.location_id AND current AND version <> NEW.version;
 	PERFORM on_resources_insert(NEW.location_id, NEW.version, NEW.location);
 	RETURN NEW;
 END;

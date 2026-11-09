@@ -19,4 +19,14 @@ ca/uhn/fhir/i18n/hapi-messages.properties
 dev/dsf/bpe/v1/plugin/ApiServicesSpringConfiguration.class
 dev/dsf/bpe/v1/spring/ApiServiceConfig.class
 META-INF/services/dev.dsf.bpe.api.plugin.ProcessPluginApiBuilder
+META-INF/services/jakarta.ws.rs.client.ClientBuilder
+META-INF/services/jakarta.ws.rs.ext.RuntimeDelegate
+META-INF/services/org.glassfish.hk2.extension.ServiceLocatorGenerator
+META-INF/services/org.glassfish.jersey.innate.inject.spi.ExternalRegistrables
+META-INF/services/org.glassfish.jersey.internal.inject.InjectionManagerFactory
+META-INF/services/org.glassfish.jersey.internal.spi.AutoDiscoverable
+META-INF/services/org.glassfish.jersey.internal.spi.ForcedAutoDiscoverable
+org/apache/http/client/version.properties
+org/glassfish/jersey/client/internal/localization.properties
+org/glassfish/jersey/internal/localization.properties
 org/hl7/fhir/r4/model/fhirversion.properties

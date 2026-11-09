@@ -41,7 +41,7 @@ public class ResearchStudyEnrollmentRevInclude extends AbstractRevIncludeParamet
 	@Override
 	protected String getRevIncludeSql(IncludeParts includeParts)
 	{
-		return "(SELECT jsonb_agg(research_study) FROM current_research_studies WHERE research_study->'enrollment' @> concat('[{\"reference\": \"Group/', group_json->>'id', '\"}]')::jsonb) AS research_studies";
+		return "(SELECT jsonb_agg(research_study) FROM current_research_studies WHERE research_study->'enrollment' @> ('[{\"reference\": \"Group/' || (group_json->>'id') || '\"}]')::jsonb) AS research_studies";
 	}
 
 	@Override

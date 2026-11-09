@@ -20,7 +20,9 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import org.hl7.fhir.r4.model.Coding;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import dev.dsf.common.auth.conf.RoleConfig.DsfRoleFactory;
 
@@ -50,6 +52,6 @@ public class RoleConfigReader
 
 	protected Yaml yaml()
 	{
-		return new Yaml();
+		return new Yaml(new SafeConstructor(new LoaderOptions()));
 	}
 }

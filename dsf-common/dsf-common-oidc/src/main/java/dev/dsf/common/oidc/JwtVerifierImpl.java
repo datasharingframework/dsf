@@ -16,6 +16,7 @@
 package dev.dsf.common.oidc;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -57,14 +58,21 @@ public class JwtVerifierImpl implements JwtVerifier
 	{
 		final String keyId = JWT.decode(token).getKeyId();
 
-		JWTVerifier verifier = oidcClient.getJwks().getKey(keyId).map(JwksKey::toAlgorithm).map(algorithm ->
-		{
-			return createVerification(algorithm).withAudience(clientId).withClaim("events",
-					(claim, _) -> claim.asMap().containsKey("http://schemas.openid.net/event/backchannel-logout"))
-					.build();
+		Optional<JwksKey> key = oidcClient.getJwks().getKey(keyId);
+		if (key.isEmpty() || !key.get().use().equals("sig"))
+			throw new OidcClientException("Logout token key with kid '" + keyId + "'  and use 'sig' not in JWKS");
 
-		}).orElseThrow(() -> new OidcClientException(
-				"Key with id " + keyId + " not found in JWKS resource from OIDC provider"));
+		Optional<Algorithm> algorithm = key.flatMap(JwksKey::toAlgorithm);
+		if (key.isEmpty())
+		{
+			throw new OidcClientException("Logout token key with kid '" + keyId
+					+ "' has unsupported type (kty) / algorithm (alg) / key-size in JWKS");
+		}
+
+		JWTVerifier verifier = createVerification(algorithm.get()).withAudience(clientId)
+				.withClaim("events",
+						(claim, _) -> claim.asMap().containsKey("http://schemas.openid.net/event/backchannel-logout"))
+				.build();
 
 		return verifier.verify(token);
 	}
@@ -79,17 +87,23 @@ public class JwtVerifierImpl implements JwtVerifier
 	{
 		final String keyId = JWT.decode(token).getKeyId();
 
-		JWTVerifier verifier = oidcClient.getJwks().getKey(keyId).map(JwksKey::toAlgorithm).map(algorithm ->
+		Optional<JwksKey> key = oidcClient.getJwks().getKey(keyId);
+		if (key.isEmpty() || !key.get().use().equals("sig"))
+			throw new OidcClientException("Bearer token key with kid '" + keyId + "'  and use 'sig' not in JWKS");
+
+		Optional<Algorithm> algorithm = key.flatMap(JwksKey::toAlgorithm);
+		if (key.isEmpty())
 		{
-			Verification verification = createVerification(algorithm).acceptLeeway(1);
+			throw new OidcClientException("Bearer token key with kid '" + keyId
+					+ "' has unsupported type (kty) / algorithm (alg) / key-size in JWKS");
+		}
 
-			if (!bearerTokenAudience.isBlank())
-				verification.withAnyOfAudience(bearerTokenAudience);
+		Verification verification = createVerification(algorithm.get());
 
-			return verification.build();
+		if (!bearerTokenAudience.isBlank())
+			verification.withAnyOfAudience(bearerTokenAudience);
 
-		}).orElseThrow(() -> new OidcClientException(
-				"Key with id " + keyId + " not found in JWKS resource from OIDC provider"));
+		JWTVerifier verifier = verification.build();
 
 		return verifier.verify(token);
 	}

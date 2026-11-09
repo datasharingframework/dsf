@@ -35,6 +35,8 @@ import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.dao.ResourceDao;
 import dev.dsf.fhir.dao.exception.ResourceDeletedException;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory.IdentifierParameter;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.IncludeParameterDefinition;
@@ -61,13 +63,13 @@ public class QuestionnaireResponseAuthor extends AbstractReferenceParameter<Ques
 	}
 
 	private static final String IDENTIFIERS_SUBQUERY = "(SELECT practitioner->'identifier' FROM current_practitioners "
-			+ "WHERE concat('Practitioner/', practitioner->>'id') = questionnaire_response->'author'->>'reference' "
+			+ "WHERE ('Practitioner/' || (practitioner->>'id')) = questionnaire_response->'author'->>'reference' "
 			+ "UNION SELECT organization->'identifier' FROM current_organizations "
-			+ "WHERE concat('Organization/', organization->>'id') = questionnaire_response->'author'->>'reference' "
+			+ "WHERE ('Organization/' || (organization->>'id')) = questionnaire_response->'author'->>'reference' "
 			+ "UNION SELECT patient->'identifier' FROM current_patients "
-			+ "WHERE concat('Patient/', patient->>'id') = questionnaire_response->'author'->>'reference' "
+			+ "WHERE ('Patient/' || (patient->>'id')) = questionnaire_response->'author'->>'reference' "
 			+ "UNION SELECT practitioner_role->'identifier' FROM current_practitioner_roles "
-			+ "WHERE concat('PractitionerRole/', practitioner_role->>'id') = questionnaire_response->'author'->>'reference')";
+			+ "WHERE ('PractitionerRole/' || (practitioner_role->>'id')) = questionnaire_response->'author'->>'reference')";
 
 	public QuestionnaireResponseAuthor()
 	{
@@ -81,16 +83,21 @@ public class QuestionnaireResponseAuthor extends AbstractReferenceParameter<Ques
 		{
 			// testing all TargetResourceTypeName/ID combinations
 			case ID -> "questionnaire_response->'author'->>'reference' = ANY (?)";
+
 			case RESOURCE_NAME_AND_ID, URL, TYPE_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID ->
 				"questionnaire_response->'author'->>'reference' = ?";
+
 			case IDENTIFIER -> switch (valueAndType.identifier.type)
 			{
 				case CODE -> "(" + IDENTIFIERS_SUBQUERY
-						+ " @> ?::jsonb OR questionnaire_response->'author'->'identifier'->>'value' = ?)";
+						+ " @> ? OR questionnaire_response->'author'->'identifier'->>'value' = ?)";
+
 				case CODE_AND_SYSTEM -> "(" + IDENTIFIERS_SUBQUERY
-						+ " @> ?::jsonb OR (questionnaire_response->'author'->'identifier'->>'system' = ? AND questionnaire_response->'author'->'identifier'->>'value' = ?))";
+						+ " @> ? OR (questionnaire_response->'author'->'identifier'->>'system' = ? AND questionnaire_response->'author'->'identifier'->>'value' = ?))";
+
 				case SYSTEM -> "(" + IDENTIFIERS_SUBQUERY
-						+ " @> ?::jsonb OR questionnaire_response->'author'->'identifier'->>'system' = ?)";
+						+ " @> ? OR questionnaire_response->'author'->'identifier'->>'system' = ?)";
+
 				case CODE_AND_NO_SYSTEM_PROPERTY -> "((SELECT count(*) FROM jsonb_array_elements("
 						+ IDENTIFIERS_SUBQUERY
 						+ ") identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0"
@@ -115,15 +122,13 @@ public class QuestionnaireResponseAuthor extends AbstractReferenceParameter<Ques
 
 	@Override
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
-			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator, PgObjectFactory pgObjectFactory)
+			throws SQLException
 	{
 		switch (valueAndType.type)
 		{
-			case ID -> {
-				Array array = arrayCreator.apply("TEXT",
-						Arrays.stream(TARGET_RESOURCE_TYPE_NAMES).map(n -> n + "/" + valueAndType.id).toArray());
-				statement.setArray(parameterIndex, array);
-			}
+			case ID -> statement.setArray(parameterIndex, arrayCreator.apply("TEXT",
+					Arrays.stream(TARGET_RESOURCE_TYPE_NAMES).map(n -> n + "/" + valueAndType.id).toArray()));
 
 			case RESOURCE_NAME_AND_ID, TYPE_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID ->
 				statement.setString(parameterIndex, valueAndType.resourceName + "/" + valueAndType.id);
@@ -135,16 +140,17 @@ public class QuestionnaireResponseAuthor extends AbstractReferenceParameter<Ques
 				{
 					case CODE -> {
 						if (subqueryParameterIndex == 1)
-							statement.setString(parameterIndex,
-									"[{\"value\": \"" + valueAndType.identifier.codeValue + "\"}]");
+							statement.setObject(parameterIndex, pgObjectFactory.jsonParameterToPgObjectAsArray(
+									new IdentifierParameter(null, valueAndType.identifier.codeValue)));
 						else if (subqueryParameterIndex == 2)
 							statement.setString(parameterIndex, valueAndType.identifier.codeValue);
 					}
 
 					case CODE_AND_SYSTEM -> {
 						if (subqueryParameterIndex == 1)
-							statement.setString(parameterIndex, "[{\"system\": \"" + valueAndType.identifier.systemValue
-									+ "\", \"value\": \"" + valueAndType.identifier.codeValue + "\"}]");
+							statement.setObject(parameterIndex,
+									pgObjectFactory.jsonParameterToPgObjectAsArray(new IdentifierParameter(
+											valueAndType.identifier.systemValue, valueAndType.identifier.codeValue)));
 						else if (subqueryParameterIndex == 2)
 							statement.setString(parameterIndex, valueAndType.identifier.systemValue);
 						else if (subqueryParameterIndex == 3)
@@ -153,8 +159,8 @@ public class QuestionnaireResponseAuthor extends AbstractReferenceParameter<Ques
 
 					case SYSTEM -> {
 						if (subqueryParameterIndex == 1)
-							statement.setString(parameterIndex,
-									"[{\"system\": \"" + valueAndType.identifier.systemValue + "\"}]");
+							statement.setObject(parameterIndex, pgObjectFactory.jsonParameterToPgObjectAsArray(
+									new IdentifierParameter(valueAndType.identifier.systemValue, null)));
 						else if (subqueryParameterIndex == 2)
 							statement.setString(parameterIndex, valueAndType.identifier.systemValue);
 					}
@@ -261,17 +267,17 @@ public class QuestionnaireResponseAuthor extends AbstractReferenceParameter<Ques
 			return switch (includeParts.getTargetResourceTypeName())
 			{
 				case "Practitioner" -> "(SELECT jsonb_build_array(practitioner) FROM current_practitioners"
-						+ " WHERE concat('Practitioner/', practitioner->>'id') = questionnaire_response->'author'->>'reference') AS practitioners";
+						+ " WHERE ('Practitioner/' || (practitioner->>'id')) = questionnaire_response->'author'->>'reference') AS practitioners";
 
 				case "Organization" -> "(SELECT jsonb_build_array(organization) FROM current_organizations"
-						+ " WHERE concat('Organization/', organization->>'id') = questionnaire_response->'author'->>'reference') AS organizations";
+						+ " WHERE ('Organization/' || (organization->>'id')) = questionnaire_response->'author'->>'reference') AS organizations";
 
 				case "Patient" -> "(SELECT jsonb_build_array(patient) FROM current_patients"
-						+ " WHERE concat('Patient/', patient->>'id') = questionnaire_response->'author'->>'reference') AS patients";
+						+ " WHERE ('Patient/' || (patient->>'id')) = questionnaire_response->'author'->>'reference') AS patients";
 
 				case "PractitionerRole" ->
 					"(SELECT jsonb_build_array(practitioner_role) FROM current_practitioner_roles"
-							+ " WHERE concat('PractitionerRole/', practitioner_role->>'id') = questionnaire_response->'author'->>'reference') AS practitioner_roles";
+							+ " WHERE ('PractitionerRole/' || (practitioner_role->>'id')) = questionnaire_response->'author'->>'reference') AS practitioner_roles";
 
 				default -> null;
 			};

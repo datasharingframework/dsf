@@ -25,11 +25,12 @@ import java.util.function.Supplier;
 
 import javax.sql.DataSource;
 
-import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.MetadataResource;
 
+import dev.dsf.fhir.dao.ReadByUrlDao;
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 
-class ReadByUrlDaoJdbc<R extends DomainResource>
+public class ReadByUrlDaoJdbc<R extends MetadataResource> implements ReadByUrlDao<R>
 {
 	private final Supplier<DataSource> dataSourceSupplier;
 	private final BiFunctionWithSqlException<ResultSet, Integer, R> resourceExtractor;
@@ -37,24 +38,23 @@ class ReadByUrlDaoJdbc<R extends DomainResource>
 	private final String resourceTable;
 	private final String resourceColumn;
 
-	ReadByUrlDaoJdbc(Supplier<DataSource> dataSourceSupplier,
+	public ReadByUrlDaoJdbc(Supplier<DataSource> dataSourceSupplier,
 			BiFunctionWithSqlException<ResultSet, Integer, R> resourceExtractor, String resourceTable,
 			String resourceColumn)
 	{
-		this.dataSourceSupplier = dataSourceSupplier;
-		this.resourceExtractor = resourceExtractor;
-		this.resourceTable = resourceTable;
-		this.resourceColumn = resourceColumn;
+		this.dataSourceSupplier = Objects.requireNonNull(dataSourceSupplier, "dataSourceSupplier");
+		this.resourceExtractor = Objects.requireNonNull(resourceExtractor, "resourceExtractor");
+		this.resourceTable = Objects.requireNonNull(resourceTable, "resourceTable");
+		this.resourceColumn = Objects.requireNonNull(resourceColumn, "resourceColumn");
 	}
 
-	/**
-	 * @param urlAndVersion
-	 *            not <code>null</code>, url|version
-	 * @return {@link Optional#empty()} if param <code>urlAndVersion</code> is null or {@link String#isBlank()}
-	 * @throws SQLException
-	 *             if database access errors occur
-	 */
-	Optional<R> readByUrlAndVersion(String urlAndVersion) throws SQLException
+	@Override
+	public void onResourceCreated(R resource)
+	{
+	}
+
+	@Override
+	public Optional<R> readByUrlAndVersion(String urlAndVersion) throws SQLException
 	{
 		try (Connection connection = dataSourceSupplier.get().getConnection())
 		{
@@ -62,15 +62,7 @@ class ReadByUrlDaoJdbc<R extends DomainResource>
 		}
 	}
 
-	/**
-	 * @param connection
-	 *            not <code>null</code>
-	 * @param urlAndVersion
-	 *            not <code>null</code>, url|version
-	 * @return {@link Optional#empty()} if param <code>urlAndVersion</code> is null or {@link String#isBlank()}
-	 * @throws SQLException
-	 *             if database access errors occur
-	 */
+	@Override
 	public Optional<R> readByUrlAndVersionWithTransaction(Connection connection, String urlAndVersion)
 			throws SQLException
 	{
@@ -85,16 +77,8 @@ class ReadByUrlDaoJdbc<R extends DomainResource>
 		return readByUrlAndVersionWithTransaction(connection, split[0], split.length == 2 ? split[1] : null);
 	}
 
-	/**
-	 * @param url
-	 *            not <code>null</code>
-	 * @param version
-	 *            may be <code>null</code>
-	 * @return {@link Optional#empty()} if param <code>url</code> is null or {@link String#isBlank()}
-	 * @throws SQLException
-	 *             if database access errors occur
-	 */
-	Optional<R> readByUrlAndVersion(String url, String version) throws SQLException
+	@Override
+	public Optional<R> readByUrlAndVersion(String url, String version) throws SQLException
 	{
 		try (Connection connection = dataSourceSupplier.get().getConnection())
 		{
@@ -102,18 +86,8 @@ class ReadByUrlDaoJdbc<R extends DomainResource>
 		}
 	}
 
-	/**
-	 * @param connection
-	 *            not <code>null</code>
-	 * @param url
-	 *            not <code>null</code>
-	 * @param version
-	 *            may be <code>null</code>
-	 * @return {@link Optional#empty()} if param <code>url</code> is null or {@link String#isBlank()}
-	 * @throws SQLException
-	 *             if database access errors occur
-	 */
-	Optional<R> readByUrlAndVersionWithTransaction(Connection connection, String url, String version)
+	@Override
+	public Optional<R> readByUrlAndVersionWithTransaction(Connection connection, String url, String version)
 			throws SQLException
 	{
 		Objects.requireNonNull(connection, "connection");

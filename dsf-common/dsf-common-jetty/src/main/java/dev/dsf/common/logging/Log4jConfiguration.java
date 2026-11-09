@@ -60,17 +60,17 @@ public class Log4jConfiguration extends AbstractConfiguration
 		public StringLayout consoleLayout(Configuration configuration)
 		{
 			if (color)
-				return PatternLayout.newBuilder().withPattern(
+				return PatternLayout.newBuilder().setPattern(
 						"%highlight{%p %t - %C{1}.%M(%L) | %m}{FATAL=red, ERROR=red, WARN=yellow, INFO=white, DEBUG=white, TRACE=white}%n")
 						.build();
 			else
-				return PatternLayout.newBuilder().withPattern("%p %t - %C{1}.%M(%L) | %m%n").build();
+				return PatternLayout.newBuilder().setPattern("%p %t - %C{1}.%M(%L) | %m%n").build();
 		}
 
 		@Override
 		public StringLayout fileLayout(Configuration configuration)
 		{
-			return PatternLayout.newBuilder().withPattern("%d [%t] %-5p %c - %m%n").build();
+			return PatternLayout.newBuilder().setPattern("%d [%t] %-5p %c - %m%n").build();
 		}
 	}
 
@@ -87,17 +87,17 @@ public class Log4jConfiguration extends AbstractConfiguration
 		public StringLayout consoleLayout(Configuration configuration)
 		{
 			if (color)
-				return PatternLayout.newBuilder().withPattern(
+				return PatternLayout.newBuilder().setPattern(
 						"%highlight{%p %t - %C{1}.%M(%L)%notEmpty{ - %X} | %m}{FATAL=red, ERROR=red, WARN=yellow, INFO=white, DEBUG=white, TRACE=white}%n")
 						.build();
 			else
-				return PatternLayout.newBuilder().withPattern("%p %t - %C{1}.%M(%L)%notEmpty{ - %X} | %m%n").build();
+				return PatternLayout.newBuilder().setPattern("%p %t - %C{1}.%M(%L)%notEmpty{ - %X} | %m%n").build();
 		}
 
 		@Override
 		public StringLayout fileLayout(Configuration configuration)
 		{
-			return PatternLayout.newBuilder().withPattern("%d [%t] %-5p %c%notEmpty{ - %X} - %m%n").build();
+			return PatternLayout.newBuilder().setPattern("%d [%t] %-5p %c%notEmpty{ - %X} - %m%n").build();
 		}
 	}
 
@@ -180,11 +180,10 @@ public class Log4jConfiguration extends AbstractConfiguration
 
 		if (fileEnabled)
 		{
-			Appender file = RollingFileAppender.newBuilder().setName("FILE")
-					.withFileName("log/" + fileNamePart + ".log")
-					.withFilePattern("log/" + fileNamePart + "_%d{yyyy-MM-dd}_%i.log.gz").setIgnoreExceptions(false)
+			Appender file = RollingFileAppender.newBuilder().setName("FILE").setFileName("log/" + fileNamePart + ".log")
+					.setFilePattern("log/" + fileNamePart + "_%d{yyyy-MM-dd}_%i.log.gz").setIgnoreExceptions(false)
 					.setLayout(fileLayout.fileLayout(this))
-					.withPolicy(CompositeTriggeringPolicy.createPolicy(OnStartupTriggeringPolicy.createPolicy(1),
+					.setPolicy(CompositeTriggeringPolicy.createPolicy(OnStartupTriggeringPolicy.createPolicy(1),
 							TimeBasedTriggeringPolicy.newBuilder().build()))
 					.build();
 			addAppender(file);
@@ -246,10 +245,10 @@ public class Log4jConfiguration extends AbstractConfiguration
 			return null;
 
 		return RollingFileAppender.newBuilder().setName(appenderName + ".FILE")
-				.withFileName("log/" + fileNamePart + ".log")
-				.withFilePattern("log/" + fileNamePart + "_%d{yyyy-MM-dd}_%i.log.gz").setIgnoreExceptions(false)
+				.setFileName("log/" + fileNamePart + ".log")
+				.setFilePattern("log/" + fileNamePart + "_%d{yyyy-MM-dd}_%i.log.gz").setIgnoreExceptions(false)
 				.setLayout(layout)
-				.withPolicy(CompositeTriggeringPolicy.createPolicy(OnStartupTriggeringPolicy.createPolicy(1),
+				.setPolicy(CompositeTriggeringPolicy.createPolicy(OnStartupTriggeringPolicy.createPolicy(1),
 						TimeBasedTriggeringPolicy.newBuilder().build()))
 				.build();
 	}

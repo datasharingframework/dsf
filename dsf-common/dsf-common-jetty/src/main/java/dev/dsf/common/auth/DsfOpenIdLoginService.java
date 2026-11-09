@@ -22,6 +22,7 @@ import org.eclipse.jetty.security.UserIdentity;
 import org.eclipse.jetty.security.openid.OpenIdConfiguration;
 import org.eclipse.jetty.security.openid.OpenIdCredentials;
 import org.eclipse.jetty.security.openid.OpenIdLoginService;
+import org.eclipse.jetty.security.openid.OpenIdUserPrincipal;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Session;
 import org.slf4j.Logger;
@@ -33,14 +34,12 @@ public class DsfOpenIdLoginService extends OpenIdLoginService
 {
 	private static final Logger logger = LoggerFactory.getLogger(DsfOpenIdLoginService.class);
 
-	private final OpenIdConfiguration configuration;
 	private final LoginService loginService;
 
 	public DsfOpenIdLoginService(OpenIdConfiguration configuration, LoginService loginService)
 	{
 		super(configuration, loginService);
 
-		this.configuration = configuration;
 		this.loginService = loginService;
 	}
 
@@ -49,17 +48,6 @@ public class DsfOpenIdLoginService extends OpenIdLoginService
 			Function<Boolean, Session> getOrCreateSession)
 	{
 		OpenIdCredentials openIdCredentials = (OpenIdCredentials) credentials;
-		try
-		{
-			openIdCredentials.redeemAuthCode(configuration);
-		}
-		catch (Exception e)
-		{
-			logger.debug("Unable to redeem auth code", e);
-			logger.warn("Unable to redeem auth code: {} - {}", e.getClass().getName(), e.getMessage());
-
-			return null;
-		}
 
 		return loginService.login(openIdCredentials.getUserId(), credentials, request, getOrCreateSession);
 	}
@@ -67,18 +55,25 @@ public class DsfOpenIdLoginService extends OpenIdLoginService
 	@Override
 	public boolean validate(UserIdentity user)
 	{
-		if (!(user.getUserPrincipal() instanceof PractitionerIdentity identity))
+		if (!(user.getUserPrincipal() instanceof OpenIdUserPrincipal identity))
+		{
+			logger.warn("Login principal not OpenId");
 			return false;
+		}
 
-		if (identity.getCredentials().isEmpty())
+		if (user.getSubject().getPrincipals(PractitionerIdentity.class).isEmpty())
+		{
+			logger.warn("No practitioner identity principal");
+			return false;
+		}
+
+		if (identity.getCredentials() == null)
 		{
 			logger.warn("No credentials");
 			return false;
 		}
 
-		long expiry = identity.getCredentials().get().getLongClaim("exp");
-		long currentTimeSeconds = (long) (System.currentTimeMillis() / 1000F);
-		if (currentTimeSeconds > expiry)
+		if (identity.getCredentials().isExpired())
 		{
 			logger.debug("ID Token has expired");
 			return false;

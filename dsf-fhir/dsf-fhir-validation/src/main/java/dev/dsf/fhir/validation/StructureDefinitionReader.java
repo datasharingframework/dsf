@@ -112,9 +112,6 @@ public class StructureDefinitionReader
 	{
 		try (InputStream in = Files.newInputStream(xmlPath))
 		{
-			if (in == null)
-				logger.warn("File {} not found", xmlPath);
-
 			return context.newXmlParser().parseResource(StructureDefinition.class, in);
 		}
 		catch (DataFormatException | IOException e)
@@ -127,9 +124,6 @@ public class StructureDefinitionReader
 	{
 		try (InputStream in = Files.newInputStream(xmlPath))
 		{
-			if (in == null)
-				logger.warn("File {} not found", xmlPath);
-
 			String read = IOUtils.toString(in, StandardCharsets.UTF_8);
 			read = replaceVersionAndDate(read, version, date);
 

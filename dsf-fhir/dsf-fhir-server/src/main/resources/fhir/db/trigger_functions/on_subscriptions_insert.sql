@@ -16,6 +16,7 @@
 
 CREATE OR REPLACE FUNCTION on_subscriptions_insert() RETURNS TRIGGER AS $$
 BEGIN
+	UPDATE subscriptions SET current = false WHERE subscription_id = NEW.subscription_id AND current AND version <> NEW.version;
 	PERFORM on_resources_insert(NEW.subscription_id, NEW.version, NEW.subscription);
 	RETURN NEW;
 END;

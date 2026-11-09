@@ -16,6 +16,7 @@
 
 CREATE OR REPLACE FUNCTION on_provenances_insert() RETURNS TRIGGER AS $$
 BEGIN
+	UPDATE provenances SET current = false WHERE provenance_id = NEW.provenance_id AND current AND version <> NEW.version;
 	PERFORM on_resources_insert(NEW.provenance_id, NEW.version, NEW.provenance);
 	RETURN NEW;
 END;

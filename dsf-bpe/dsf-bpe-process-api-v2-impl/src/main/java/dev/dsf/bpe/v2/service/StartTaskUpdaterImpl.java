@@ -27,18 +27,17 @@ import org.hl7.fhir.r4.model.Task;
 import org.hl7.fhir.r4.model.Task.TaskOutputComponent;
 import org.hl7.fhir.r4.model.Type;
 
-import dev.dsf.bpe.v2.client.dsf.DsfClient;
-
 public class StartTaskUpdaterImpl implements StartTaskUpdater
 {
-	private final DsfClient client;
+	private final DsfClientProvider dsfClientProvider;
 
 	private final Supplier<Task> getStartTask;
 	private final Consumer<Task> updateTask;
 
-	public StartTaskUpdaterImpl(DsfClient client, Supplier<Task> getStartTask, Consumer<Task> updateTask)
+	public StartTaskUpdaterImpl(DsfClientProvider dsfClientProvider, Supplier<Task> getStartTask,
+			Consumer<Task> updateTask)
 	{
-		this.client = Objects.requireNonNull(client, "client");
+		this.dsfClientProvider = Objects.requireNonNull(dsfClientProvider, "dsfClientProvider");
 
 		this.getStartTask = Objects.requireNonNull(getStartTask, "getStartTask");
 		this.updateTask = Objects.requireNonNull(updateTask, "updateTask");
@@ -47,10 +46,12 @@ public class StartTaskUpdaterImpl implements StartTaskUpdater
 	@Override
 	public void addOutput(Coding outputType, Type outputValue)
 	{
+		checkOutputType(outputType);
+
 		Task task = getStartTask.get();
 		task.addOutput().setValue(outputValue).getType().addCoding(outputType);
 
-		Task updated = client.update(task);
+		Task updated = dsfClientProvider.getLocal().update(task);
 		updateTask.accept(updated);
 	}
 
@@ -65,16 +66,15 @@ public class StartTaskUpdaterImpl implements StartTaskUpdater
 
 	private Optional<TaskOutputComponent> doGetOutput(Task task, Coding outputType)
 	{
-		return task.getOutput().stream().filter(matchesSystemAndCodeOptionallyVersion(outputType)).findFirst();
+		return task.getOutput().stream().filter(matchesSystemCodeAndVersion(outputType)).findFirst();
 	}
 
-	private Predicate<TaskOutputComponent> matchesSystemAndCodeOptionallyVersion(Coding outputType)
+	private Predicate<TaskOutputComponent> matchesSystemCodeAndVersion(Coding outputType)
 	{
 		return o -> o.getType().getCoding().stream()
 				.anyMatch(c -> Objects.equals(c.getSystem(), outputType.getSystem())
-						&& Objects.equals(c.getCode(), outputType.getCode()) && outputType.hasVersion()
-								? Objects.equals(c.getVersion(), outputType.getVersion())
-								: true);
+						&& Objects.equals(c.getCode(), outputType.getCode())
+						&& Objects.equals(c.getVersion(), outputType.getVersion()));
 	}
 
 	@Override
@@ -86,11 +86,10 @@ public class StartTaskUpdaterImpl implements StartTaskUpdater
 
 		doGetOutput(task, outputType)
 				.orElseThrow(() -> new IllegalArgumentException("Output for type " + outputType.getSystem() + "|"
-						+ outputType.getCode()
-						+ (outputType.hasVersion() ? " (version: " + outputType.getVersion() + ") not found" : "")))
+						+ outputType.getCode() + " (version: " + outputType.getVersion() + ") not found"))
 				.setValue(outputValue);
 
-		Task updated = client.update(task);
+		Task updated = dsfClientProvider.getLocal().update(task);
 		updateTask.accept(updated);
 	}
 
@@ -102,15 +101,15 @@ public class StartTaskUpdaterImpl implements StartTaskUpdater
 		Task task = getStartTask.get();
 
 		List<TaskOutputComponent> filtered = task.getOutput().stream()
-				.filter(matchesSystemAndCodeOptionallyVersion(outputType).negate()).toList();
+				.filter(matchesSystemCodeAndVersion(outputType).negate()).toList();
 
 		if (task.getOutput().size() == filtered.size())
 			throw new IllegalArgumentException("Output for type " + outputType.getSystem() + "|" + outputType.getCode()
-					+ (outputType.hasVersion() ? " (version: " + outputType.getVersion() + ") not found" : ""));
+					+ " (version: " + outputType.getVersion() + ") not found");
 
 		task.setOutput(filtered);
 
-		Task updated = client.update(task);
+		Task updated = dsfClientProvider.getLocal().update(task);
 		updateTask.accept(updated);
 	}
 

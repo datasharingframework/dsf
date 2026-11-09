@@ -27,7 +27,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import org.glassfish.jersey.SslConfigurator;
-import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
+import org.glassfish.jersey.apache5.connector.Apache5ConnectorProvider;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.logging.LoggingFeature;
@@ -85,7 +85,7 @@ public class WebserviceClientJersey implements WebserviceClient
 				.connectTimeout(connectTimeout.toMillis(), TimeUnit.MILLISECONDS);
 
 		ClientConfig config = new ClientConfig();
-		config.connectorProvider(new ApacheConnectorProvider());
+		config.connectorProvider(new Apache5ConnectorProvider());
 		config.property(ClientProperties.PROXY_URI, proxySchemeHostPort);
 		config.property(ClientProperties.PROXY_USERNAME, proxyUserName);
 		config.property(ClientProperties.PROXY_PASSWORD, proxyPassword == null ? null : String.valueOf(proxyPassword));
@@ -190,7 +190,7 @@ public class WebserviceClientJersey implements WebserviceClient
 			throw handleError(response);
 	}
 
-	PreferReturn createConditionaly(PreferReturnType returnType, Resource resource, String ifNoneExistCriteria)
+	PreferReturn createConditionally(PreferReturnType returnType, Resource resource, String ifNoneExistCriteria)
 	{
 		Objects.requireNonNull(returnType, "returnType");
 		Objects.requireNonNull(resource, "resource");
@@ -253,7 +253,7 @@ public class WebserviceClientJersey implements WebserviceClient
 			throw handleError(response);
 	}
 
-	PreferReturn updateConditionaly(PreferReturnType returnType, Resource resource, Map<String, List<String>> criteria)
+	PreferReturn updateConditionally(PreferReturnType returnType, Resource resource, Map<String, List<String>> criteria)
 	{
 		Objects.requireNonNull(returnType, "returnType");
 		Objects.requireNonNull(resource, "resource");
@@ -364,7 +364,7 @@ public class WebserviceClientJersey implements WebserviceClient
 		if (delay == null || delay.isNegative())
 			throw new IllegalArgumentException("delay null or negative");
 
-		return new BasicWebserviceCientWithRetryImpl(this, nTimes, delay);
+		return new BasicWebserviceClientWithRetryImpl(this, nTimes, delay);
 	}
 
 	@Override
@@ -373,6 +373,6 @@ public class WebserviceClientJersey implements WebserviceClient
 		if (delay == null || delay.isNegative())
 			throw new IllegalArgumentException("delay null or negative");
 
-		return new BasicWebserviceCientWithRetryImpl(this, RETRY_FOREVER, delay);
+		return new BasicWebserviceClientWithRetryImpl(this, RETRY_FOREVER, delay);
 	}
 }

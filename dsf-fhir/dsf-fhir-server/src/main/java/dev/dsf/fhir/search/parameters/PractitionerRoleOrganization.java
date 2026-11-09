@@ -31,6 +31,8 @@ import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.fhir.dao.OrganizationDao;
 import dev.dsf.fhir.dao.exception.ResourceDeletedException;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory.IdentifierParameter;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.IncludeParameterDefinition;
@@ -54,7 +56,7 @@ public class PractitionerRoleOrganization extends AbstractReferenceParameter<Pra
 	}
 
 	private static final String PRACTITIONER_IDENTIFIERS_SUBQUERY = "(SELECT organization->'identifier' FROM current_organizations"
-			+ " WHERE concat('Organization/', organization->>'id') = practitioner_role->'organization'->>'reference')";
+			+ " WHERE ('Organization/' || (organization->>'id')) = practitioner_role->'organization'->>'reference')";
 
 	public PractitionerRoleOrganization()
 	{
@@ -68,9 +70,11 @@ public class PractitionerRoleOrganization extends AbstractReferenceParameter<Pra
 		{
 			case ID, RESOURCE_NAME_AND_ID, URL, TYPE_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID ->
 				"practitioner_role->'organization'->>'reference' = ?";
+
 			case IDENTIFIER -> switch (valueAndType.identifier.type)
 			{
-				case CODE, CODE_AND_SYSTEM, SYSTEM -> PRACTITIONER_IDENTIFIERS_SUBQUERY + " @> ?::jsonb";
+				case CODE, CODE_AND_SYSTEM, SYSTEM -> PRACTITIONER_IDENTIFIERS_SUBQUERY + " @> ?";
+
 				case CODE_AND_NO_SYSTEM_PROPERTY ->
 					"(SELECT count(*) FROM jsonb_array_elements(" + PRACTITIONER_IDENTIFIERS_SUBQUERY
 							+ ") identifier WHERE identifier->>'value' = ? AND NOT (identifier ?? 'system')) > 0";
@@ -86,38 +90,31 @@ public class PractitionerRoleOrganization extends AbstractReferenceParameter<Pra
 
 	@Override
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
-			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator, PgObjectFactory pgObjectFactory)
+			throws SQLException
 	{
 		switch (valueAndType.type)
 		{
-			case ID:
-			case RESOURCE_NAME_AND_ID:
-			case TYPE_AND_ID:
-			case TYPE_AND_RESOURCE_NAME_AND_ID:
+			case ID, RESOURCE_NAME_AND_ID, TYPE_AND_ID, TYPE_AND_RESOURCE_NAME_AND_ID ->
 				statement.setString(parameterIndex, TARGET_RESOURCE_TYPE_NAME + "/" + valueAndType.id);
-				break;
-			case URL:
-				statement.setString(parameterIndex, valueAndType.url);
-				break;
-			case IDENTIFIER:
-			{
+
+			case URL -> statement.setString(parameterIndex, valueAndType.url);
+
+			case IDENTIFIER -> {
 				switch (valueAndType.identifier.type)
 				{
-					case CODE:
-						statement.setString(parameterIndex,
-								"[{\"value\": \"" + valueAndType.identifier.codeValue + "\"}]");
-						break;
-					case CODE_AND_SYSTEM:
-						statement.setString(parameterIndex, "[{\"value\": \"" + valueAndType.identifier.codeValue
-								+ "\", \"system\": \"" + valueAndType.identifier.systemValue + "\"}]");
-						break;
-					case CODE_AND_NO_SYSTEM_PROPERTY:
+					case CODE -> statement.setObject(parameterIndex, pgObjectFactory.jsonParameterToPgObjectAsArray(
+							new IdentifierParameter(null, valueAndType.identifier.codeValue)));
+
+					case CODE_AND_SYSTEM -> statement.setObject(parameterIndex,
+							pgObjectFactory.jsonParameterToPgObjectAsArray(new IdentifierParameter(
+									valueAndType.identifier.systemValue, valueAndType.identifier.codeValue)));
+
+					case SYSTEM -> statement.setObject(parameterIndex, pgObjectFactory.jsonParameterToPgObjectAsArray(
+							new IdentifierParameter(valueAndType.identifier.systemValue, null)));
+
+					case CODE_AND_NO_SYSTEM_PROPERTY ->
 						statement.setString(parameterIndex, valueAndType.identifier.codeValue);
-						break;
-					case SYSTEM:
-						statement.setString(parameterIndex,
-								"[{\"system\": \"" + valueAndType.identifier.systemValue + "\"}]");
-						break;
 				}
 			}
 		}
@@ -179,7 +176,7 @@ public class PractitionerRoleOrganization extends AbstractReferenceParameter<Pra
 	protected String getIncludeSql(IncludeParts includeParts)
 	{
 		if (includeParts.matches(RESOURCE_TYPE_NAME, PARAMETER_NAME, TARGET_RESOURCE_TYPE_NAME))
-			return "(SELECT jsonb_build_array(organization) FROM current_organizations WHERE concat('Organization/', organization->>'id') = practitioner_role->'organization'->>'reference') AS organizations";
+			return "(SELECT jsonb_build_array(organization) FROM current_organizations WHERE ('Organization/' || (organization->>'id')) = practitioner_role->'organization'->>'reference') AS organizations";
 		else
 			return null;
 	}

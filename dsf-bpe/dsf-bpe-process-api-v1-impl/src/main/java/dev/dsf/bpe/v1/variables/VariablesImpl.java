@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
@@ -42,7 +43,9 @@ public class VariablesImpl implements Variables, ListenerVariables
 	private static final Logger logger = LoggerFactory.getLogger(VariablesImpl.class);
 
 	private static final String TASKS_PREFIX = VariablesImpl.class.getName() + ".tasks.";
+	private static final String TASKS_PREFIX_DSF_1 = "dev.dsf.bpe.variables.VariablesImpl.tasks.";
 	private static final String START_TASK = VariablesImpl.class.getName() + ".startTask";
+	private static final String START_TASK_DSF_1 = "dev.dsf.bpe.variables.VariablesImpl.startTask";
 
 	private static final class DistinctTask
 	{
@@ -170,10 +173,10 @@ public class VariablesImpl implements Variables, ListenerVariables
 		return list != null ? list.getResourcesAndCast() : null;
 	}
 
-	private <R extends Resource> List<R> getResourceListOrDefault(String variableName, List<R> defaultList)
+	private <R extends Resource> List<R> getResourceListOrDefault(String variableName, Supplier<List<R>> defaultList)
 	{
 		List<R> list = getResourceList(variableName);
-		return list != null ? list : defaultList;
+		return list != null ? list : defaultList.get();
 	}
 
 	@Override
@@ -197,7 +200,12 @@ public class VariablesImpl implements Variables, ListenerVariables
 		logger.trace("getStartTask - parentActivityInstanceId: {}, parentId: {}",
 				execution.getParentActivityInstanceId(), execution.getParentId());
 
-		return getResource(START_TASK);
+		Task task = getResource(START_TASK);
+
+		if (task == null)
+			task = getResource(START_TASK_DSF_1);
+
+		return task;
 	}
 
 	@Override
@@ -218,7 +226,8 @@ public class VariablesImpl implements Variables, ListenerVariables
 
 		List<Task> tasks = Stream
 				.concat(Stream.of(getStartTask()),
-						execution.getVariables().keySet().stream().filter(k -> k.startsWith(TASKS_PREFIX))
+						execution.getVariables().keySet().stream()
+								.filter(k -> k.startsWith(TASKS_PREFIX) || k.startsWith(TASKS_PREFIX_DSF_1))
 								.map(this::getResourceList).flatMap(List::stream).filter(r -> r instanceof Task)
 								.map(r -> (Task) r))
 				.filter(t -> t != null).map(DistinctTask::new).distinct().map(DistinctTask::getTask).toList();
@@ -234,7 +243,9 @@ public class VariablesImpl implements Variables, ListenerVariables
 
 		Stream<Task> start = execution.getParentId() == null ? Stream.of(getStartTask()) : Stream.empty();
 		Stream<Task> current = getResourceListOrDefault(TASKS_PREFIX + execution.getParentActivityInstanceId(),
-				List.<Task> of()).stream();
+				() -> getResourceListOrDefault(TASKS_PREFIX_DSF_1 + execution.getParentActivityInstanceId(),
+						List::<Task> of))
+				.stream();
 
 		return Collections.unmodifiableList(Stream.concat(start, current).toList());
 	}
@@ -252,7 +263,8 @@ public class VariablesImpl implements Variables, ListenerVariables
 			else
 			{
 				String instanceId = execution.getParentActivityInstanceId();
-				List<Task> tasks = getResourceListOrDefault(TASKS_PREFIX + instanceId, List.of());
+				List<Task> tasks = getResourceListOrDefault(TASKS_PREFIX + instanceId,
+						() -> getResourceListOrDefault(TASKS_PREFIX_DSF_1 + instanceId, List::of));
 
 				if (tasks.stream().anyMatch(t -> t.getIdElement().getIdPart().equals(task.getIdElement().getIdPart())))
 					setResourceList(TASKS_PREFIX + instanceId, tasks);
@@ -307,7 +319,8 @@ public class VariablesImpl implements Variables, ListenerVariables
 		{
 			String instanceId = execution.getParentActivityInstanceId();
 
-			List<Task> tasks = new ArrayList<>(getResourceListOrDefault(TASKS_PREFIX + instanceId, List.of()));
+			List<Task> tasks = new ArrayList<>(getResourceListOrDefault(TASKS_PREFIX + instanceId,
+					() -> getResourceListOrDefault(TASKS_PREFIX_DSF_1 + instanceId, List::of)));
 			tasks.add(task);
 
 			setResourceList(TASKS_PREFIX + instanceId, tasks);
@@ -322,7 +335,8 @@ public class VariablesImpl implements Variables, ListenerVariables
 		logger.trace("onEnd");
 
 		String instanceId = execution.getParentActivityInstanceId();
-		List<Task> tasks = new ArrayList<>(getResourceListOrDefault(TASKS_PREFIX + instanceId, List.of()));
+		List<Task> tasks = new ArrayList<>(getResourceListOrDefault(TASKS_PREFIX + instanceId,
+				() -> getResourceListOrDefault(TASKS_PREFIX_DSF_1 + instanceId, List::of)));
 		tasks.removeAll(getCurrentTasks());
 		setResourceList(TASKS_PREFIX + instanceId, tasks);
 	}

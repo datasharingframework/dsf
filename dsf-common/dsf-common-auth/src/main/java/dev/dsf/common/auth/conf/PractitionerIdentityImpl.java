@@ -29,13 +29,14 @@ import org.hl7.fhir.r4.model.Practitioner;
 
 import dev.dsf.common.auth.DsfOpenIdCredentials;
 
-// TODO implement equals, hashCode, toString methods based on the DSF organization identifier to fully comply with the java.security.Principal specification
 public class PractitionerIdentityImpl extends AbstractIdentity implements PractitionerIdentity
 {
 	private final Practitioner practitioner;
 	private final DsfOpenIdCredentials credentials;
 
 	private final Set<Coding> practitionerRoles = new HashSet<>();
+
+	private final String practitionerIdentifierValue;
 
 	/**
 	 * @param organization
@@ -59,6 +60,7 @@ public class PractitionerIdentityImpl extends AbstractIdentity implements Practi
 	{
 		super(true, organization, endpoint, dsfRoles, certificate);
 
+
 		this.practitioner = Objects.requireNonNull(practitioner, "practitioner");
 
 		if (practitionerRoles != null)
@@ -66,12 +68,51 @@ public class PractitionerIdentityImpl extends AbstractIdentity implements Practi
 
 		// null if login via client certificate
 		this.credentials = credentials;
+
+		this.practitionerIdentifierValue = getIdentifierValue(practitioner::getIdentifier,
+				PRACTITIONER_IDENTIFIER_SYSTEM).orElseThrow();
+	}
+
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(getOrganizationIdentifierValue());
+		result = prime * result + Objects.hash(practitionerIdentifierValue);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+
+		PractitionerIdentityImpl other = (PractitionerIdentityImpl) obj;
+		return Objects.equals(getOrganizationIdentifierValue(), other.getOrganizationIdentifierValue())
+				&& Objects.equals(practitionerIdentifierValue, other.practitionerIdentifierValue);
+	}
+
+	@Override
+	public boolean isNotExpired()
+	{
+		if (credentials != null)
+			return credentials.isNotExpired();
+		else
+			return super.isNotExpired();
 	}
 
 	@Override
 	public String getName()
 	{
-		return getOrganizationIdentifierValue().orElse("?") + "/" + getPractitionerIdentifierValue().orElse("?");
+		return getOrganizationIdentifierValue() + "/" + practitionerIdentifierValue;
 	}
 
 	@Override
@@ -87,9 +128,9 @@ public class PractitionerIdentityImpl extends AbstractIdentity implements Practi
 	}
 
 	@Override
-	public Optional<String> getPractitionerIdentifierValue()
+	public String getPractitionerIdentifierValue()
 	{
-		return getIdentifierValue(practitioner::getIdentifier, PRACTITIONER_IDENTIFIER_SYSTEM);
+		return practitionerIdentifierValue;
 	}
 
 	@Override

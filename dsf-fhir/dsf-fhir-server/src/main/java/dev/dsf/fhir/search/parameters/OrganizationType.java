@@ -22,6 +22,8 @@ import java.sql.SQLException;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
 import org.hl7.fhir.r4.model.Organization;
 
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory.CodingParameter;
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.SearchQueryParameter.SearchParameterDefinition;
 import dev.dsf.fhir.search.parameters.basic.AbstractTokenParameter;
@@ -42,7 +44,8 @@ public class OrganizationType extends AbstractTokenParameter<Organization>
 		return switch (valueAndType.type)
 		{
 			case CODE, CODE_AND_SYSTEM, SYSTEM ->
-				"(SELECT jsonb_agg(coding) FROM jsonb_array_elements(organization->'type') AS type, jsonb_array_elements(type->'coding') AS coding) @> ?::jsonb";
+				"(SELECT jsonb_agg(coding) FROM jsonb_array_elements(organization->'type') AS type, jsonb_array_elements(type->'coding') AS coding) @> ?";
+
 			case CODE_AND_NO_SYSTEM_PROPERTY ->
 				"(SELECT COUNT(*) FROM jsonb_array_elements(organization->'type') AS type, jsonb_array_elements(type->'coding') AS coding "
 						+ "WHERE coding->>'code' = ? AND NOT (coding ?? 'system')) > 0";
@@ -55,7 +58,8 @@ public class OrganizationType extends AbstractTokenParameter<Organization>
 		return switch (valueAndType.type)
 		{
 			case CODE, CODE_AND_SYSTEM, SYSTEM ->
-				"NOT ((SELECT jsonb_agg(coding) FROM jsonb_array_elements(organization->'type') AS type, jsonb_array_elements(type->'coding') AS coding) @> ?::jsonb)";
+				"NOT ((SELECT jsonb_agg(coding) FROM jsonb_array_elements(organization->'type') AS type, jsonb_array_elements(type->'coding') AS coding) @> ?)";
+
 			case CODE_AND_NO_SYSTEM_PROPERTY ->
 				"(SELECT COUNT(*) FROM jsonb_array_elements(organization->'type') AS type, jsonb_array_elements(type->'coding') AS coding "
 						+ "WHERE coding->>'code' <> ? OR (coding ?? 'system')) > 0";
@@ -70,26 +74,21 @@ public class OrganizationType extends AbstractTokenParameter<Organization>
 
 	@Override
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
-			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator, PgObjectFactory pgObjectFactory)
+			throws SQLException
 	{
 		switch (valueAndType.type)
 		{
-			case CODE:
-				statement.setString(parameterIndex, "[{\"code\": \"" + valueAndType.codeValue + "\"}]");
-				return;
+			case CODE -> statement.setObject(parameterIndex,
+					pgObjectFactory.jsonParameterToPgObjectAsArray(new CodingParameter(null, valueAndType.codeValue)));
 
-			case CODE_AND_SYSTEM:
-				statement.setString(parameterIndex, "[{\"code\": \"" + valueAndType.codeValue + "\", \"system\": \""
-						+ valueAndType.systemValue + "\"}]");
-				return;
+			case CODE_AND_SYSTEM -> statement.setObject(parameterIndex, pgObjectFactory.jsonParameterToPgObjectAsArray(
+					new CodingParameter(valueAndType.systemValue, valueAndType.codeValue)));
 
-			case CODE_AND_NO_SYSTEM_PROPERTY:
-				statement.setString(parameterIndex, valueAndType.codeValue);
-				return;
+			case SYSTEM -> statement.setObject(parameterIndex, pgObjectFactory
+					.jsonParameterToPgObjectAsArray(new CodingParameter(valueAndType.systemValue, null)));
 
-			case SYSTEM:
-				statement.setString(parameterIndex, "[{\"system\": \"" + valueAndType.systemValue + "\"}]");
-				return;
+			case CODE_AND_NO_SYSTEM_PROPERTY -> statement.setString(parameterIndex, valueAndType.codeValue);
 		}
 	}
 

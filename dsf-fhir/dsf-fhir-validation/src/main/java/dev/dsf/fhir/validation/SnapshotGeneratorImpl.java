@@ -67,8 +67,8 @@ public class SnapshotGeneratorImpl implements SnapshotGenerator
 			String baseAbsoluteUrlPrefix)
 	{
 		if (differential == null)
-			return new SnapshotWithValidationMessages(differential, List.of(new ValidationMessage(null,
-					IssueType.PROCESSING, null, "StructureDefinition is null", IssueSeverity.ERROR)));
+			return new SnapshotWithValidationMessages(null, List.of(new ValidationMessage(null, IssueType.PROCESSING,
+					null, "StructureDefinition is null", IssueSeverity.ERROR)));
 		if (!differential.hasBaseDefinition())
 			return new SnapshotWithValidationMessages(differential, List.of(new ValidationMessage(null,
 					IssueType.PROCESSING, null, "StructureDefinition.baseDefinition missing", IssueSeverity.ERROR)));

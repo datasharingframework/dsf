@@ -134,10 +134,10 @@ public class ResponseGenerator
 		switch (prefer)
 		{
 			case REPRESENTATION:
-				b = b.entity(resource);
+				b.entity(resource);
 				break;
 			case OPERATION_OUTCOME:
-				b = b.entity(operationOutcomeCreator.get());
+				b.entity(operationOutcomeCreator.get());
 				break;
 			case MINIMAL:
 				// do nothing, headers only
@@ -147,16 +147,24 @@ public class ResponseGenerator
 		}
 
 		if (mediaType != null)
-			b = b.type(mediaType.withCharset(StandardCharsets.UTF_8.displayName()));
+			b.type(mediaType.withCharset(StandardCharsets.UTF_8.displayName()));
 
-		if (resource.getMeta() != null && resource.getMeta().getLastUpdated() != null
-				&& resource.getMeta().getVersionId() != null)
+		if (resource.hasMeta())
 		{
-			b = b.lastModified(resource.getMeta().getLastUpdated());
-			b = b.tag(new EntityTag(resource.getMeta().getVersionId(), true));
+			if (resource.getMeta().hasLastUpdated())
+				b.lastModified(resource.getMeta().getLastUpdated());
+
+			if (resource.getMeta().hasVersionId())
+			{
+				b.tag(new EntityTag(mediaType == null ? ""
+						: mediaType.getParameters().getOrDefault(ParameterConverter.MEDIA_TYPE_PARAM_ETAG, "")
+								+ resource.getMeta().getVersionId(),
+						true));
+			}
 		}
 
-		b = b.cacheControl(PRIVATE_NO_CACHE_NO_TRANSFORM);
+		b.cacheControl(PRIVATE_NO_CACHE_NO_TRANSFORM);
+		b.header(HttpHeaders.VARY, HttpHeaders.ACCEPT);
 
 		return b;
 	}
@@ -694,7 +702,7 @@ public class ResponseGenerator
 						+ resourceReference.getReference().getIdentifier().getValue() + "' of reference at "
 						+ resourceReference.getLocation() + " in resource of type " + resource.getResourceType().name()
 						+ " with id " + resource.getId()
-						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex) + " not found");
+						+ (bundleIndex == null ? "" : " at bundle index " + bundleIndex));
 	}
 
 	public OperationOutcome referenceTargetNotFoundLocallyByCondition(Integer bundleIndex, Resource resource,
@@ -770,10 +778,10 @@ public class ResponseGenerator
 
 	public Response badCreateRequestUrl(int bundleIndex, String url)
 	{
-		logger.warn("Bad crate request url {} at bundle index {}", url, bundleIndex);
+		logger.warn("Bad create request url {} at bundle index {}", url, bundleIndex);
 
 		OperationOutcome outcome = createOutcome(IssueSeverity.ERROR, IssueType.PROCESSING,
-				"Bad crete request url " + url + " at bundle index " + bundleIndex);
+				"Bad create request url " + url + " at bundle index " + bundleIndex);
 		return Response.status(Status.BAD_REQUEST).entity(outcome).build();
 	}
 
@@ -891,7 +899,7 @@ public class ResponseGenerator
 
 	}
 
-	public Response bundleEntryResouceMissingId(int bundleIndex, String resourceTypeName)
+	public Response bundleEntryResourceMissingId(int bundleIndex, String resourceTypeName)
 	{
 		logger.warn("Bundle entry of type {} at bundle index {} is missing id value", resourceTypeName, bundleIndex);
 

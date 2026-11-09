@@ -16,6 +16,7 @@
 
 CREATE OR REPLACE FUNCTION on_libraries_insert() RETURNS TRIGGER AS $$
 BEGIN
+	UPDATE libraries SET current = false WHERE library_id = NEW.library_id AND current AND version <> NEW.version;
 	PERFORM on_resources_insert(NEW.library_id, NEW.version, NEW.library);
 	RETURN NEW;
 END;

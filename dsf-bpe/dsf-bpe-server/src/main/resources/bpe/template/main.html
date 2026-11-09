@@ -42,7 +42,7 @@
 			<a href="" download="" id="download-link" title="" th:if="${download}" th:href="${download.href}" th:title="${download.title}" th:attr="download = ${download.filename}"><svg class="icon" id="download" viewBox="0 0 24 24"><path d="M18,15v3H6v-3H4v3c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2v-3H18z M17,11l-1.41-1.41L13,12.17V4h-2v8.17L8.41,9.59L7,11l5,5 L17,11z" /></svg></a>
 		</div>
 		<img id="logo" src="static/logo.svg" title="Logo">
-		<h1 id="heading" th:utext="${heading}"></h1>
+		<h1 id="heading" th:text="${heading}"></h1>
 	</div>
 	<div id="html" th:insert="${htmlFragment} ? ~{(${htmlFragment})::content} : _" th:if="${htmlFragment}"></div>
 </body>

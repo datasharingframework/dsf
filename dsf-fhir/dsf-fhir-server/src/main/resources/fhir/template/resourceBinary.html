@@ -20,11 +20,18 @@
 <body>
 	<div id="resource">
 		<div id="resource-data" th:fragment="resource-data">
-			<th:block th:insert="~{resourceElements::string}" th:with="label='Content Type',string=${binary.contentType}"></th:block>
+			<th:block th:insert="~{resourceElements::string}" th:with="label='Content Type',string=${binary.contentType},class='element element-50'"></th:block>
+			<th:block th:insert="~{resourceElements::string}" th:with="label='Data Size',string=${binary.dataSize},class='element element-50'"></th:block>
 			<th:block th:insert="~{resourceElements::id}" th:with="label='Security Context',id=${binary.securityContext}" th:if="${binary.securityContext}"></th:block>
-			<th:block th:insert="~{resourceElements::string}" th:with="label='Data Size',string=${binary.dataSize}">foo</th:block>
+			<div class="element element-100" th:if="${binary.inlineDisplay}">
+				<label>Content</label>
+				<iframe id="binary-content" th:src="${binary.inlineDisplay}"></iframe>
+			</div>
 			<div>
-				<a id="download" th:href="${binary.download}" title="Download Data">Download Data</a>
+				<a id="binary-download" th:href="${binary.download}" title="Download Content">Download Content</a>
+			</div>
+			<div th:if="${binary.inlineOpen}">
+				<a id="binary-open" th:href="${binary.inlineOpen}" title="Open Content">Open Content</a>
 			</div>
 		</div>
 	</div>

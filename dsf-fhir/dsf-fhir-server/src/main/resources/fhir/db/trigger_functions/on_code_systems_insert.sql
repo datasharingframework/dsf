@@ -16,6 +16,7 @@
 
 CREATE OR REPLACE FUNCTION on_code_systems_insert() RETURNS TRIGGER AS $$
 BEGIN
+	UPDATE code_systems SET current = false WHERE code_system_id = NEW.code_system_id AND current AND version <> NEW.version;
 	PERFORM on_resources_insert(NEW.code_system_id, NEW.version, NEW.code_system);
 	RETURN NEW;
 END;

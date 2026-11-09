@@ -41,10 +41,10 @@ class PreferReturnOutcomeRetryImpl extends AbstractFhirWebserviceClientJerseyWit
 	}
 
 	@Override
-	public OperationOutcome createConditionaly(Resource resource, String ifNoneExistCriteria)
+	public OperationOutcome createConditionally(Resource resource, String ifNoneExistCriteria)
 	{
 		return retry(
-				() -> delegate.createConditionaly(PreferReturnType.OPERATION_OUTCOME, resource, ifNoneExistCriteria)
+				() -> delegate.createConditionally(PreferReturnType.OPERATION_OUTCOME, resource, ifNoneExistCriteria)
 						.getOperationOutcome());
 	}
 
@@ -63,9 +63,9 @@ class PreferReturnOutcomeRetryImpl extends AbstractFhirWebserviceClientJerseyWit
 	}
 
 	@Override
-	public OperationOutcome updateConditionaly(Resource resource, Map<String, List<String>> criteria)
+	public OperationOutcome updateConditionally(Resource resource, Map<String, List<String>> criteria)
 	{
-		return retry(() -> delegate.updateConditionaly(PreferReturnType.OPERATION_OUTCOME, resource, criteria)
+		return retry(() -> delegate.updateConditionally(PreferReturnType.OPERATION_OUTCOME, resource, criteria)
 				.getOperationOutcome());
 	}
 

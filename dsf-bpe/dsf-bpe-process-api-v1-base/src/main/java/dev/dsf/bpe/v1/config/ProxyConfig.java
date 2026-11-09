@@ -25,7 +25,7 @@ public interface ProxyConfig
 	String getUrl();
 
 	/**
-	 * @return <code>true</code> if a proxy url is configured and '*' is not set as a no-proxy url
+	 * @return <code>true</code> if a proxy url is configured
 	 */
 	boolean isEnabled();
 

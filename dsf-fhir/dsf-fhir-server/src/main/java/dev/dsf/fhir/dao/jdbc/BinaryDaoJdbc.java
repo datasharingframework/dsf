@@ -35,6 +35,8 @@ import org.postgresql.util.PGobject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.dao.BinaryDao;
 import dev.dsf.fhir.dao.exception.ResourceDeletedException;
@@ -55,10 +57,10 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 	private final ExecutorService loUnlinker;
 
 	public BinaryDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource, FhirContext fhirContext,
-			String selectUpdateUser)
+			ObjectMapper objectMapper, String selectUpdateUser)
 	{
 		super(dataSource, permanentDeleteDataSource, Binary.class, "binaries", "binary_json", "binary_id",
-				new PreparedStatementFactoryBinary(fhirContext), BinaryIdentityFilter::new,
+				new PreparedStatementFactoryBinary(fhirContext, objectMapper), BinaryIdentityFilter::new,
 				List.of(factory(BinaryContentType.PARAMETER_NAME, BinaryContentType::new,
 						BinaryContentType.getNameModifiers())),
 				List.of());
@@ -272,6 +274,7 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 		catch (InterruptedException ex)
 		{
 			loUnlinker.shutdownNow();
+			Thread.currentThread().interrupt();
 		}
 	}
 }

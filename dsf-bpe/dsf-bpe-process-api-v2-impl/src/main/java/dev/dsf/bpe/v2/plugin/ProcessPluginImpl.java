@@ -75,7 +75,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import dev.dsf.bpe.api.logging.PluginMdc;
+import dev.dsf.bpe.api.context.PluginContext;
 import dev.dsf.bpe.api.plugin.AbstractProcessPlugin;
 import dev.dsf.bpe.api.plugin.FhirResourceModifier;
 import dev.dsf.bpe.api.plugin.FhirResourceModifiers;
@@ -103,8 +103,8 @@ import dev.dsf.bpe.v2.activity.values.SendTaskValues;
 import dev.dsf.bpe.v2.constants.CodeSystems.BpmnMessage;
 import dev.dsf.bpe.v2.constants.NamingSystems.OrganizationIdentifier;
 import dev.dsf.bpe.v2.constants.NamingSystems.TaskIdentifier;
+import dev.dsf.bpe.v2.context.PluginContextImpl;
 import dev.dsf.bpe.v2.fhir.FhirResourceModifierDelegate;
-import dev.dsf.bpe.v2.logging.PluginMdcImpl;
 import dev.dsf.bpe.v2.variables.FhirResourceValues;
 import dev.dsf.bpe.v2.variables.Variables;
 import dev.dsf.bpe.v2.variables.VariablesImpl;
@@ -116,7 +116,7 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> i
 	private final ProcessPluginDefinition processPluginDefinition;
 
 	private final Function<DelegateExecution, Variables> variablesFactory;
-	private final PluginMdc pluginMdc;
+	private final PluginContext pluginContext;
 
 	private final AtomicReference<ProcessPluginApi> processPluginApi = new AtomicReference<>();
 	private final AtomicReference<FhirContext> fhirContext = new AtomicReference<>();
@@ -134,9 +134,9 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> i
 		this.processPluginDefinition = processPluginDefinition;
 
 		variablesFactory = delegateExecution -> new VariablesImpl(delegateExecution, getObjectMapper(),
-				getProcessPluginApi().getDsfClientProvider().getLocal());
-		pluginMdc = new PluginMdcImpl(processPluginApiVersion, processPluginDefinition.getName(),
-				processPluginDefinition.getVersion(), jarFile.toString(), serverBaseUrl, variablesFactory);
+				getProcessPluginApi().getDsfClientProvider());
+		pluginContext = new PluginContextImpl(processPluginApiVersion, processPluginDefinition.getName(),
+				processPluginDefinition.getVersion(), jarFile.toString(), classLoader, serverBaseUrl, variablesFactory);
 	}
 
 	@Override
@@ -185,9 +185,9 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<UserTaskListener> i
 	}
 
 	@Override
-	public PluginMdc getPluginMdc()
+	public PluginContext getPluginContext()
 	{
-		return pluginMdc;
+		return pluginContext;
 	}
 
 	@Override

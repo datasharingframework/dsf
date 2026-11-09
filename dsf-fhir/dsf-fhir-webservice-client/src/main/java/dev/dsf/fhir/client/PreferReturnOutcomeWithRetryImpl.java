@@ -43,9 +43,9 @@ class PreferReturnOutcomeWithRetryImpl implements PreferReturnOutcomeWithRetry
 	}
 
 	@Override
-	public OperationOutcome createConditionaly(Resource resource, String ifNoneExistCriteria)
+	public OperationOutcome createConditionally(Resource resource, String ifNoneExistCriteria)
 	{
-		return delegate.createConditionaly(PreferReturnType.OPERATION_OUTCOME, resource, ifNoneExistCriteria)
+		return delegate.createConditionally(PreferReturnType.OPERATION_OUTCOME, resource, ifNoneExistCriteria)
 				.getOperationOutcome();
 	}
 
@@ -63,9 +63,9 @@ class PreferReturnOutcomeWithRetryImpl implements PreferReturnOutcomeWithRetry
 	}
 
 	@Override
-	public OperationOutcome updateConditionaly(Resource resource, Map<String, List<String>> criteria)
+	public OperationOutcome updateConditionally(Resource resource, Map<String, List<String>> criteria)
 	{
-		return delegate.updateConditionaly(PreferReturnType.OPERATION_OUTCOME, resource, criteria)
+		return delegate.updateConditionally(PreferReturnType.OPERATION_OUTCOME, resource, criteria)
 				.getOperationOutcome();
 	}
 

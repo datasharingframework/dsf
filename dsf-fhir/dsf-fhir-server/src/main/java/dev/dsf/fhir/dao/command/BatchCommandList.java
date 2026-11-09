@@ -17,18 +17,16 @@ package dev.dsf.fhir.dao.command;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.Set;
+import java.util.function.Predicate;
 
 import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.IdType;
 import org.postgresql.util.PSQLException;
@@ -56,7 +54,7 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 			ExceptionHandler exceptionHandler, List<? extends Command> commands, ValidationHelper validationHelper,
 			SnapshotGenerator snapshotGenerator, EventHandler eventHandler, ResponseGenerator responseGenerator)
 	{
-		super(dataSource, permanentDeleteDataSource, selectUpdateUser, exceptionHandler, commands);
+		super(dataSource, permanentDeleteDataSource, selectUpdateUser, exceptionHandler, commands, (_, _) -> 0);
 
 		this.validationHelper = validationHelper;
 		this.snapshotGenerator = snapshotGenerator;
@@ -73,8 +71,16 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 			boolean initialAutoCommit = connection.getAutoCommit();
 			int initialTransactionIsolationLevel = connection.getTransactionIsolation();
 
-			Map<Integer, Exception> caughtExceptions = new HashMap<>((int) (commands.size() / 0.75) + 1);
 			Map<String, IdType> idTranslationTable = new HashMap<>();
+			Set<Integer> indexesWithError = new HashSet<>();
+
+			commands.forEach(cR ->
+			{
+				preExecute(cR, connection, idTranslationTable);
+
+				if (cR.hasException())
+					indexesWithError.add(cR.getCommand().getIndex());
+			});
 
 			if (hasModifyingCommands)
 			{
@@ -83,9 +89,14 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 				connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 			}
 
-			commands.forEach(preExecute(idTranslationTable, connection, caughtExceptions));
+			commands.stream().filter(Predicate.not(CommandResult::hasException)).forEach(cR ->
+			{
+				if (!indexesWithError.contains(cR.getCommand().getIndex()))
+					execute(cR, connection, idTranslationTable);
 
-			commands.forEach(execute(idTranslationTable, connection, caughtExceptions));
+				if (cR.hasException())
+					indexesWithError.add(cR.getCommand().getIndex());
+			});
 
 			if (hasModifyingCommands)
 			{
@@ -94,22 +105,28 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 				connection.setTransactionIsolation(initialTransactionIsolationLevel);
 			}
 
-			Map<Integer, BundleEntryComponent> results = new HashMap<>((int) (commands.size() / 0.75) + 1);
-
-			commands.forEach(postExecute(connection, caughtExceptions, results));
-			caughtExceptions.forEach((k, v) -> results.put(k, toEntry(v)));
-
-			results.entrySet().stream().sorted(Comparator.comparing(Entry::getKey)).forEach(e ->
+			commands.stream().filter(Predicate.not(CommandResult::hasException)).forEach(cR ->
 			{
-				Command command = commands.get(e.getKey());
-				BundleEntryComponent result = e.getValue();
-				auditLogResult(command, result);
+				if (!indexesWithError.contains(cR.getCommand().getIndex()))
+					postExecute(cR, connection);
+
+				if (cR.hasException())
+					indexesWithError.add(cR.getCommand().getIndex());
 			});
 
 			Bundle result = new Bundle();
 			result.setType(BundleType.BATCHRESPONSE);
-			results.entrySet().stream().sorted(Comparator.comparing(Entry::getKey)).map(Entry::getValue)
-					.forEach(result::addEntry);
+
+			commands.forEach(c ->
+			{
+				c.convertExceptionToResult(this::internalServerError);
+
+				if (c.hasResult())
+				{
+					auditLogResult(c);
+					result.addEntry(c.getResult());
+				}
+			});
 
 			return result;
 		}
@@ -119,154 +136,123 @@ public class BatchCommandList extends AbstractCommandList implements CommandList
 		}
 	}
 
-	private Consumer<Command> preExecute(Map<String, IdType> idTranslationTable, Connection connection,
-			Map<Integer, Exception> caughtExceptions)
+	private void preExecute(CommandResult commandResult, Connection connection, Map<String, IdType> idTranslationTable)
 	{
-		return command ->
-		{
-			try
-			{
-				if (!caughtExceptions.containsKey(command.getIndex()))
-				{
-					logger.debug("Running pre-execute of command {} for entry at index {}",
-							command.getClass().getName(), command.getIndex());
-					command.preExecute(idTranslationTable, connection, validationHelper, snapshotGenerator);
-				}
-				else
-				{
-					logger.info("Skipping pre-execute of command {} for entry at index {}, caught exception {}",
-							command.getClass().getName(), command.getIndex(),
-							caughtExceptions.get(command.getIndex()).getClass().getName() + ": "
-									+ caughtExceptions.get(command.getIndex()).getMessage());
-				}
-			}
-			catch (Exception e)
-			{
-				logger.debug("Error while running pre-execute of command {} for entry at index {}",
-						command.getClass().getName(), command.getIndex(), e);
-				logger.warn("Error while running pre-execute of command {} for entry at index {}: {} - {}",
-						command.getClass().getName(), command.getIndex(), e.getClass().getName(), e.getMessage());
+		if (commandResult.hasException())
+			throw new IllegalStateException("Command has exception");
 
-				caughtExceptions.put(command.getIndex(), e);
-			}
-		};
+		Command command = commandResult.getCommand();
+
+		try
+		{
+			logger.debug("Running pre-execute of {} for entry at index {}", command.getClass().getSimpleName(),
+					command.getIndex());
+			command.preExecute(idTranslationTable, connection, validationHelper, snapshotGenerator);
+		}
+		catch (Exception e)
+		{
+			logger.debug("Error while running pre-execute of {} for entry at index {}",
+					command.getClass().getSimpleName(), command.getIndex(), e);
+			logger.warn("Error while running pre-execute of {} for entry at index {}: {} - {}",
+					command.getClass().getSimpleName(), command.getIndex(), e.getClass().getName(), e.getMessage());
+
+			commandResult.setException(e);
+		}
 	}
 
-	private Consumer<Command> execute(Map<String, IdType> idTranslationTable, Connection connection,
-			Map<Integer, Exception> caughtExceptions)
+	private void execute(CommandResult commandResult, Connection connection, Map<String, IdType> idTranslationTable)
 	{
-		return command ->
+		if (commandResult.hasException())
+			throw new IllegalStateException("Command has exception");
+
+		Command command = commandResult.getCommand();
+
+		LargeObjectManager largeObjectManager = command instanceof ModifyingCommand m
+				? m.createLargeObjectManager(connection)
+				: LargeObjectManager.NO_OP;
+
+		try
 		{
-			LargeObjectManager largeObjectManager = command instanceof ModifyingCommand m
-					? m.createLargeObjectManager(connection)
-					: LargeObjectManager.NO_OP;
+			logger.debug("Running execute and check-references of {} for entry at index {}",
+					command.getClass().getSimpleName(), command.getIndex());
+			command.execute(idTranslationTable, largeObjectManager, connection, validationHelper);
+
+			command.checkReferences(idTranslationTable, connection);
+
+			if (!connection.getAutoCommit())
+				connection.commit();
+		}
+		catch (Exception e)
+		{
+			logger.debug("Error while executing {}, rolling back transaction for entry at index {}",
+					command.getClass().getSimpleName(), command.getIndex(), e);
+			logger.warn("Error while executing {}, rolling back transaction for entry at index {}: {} - {}",
+					command.getClass().getSimpleName(), command.getIndex(), e.getClass().getName(), e.getMessage());
+
+			if (e instanceof PSQLException s && PSQLState.UNIQUE_VIOLATION.getState().equals(s.getSQLState()))
+				commandResult.setException(new WebApplicationException(responseGenerator.duplicateResourceExists()));
+			else
+				commandResult.setException(e);
 
 			try
 			{
-				if (!caughtExceptions.containsKey(command.getIndex()))
-				{
-					logger.debug("Running execute of command {} for entry at index {}", command.getClass().getName(),
-							command.getIndex());
-					command.execute(idTranslationTable, largeObjectManager, connection, validationHelper);
-				}
-				else
-				{
-					logger.info("Skipping execute of command {} for entry at index {}, caught exception {}",
-							command.getClass().getName(), command.getIndex(),
-							caughtExceptions.get(command.getIndex()).getClass().getName() + ": "
-									+ caughtExceptions.get(command.getIndex()).getMessage());
-				}
-
 				if (!connection.getAutoCommit())
-					connection.commit();
+					connection.rollback();
 			}
-			catch (Exception exception)
+			catch (SQLException rollbackException)
 			{
-				logger.debug("Error while executing command {}, rolling back transaction for entry at index {}",
-						command.getClass().getName(), command.getIndex(), exception);
-				logger.warn("Error while executing command {}, rolling back transaction for entry at index {}: {} - {}",
-						command.getClass().getName(), command.getIndex(), exception.getClass().getName(),
-						exception.getMessage());
+				logger.debug("Error while executing {}, error while rolling back transaction for entry at index {}",
+						command.getClass().getSimpleName(), command.getIndex(), rollbackException);
+				logger.warn(
+						"Error while executing {}, error while rolling back transaction for entry at index {}: {} - {}",
+						command.getClass().getSimpleName(), command.getIndex(), rollbackException.getClass().getName(),
+						rollbackException.getMessage());
 
-				if (exception instanceof PSQLException s
-						&& PSQLState.UNIQUE_VIOLATION.getState().equals(s.getSQLState()))
-					caughtExceptions.put(command.getIndex(),
-							new WebApplicationException(responseGenerator.duplicateResourceExists()));
-				else
-					caughtExceptions.put(command.getIndex(), exception);
-
-				try
-				{
-					if (!connection.getAutoCommit())
-						connection.rollback();
-				}
-				catch (SQLException rollbackException)
-				{
-					logger.debug(
-							"Error while executing command {}, error while rolling back transaction for entry at index {}",
-							command.getClass().getName(), command.getIndex(), rollbackException);
-					logger.warn(
-							"Error while executing command {}, error while rolling back transaction for entry at index {}: {} - {}",
-							command.getClass().getName(), command.getIndex(), rollbackException.getClass().getName(),
-							rollbackException.getMessage());
-
-					caughtExceptions.put(command.getIndex(), rollbackException);
-				}
-
-				try
-				{
-					if (!connection.getAutoCommit())
-						largeObjectManager.rollback();
-				}
-				catch (SQLException rollbackException)
-				{
-					logger.debug(
-							"Error while executing command {}, error while rolling back DB large object for entry at index {}",
-							command.getClass().getName(), command.getIndex(), rollbackException);
-					logger.warn(
-							"Error while executing command {}, error while rolling back DB large object for entry at index {}: {} - {}",
-							command.getClass().getName(), command.getIndex(), rollbackException.getClass().getName(),
-							rollbackException.getMessage());
-
-					caughtExceptions.put(command.getIndex(), rollbackException);
-				}
+				commandResult.addSuppressedException(rollbackException);
 			}
-		};
-	}
 
-	private Consumer<Command> postExecute(Connection connection, Map<Integer, Exception> caughtExceptions,
-			Map<Integer, BundleEntryComponent> results)
-	{
-		return command ->
-		{
 			try
 			{
-				if (!caughtExceptions.containsKey(command.getIndex()))
-				{
-					logger.debug("Running post-execute of command {} for entry at index {}",
-							command.getClass().getName(), command.getIndex());
-
-					Optional<BundleEntryComponent> optResult = command.postExecute(connection, eventHandler);
-					optResult.ifPresent(result -> results.put(command.getIndex(), result));
-				}
-				else
-				{
-					logger.info("Skipping post-execute of command {} for entry at index {}, caught exception {}",
-							command.getClass().getName(), command.getIndex(),
-							caughtExceptions.get(command.getIndex()).getClass().getName() + ": "
-									+ caughtExceptions.get(command.getIndex()).getMessage());
-				}
+				if (!connection.getAutoCommit())
+					largeObjectManager.rollback();
 			}
-			catch (Exception e)
+			catch (SQLException rollbackException)
 			{
-				logger.debug("Error while running post-execute of command {} for entry at index {}",
-						command.getClass().getName(), command.getIndex(), e);
-				logger.warn("Error while running post-execute of command {} for entry at index {}: {} - {}",
-						command.getClass().getName(), command.getIndex(), e.getClass().getName(), e.getMessage());
+				logger.debug("Error while executing {}, error while rolling back DB large object for entry at index {}",
+						command.getClass().getSimpleName(), command.getIndex(), rollbackException);
+				logger.warn(
+						"Error while executing {}, error while rolling back DB large object for entry at index {}: {} - {}",
+						command.getClass().getSimpleName(), command.getIndex(), rollbackException.getClass().getName(),
+						rollbackException.getMessage());
 
-				caughtExceptions.put(command.getIndex(), e);
+				commandResult.addSuppressedException(rollbackException);
 			}
-		};
+		}
+	}
+
+	private void postExecute(CommandResult commandResult, Connection connection)
+	{
+		if (commandResult.hasException())
+			throw new IllegalStateException("Command has exception");
+
+		Command command = commandResult.getCommand();
+
+		try
+		{
+			logger.debug("Running post-execute of {} for entry at index {}", command.getClass().getSimpleName(),
+					command.getIndex());
+
+			command.postExecute(connection, eventHandler).ifPresent(commandResult::setResult);
+		}
+		catch (Exception e)
+		{
+			logger.debug("Error while running post-execute of {} for entry at index {}",
+					command.getClass().getSimpleName(), command.getIndex(), e);
+			logger.warn("Error while running post-execute of {} for entry at index {}: {} - {}",
+					command.getClass().getSimpleName(), command.getIndex(), e.getClass().getName(), e.getMessage());
+
+			commandResult.setException(e);
+		}
 	}
 
 	@Override

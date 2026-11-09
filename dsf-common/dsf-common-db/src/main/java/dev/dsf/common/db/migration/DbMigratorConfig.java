@@ -16,9 +16,13 @@
 package dev.dsf.common.db.migration;
 
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public interface DbMigratorConfig
 {
+	String POSTGRES_UNQUOTED_IDENTIFIER_STRING = "^[a-zA-Z_][a-zA-Z0-9_$]{0,62}$";
+	Pattern POSTGRES_UNQUOTED_IDENTIFIER = Pattern.compile(POSTGRES_UNQUOTED_IDENTIFIER_STRING);
+
 	String getDbUrl();
 
 	String getDbLiquibaseUsername();

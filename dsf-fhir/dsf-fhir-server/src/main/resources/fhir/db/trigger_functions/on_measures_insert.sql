@@ -16,6 +16,7 @@
 
 CREATE OR REPLACE FUNCTION on_measures_insert() RETURNS TRIGGER AS $$
 BEGIN
+	UPDATE measures SET current = false WHERE measure_id = NEW.measure_id AND current AND version <> NEW.version;
 	PERFORM on_resources_insert(NEW.measure_id, NEW.version, NEW.measure);
 	RETURN NEW;
 END;

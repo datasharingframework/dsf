@@ -19,16 +19,20 @@ import javax.sql.DataSource;
 
 import org.hl7.fhir.r4.model.StructureDefinition;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.fhir.search.filter.StructureDefinitionIdentityFilter;
 
 public class StructureDefinitionDaoJdbc extends AbstractStructureDefinitionDaoJdbc
 {
 	public StructureDefinitionDaoJdbc(DataSource dataSource, DataSource permanentDeleteDataSource,
-			FhirContext fhirContext)
+			FhirContext fhirContext, ObjectMapper objectMapper,
+			ReadByUrlDaoFactory<StructureDefinition> readByUrlDaoFactory)
 	{
-		super(dataSource, permanentDeleteDataSource, fhirContext, "structure_definitions", "structure_definition",
-				"structure_definition_id", StructureDefinitionIdentityFilter::new);
+		super(dataSource, permanentDeleteDataSource, fhirContext, objectMapper, "structure_definitions",
+				"structure_definition", "structure_definition_id", StructureDefinitionIdentityFilter::new,
+				readByUrlDaoFactory);
 	}
 
 	@Override

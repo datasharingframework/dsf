@@ -16,6 +16,7 @@
 
 CREATE OR REPLACE FUNCTION on_endpoints_insert() RETURNS TRIGGER AS $$
 BEGIN
+	UPDATE endpoints SET current = false WHERE endpoint_id = NEW.endpoint_id AND current AND version <> NEW.version;
 	PERFORM on_resources_insert(NEW.endpoint_id, NEW.version, NEW.endpoint);
 	RETURN NEW;
 END;

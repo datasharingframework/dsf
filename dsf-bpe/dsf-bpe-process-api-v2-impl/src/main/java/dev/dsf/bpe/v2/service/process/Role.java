@@ -42,22 +42,22 @@ public class Role implements Recipient, Requester
 	private final String practitionerRoleSystem;
 	private final String practitionerRoleCode;
 
-	public Role(boolean localIdentity, String parentOrganizationIdentifier, String organizatioRoleSystem,
+	public Role(boolean localIdentity, String parentOrganizationIdentifier, String organizationRoleSystem,
 			String organizationRoleCode, String practitionerRoleSystem, String practitionerRoleCode)
 	{
 		Objects.requireNonNull(parentOrganizationIdentifier, "parentOrganizationIdentifier");
 		if (parentOrganizationIdentifier.isBlank())
 			throw new IllegalArgumentException("parentOrganizationIdentifier blank");
-		Objects.requireNonNull(organizatioRoleSystem, "organizatioRoleSystem");
-		if (organizatioRoleSystem.isBlank())
-			throw new IllegalArgumentException("organizatioRoleSystem blank");
+		Objects.requireNonNull(organizationRoleSystem, "organizationRoleSystem");
+		if (organizationRoleSystem.isBlank())
+			throw new IllegalArgumentException("organizationRoleSystem blank");
 		Objects.requireNonNull(organizationRoleCode, "organizationRoleCode");
 		if (organizationRoleCode.isBlank())
 			throw new IllegalArgumentException("organizationRoleCode blank");
 
 		this.localIdentity = localIdentity;
 		this.parentOrganizationIdentifier = parentOrganizationIdentifier;
-		this.organizationRoleSystem = organizatioRoleSystem;
+		this.organizationRoleSystem = organizationRoleSystem;
 		this.organizationRoleCode = organizationRoleCode;
 
 		this.practitionerRoleSystem = practitionerRoleSystem;

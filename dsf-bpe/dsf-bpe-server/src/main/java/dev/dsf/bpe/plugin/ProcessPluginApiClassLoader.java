@@ -82,7 +82,7 @@ public class ProcessPluginApiClassLoader extends URLClassLoader
 			if (isBpeClassAllowed(bpeClass))
 				return bpeClass;
 
-			logger.debug("Class " + className + " not found or hidden");
+			logger.debug("Class {} not found or hidden", className);
 			throw new ClassNotFoundException(className);
 		}
 	}

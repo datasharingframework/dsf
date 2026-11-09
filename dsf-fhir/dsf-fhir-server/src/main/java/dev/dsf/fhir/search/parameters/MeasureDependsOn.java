@@ -27,6 +27,8 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Measure;
 import org.hl7.fhir.r4.model.Resource;
 
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory.RelatedArtifactParameter;
 import dev.dsf.fhir.dao.provider.DaoProvider;
 import dev.dsf.fhir.function.BiFunctionWithSqlException;
 import dev.dsf.fhir.search.IncludeParameterDefinition;
@@ -63,7 +65,7 @@ public class MeasureDependsOn extends AbstractCanonicalReferenceParameter<Measur
 	public String getFilterQuery()
 	{
 		if (ReferenceSearchType.URL.equals(valueAndType.type))
-			return "(measure->'library' ?? ? OR measure->'relatedArtifact' @> ?::jsonb)";
+			return "(measure->'library' ?? ? OR measure->'relatedArtifact' @> ?)";
 
 		return "";
 	}
@@ -76,15 +78,16 @@ public class MeasureDependsOn extends AbstractCanonicalReferenceParameter<Measur
 
 	@Override
 	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
-			BiFunctionWithSqlException<String, Object[], Array> arrayCreator) throws SQLException
+			BiFunctionWithSqlException<String, Object[], Array> arrayCreator, PgObjectFactory pgObjectFactory)
+			throws SQLException
 	{
 		if (ReferenceSearchType.URL.equals(valueAndType.type))
 		{
 			if (subqueryParameterIndex == 1)
 				statement.setString(parameterIndex, valueAndType.url);
 			else if (subqueryParameterIndex == 2)
-				statement.setString(parameterIndex,
-						"[{\"type\": \"depends-on\", \"resource\": \"" + valueAndType.url + "\"}]");
+				statement.setObject(parameterIndex, pgObjectFactory
+						.jsonParameterToPgObjectAsArray(RelatedArtifactParameter.dependsOn(valueAndType.url)));
 		}
 	}
 

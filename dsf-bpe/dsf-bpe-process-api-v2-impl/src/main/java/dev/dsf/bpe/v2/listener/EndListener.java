@@ -26,21 +26,21 @@ import org.operaton.bpm.engine.delegate.ExecutionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dev.dsf.bpe.v2.client.dsf.DsfClient;
 import dev.dsf.bpe.v2.constants.CodeSystems.BpmnMessage;
+import dev.dsf.bpe.v2.service.DsfClientProvider;
 
 public class EndListener extends AbstractListener implements ExecutionListener
 {
 	private static final Logger logger = LoggerFactory.getLogger(EndListener.class);
 
-	private final DsfClient webserviceClient;
+	private final DsfClientProvider dsfClientProvider;
 
 	public EndListener(String serverBaseUrl, Function<DelegateExecution, ListenerVariables> variablesFactory,
-			DsfClient fhirWebserviceClient)
+			DsfClientProvider dsfClientProvider)
 	{
 		super(serverBaseUrl, variablesFactory);
 
-		this.webserviceClient = fhirWebserviceClient;
+		this.dsfClientProvider = dsfClientProvider;
 	}
 
 	@Override
@@ -48,7 +48,7 @@ public class EndListener extends AbstractListener implements ExecutionListener
 	{
 		super.afterPropertiesSet();
 
-		Objects.requireNonNull(webserviceClient, "webserviceClient");
+		Objects.requireNonNull(dsfClientProvider, "dsfClientProvider");
 	}
 
 	@Override
@@ -89,7 +89,7 @@ public class EndListener extends AbstractListener implements ExecutionListener
 			logger.debug("Updating Task {}, new status: {}", getLocalVersionlessAbsoluteUrl(task),
 					task.getStatus().toCode());
 
-			webserviceClient.withMinimalReturn().update(task);
+			dsfClientProvider.getLocal().withMinimalReturn().update(task);
 		}
 		catch (Exception e)
 		{

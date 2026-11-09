@@ -167,7 +167,7 @@ public class FhirClientConnectionsConfig implements InitializingBean
 		}
 		catch (OidcClientException e)
 		{
-			logger.debug("Testing connection with OIDC provider at {} for '{}' [Failed] -> {}",
+			logger.debug("Testing connection with OIDC provider at {} for '{}' [Failed]",
 					config.oidcAuthentication().baseUrl(), config.fhirServerId(), e);
 			logger.warn("Testing connection with OIDC provider at {} for '{}' [Failed] -> {}",
 					config.oidcAuthentication().baseUrl(), config.fhirServerId(), e.getMessage());

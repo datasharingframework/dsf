@@ -15,6 +15,7 @@
  */
 package dev.dsf.common.config;
 
+import static dev.dsf.common.config.network.HostSpecParser.parse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -25,6 +26,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
+
+import dev.dsf.common.config.network.HostSpecParser.HostSpec;
 
 public class ProxyConfigTest
 {
@@ -55,7 +58,7 @@ public class ProxyConfigTest
 		String url = "http://proxy", username = "username";
 		char[] password = "password".toCharArray();
 		// Arrays.asList as we need a null element, not allowed in List.of
-		List<String> noProxy = Arrays.asList(null, " ", "no-proxy");
+		List<HostSpec> noProxy = parse(Arrays.asList(null, " ", "no-proxy"));
 
 		ProxyConfigImpl c = new ProxyConfigImpl(url, username, password, noProxy);
 		assertEquals(url, c.getUrl());
@@ -70,16 +73,15 @@ public class ProxyConfigTest
 	public void testIsEnabled() throws Exception
 	{
 		assertTrue(new ProxyConfigImpl("http://proxy", null, null, null).isEnabled());
-		assertTrue(new ProxyConfigImpl("http://proxy", null, null, List.of("foo")).isEnabled());
+		assertTrue(new ProxyConfigImpl("http://proxy", null, null, List.of(parse("foo"))).isEnabled());
 		assertFalse(new ProxyConfigImpl(null, null, null, null).isEnabled());
-		assertFalse(new ProxyConfigImpl("http://proxy", null, null, List.of("*")).isEnabled());
 	}
 
 	@Test
 	public void testIsEndabled() throws Exception
 	{
 		ProxyConfig proxyConfig = new ProxyConfigImpl("http://proxy", null, null,
-				List.of("foo.bar", "foo.bar.baz:8080", "test:1234"));
+				parse("foo.bar", "*.foo.bar", "foo.bar.baz:8080", "test:1234"));
 
 		assertFalse(proxyConfig.isEnabled("http://foo.bar"));
 		assertFalse(proxyConfig.isEnabled("http://foo.bar:8080"));
@@ -87,7 +89,7 @@ public class ProxyConfigTest
 		assertFalse(proxyConfig.isEnabled("https://foo.bar:8443"));
 		assertFalse(proxyConfig.isEnabled("http://test.foo.bar"));
 		assertFalse(proxyConfig.isEnabled("https://test.foo.bar:443"));
-		assertFalse(proxyConfig.isEnabled("https://test.test:1234"));
+		assertFalse(proxyConfig.isEnabled("https://test:1234"));
 		assertFalse(proxyConfig.isEnabled("http://foo.bar.baz:8080"));
 		assertFalse(proxyConfig.isEnabled("https://foo.bar.baz:8080"));
 
@@ -96,41 +98,18 @@ public class ProxyConfigTest
 		assertTrue(proxyConfig.isEnabled("http://bar.baz"));
 		assertTrue(proxyConfig.isEnabled("https://bar.baz"));
 		assertTrue(proxyConfig.isEnabled("https://test.test"));
-	}
-
-	@Test
-	public void testIsEnabledAllNoProxy() throws Exception
-	{
-		ProxyConfig proxyConfig = new ProxyConfigImpl(null, null, null, List.of("*"));
-
-		assertFalse(proxyConfig.isEnabled("http://foo.bar"));
-		assertFalse(proxyConfig.isEnabled("http://foo.bar:8080"));
-		assertFalse(proxyConfig.isEnabled("https://foo.bar"));
-		assertFalse(proxyConfig.isEnabled("https://foo.bar:8443"));
-		assertFalse(proxyConfig.isEnabled("http://test.foo.bar"));
-		assertFalse(proxyConfig.isEnabled("https://test.foo.bar:443"));
-
-		assertFalse(proxyConfig.isEnabled("http://foo.bar.baz:8080"));
-		assertFalse(proxyConfig.isEnabled("https://foo.bar.baz:8080"));
-		assertFalse(proxyConfig.isEnabled("http://foo.bar.baz"));
-		assertFalse(proxyConfig.isEnabled("https://foo.bar.baz"));
-		assertFalse(proxyConfig.isEnabled("http://bar.baz"));
-		assertFalse(proxyConfig.isEnabled("https://bar.baz"));
+		assertTrue(proxyConfig.isEnabled("https://test.test:1234"));
 	}
 
 	@Test
 	public void testIsEnabledNull() throws Exception
 	{
 		assertFalse(new ProxyConfigImpl("http://proxy", null, null, null).isEnabled(null));
-		assertFalse(new ProxyConfigImpl("http://proxy", null, null, List.of("*")).isEnabled(null));
-		assertFalse(new ProxyConfigImpl("http://proxy", null, null, null).isEnabled(null));
 	}
 
 	@Test
 	public void testIsEnabledBlank() throws Exception
 	{
-		assertFalse(new ProxyConfigImpl("http://proxy", null, null, List.of("*")).isEnabled(""));
-		assertFalse(new ProxyConfigImpl("http://proxy", null, null, List.of("*")).isEnabled(" "));
 		assertFalse(new ProxyConfigImpl("http://proxy", null, null, null).isEnabled(""));
 		assertFalse(new ProxyConfigImpl("http://proxy", null, null, null).isEnabled(" "));
 	}
@@ -138,14 +117,13 @@ public class ProxyConfigTest
 	@Test
 	public void testIsEnabledMalformedUrl() throws Exception
 	{
-		assertFalse(new ProxyConfigImpl("http://proxy", null, null, List.of("*")).isEnabled("malformed"));
 		assertTrue(new ProxyConfigImpl("http://proxy", null, null, null).isEnabled(":malformed"));
 		assertTrue(new ProxyConfigImpl("http://proxy", null, null, null).isEnabled("malformed"));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testIsEnabledSchemaNotSupported() throws Exception
 	{
-		new ProxyConfigImpl("http://proxy", null, null, null).isEnabled("foo://bar");
+		assertTrue(new ProxyConfigImpl("http://proxy", null, null, null).isEnabled("foo://bar"));
 	}
 }

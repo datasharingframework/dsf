@@ -15,15 +15,31 @@
  */
 package dev.dsf.fhir.dao;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Optional;
 
-import org.hl7.fhir.r4.model.DomainResource;
+import org.hl7.fhir.r4.model.MetadataResource;
 import org.junit.Test;
 
-public interface ReadByUrlDaoTest<D extends DomainResource>
+import dev.dsf.fhir.dao.ReadByUrlDao.ReadByUrlDaoFactory;
+import dev.dsf.fhir.dao.cache.ReadByUrlDaoNotFoundCache;
+import dev.dsf.fhir.dao.jdbc.ReadByUrlDaoJdbc;
+
+public interface ReadByUrlDaoTest<D extends MetadataResource>
 {
+	static <R extends MetadataResource> ReadByUrlDaoFactory<R> createReadByUrlDao()
+	{
+		return (dataSourceSupplier, resourceExtractor, resourceTable, resourceColumn) ->
+		{
+			ReadByUrlDaoJdbc<R> delegate = new ReadByUrlDaoJdbc<>(dataSourceSupplier, resourceExtractor, resourceTable,
+					resourceColumn);
+
+			return new ReadByUrlDaoNotFoundCache<>(delegate);
+		};
+	}
+
 	D createResourceWithUrlAndVersion();
 
 	String getUrl();
@@ -37,6 +53,8 @@ public interface ReadByUrlDaoTest<D extends DomainResource>
 	@Test
 	default void testReadByUrlAndVersionWithUrl1() throws Exception
 	{
+		assertFalse(readByUrlDao().readByUrlAndVersion(getUrl()).isPresent());
+
 		D newResource = createResourceWithUrlAndVersion();
 		getDao().create(newResource);
 
@@ -47,6 +65,8 @@ public interface ReadByUrlDaoTest<D extends DomainResource>
 	@Test
 	default void testReadByUrlAndVersionWithUrlAndVersion1() throws Exception
 	{
+		assertFalse(readByUrlDao().readByUrlAndVersion(getUrl() + "|" + getVersion()).isPresent());
+
 		D newResource = createResourceWithUrlAndVersion();
 		getDao().create(newResource);
 
@@ -57,6 +77,8 @@ public interface ReadByUrlDaoTest<D extends DomainResource>
 	@Test
 	default void testReadByUrlAndVersionWithUrl2() throws Exception
 	{
+		assertFalse(readByUrlDao().readByUrlAndVersion(getUrl(), null).isPresent());
+
 		D newResource = createResourceWithUrlAndVersion();
 		getDao().create(newResource);
 
@@ -67,6 +89,8 @@ public interface ReadByUrlDaoTest<D extends DomainResource>
 	@Test
 	default void testReadByUrlAndVersionWithUrlAndVersion2() throws Exception
 	{
+		assertFalse(readByUrlDao().readByUrlAndVersion(getUrl(), getVersion()).isPresent());
+
 		D newResource = createResourceWithUrlAndVersion();
 		getDao().create(newResource);
 

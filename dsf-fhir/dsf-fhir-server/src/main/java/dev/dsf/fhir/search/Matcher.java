@@ -23,7 +23,7 @@ import dev.dsf.fhir.dao.provider.DaoProvider;
 
 public interface Matcher
 {
-	void resloveReferencesForMatching(Resource resource, DaoProvider daoProvider) throws SQLException;
+	void resolveReferencesForMatching(Resource resource, DaoProvider daoProvider) throws SQLException;
 
 	boolean matches(Resource resource);
 

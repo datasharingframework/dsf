@@ -23,7 +23,9 @@ import java.util.Comparator;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import javax.xml.XMLConstants;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -61,7 +63,19 @@ public class ProcessService extends AbstractService implements InitializingBean
 		super(templateService, "Process");
 
 		this.repositoryService = repositoryService;
+
 		transformerFactory = TransformerFactory.newInstance();
+		transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+		transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+
+		try
+		{
+			transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+		}
+		catch (TransformerConfigurationException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override

@@ -66,6 +66,8 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.testcontainers.utility.DockerImageName;
 
+import com.icegreen.greenmail.util.ServerSetupTest;
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
@@ -272,6 +274,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.group", FHIR_DATABASE_DELETE_USERS_GROUP);
 		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.username", FHIR_DATABASE_DELETE_USER);
 		initParameters.put("dev.dsf.fhir.db.user.permanent.delete.password", FHIR_DATABASE_DELETE_USER_PASSWORD);
+		initParameters.put("dev.dsf.fhir.debug.log.message.dbStatement", String.valueOf(LOG_DB_STATEMENTS));
 
 		initParameters.put("dev.dsf.fhir.server.base.url", baseUrl);
 		initParameters.put("dev.dsf.fhir.server.organization.identifier.value", "Test_Organization");
@@ -370,6 +373,7 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		initParameters.put("dev.dsf.bpe.db.user.password", BPE_DATABASE_USER_PASSWORD);
 		initParameters.put("dev.dsf.bpe.db.user.engine.username", BPE_DATABASE_ENGINE_USER);
 		initParameters.put("dev.dsf.bpe.db.user.engine.password", BPE_DATABASE_ENGINE_USER_PASSWORD);
+		initParameters.put("dev.dsf.bpe.debug.log.message.dbStatement", String.valueOf(LOG_DB_STATEMENTS));
 
 		initParameters.put("dev.dsf.bpe.fhir.client.certificate", certificates.getClientCertificateFile().toString());
 		initParameters.put("dev.dsf.bpe.fhir.client.certificate.private.key",
@@ -449,6 +453,11 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		initParameters.put("dev.dsf.bpe.fhir.client.connections.config", fhirConnectionsYaml);
 		initParameters.put("dev.dsf.bpe.fhir.client.connections.config.default.trust.server.certificate.cas",
 				certificates.getCaCertificateFile().toString());
+
+		initParameters.put("dev.dsf.bpe.mail.host", "localhost");
+		initParameters.put("dev.dsf.bpe.mail.port", String.valueOf(ServerSetupTest.SMTP.getPort()));
+		initParameters.put("dev.dsf.bpe.mail.toAddresses", "to@localhost");
+		initParameters.put("dev.dsf.bpe.mail.fromAddress", "from@localhost");
 
 		initParameters.put("dev.dsf.bpe.test.env.mandatory", "test-value");
 

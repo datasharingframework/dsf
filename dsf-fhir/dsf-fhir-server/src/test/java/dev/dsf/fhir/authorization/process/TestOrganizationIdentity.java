@@ -60,6 +60,12 @@ public class TestOrganizationIdentity implements OrganizationIdentity
 	}
 
 	@Override
+	public boolean isNotExpired()
+	{
+		return false;
+	}
+
+	@Override
 	public boolean isLocalIdentity()
 	{
 		return localIdentity;
@@ -72,7 +78,7 @@ public class TestOrganizationIdentity implements OrganizationIdentity
 	}
 
 	@Override
-	public Optional<String> getOrganizationIdentifierValue()
+	public String getOrganizationIdentifierValue()
 	{
 		throw new UnsupportedOperationException();
 	}

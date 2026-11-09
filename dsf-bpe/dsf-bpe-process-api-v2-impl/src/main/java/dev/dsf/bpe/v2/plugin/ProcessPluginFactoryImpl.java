@@ -48,10 +48,10 @@ public class ProcessPluginFactoryImpl extends AbstractProcessPluginFactory imple
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
-	public Stream<TypedValueSerializer> getSerializer()
+	public Stream<TypedValueSerializer<?>> getSerializer()
 	{
-		return apiApplicationContext.getBeansOfType(TypedValueSerializer.class).values().stream();
+		return apiApplicationContext.getBeansOfType(TypedValueSerializer.class).values().stream()
+				.map(s -> (TypedValueSerializer<?>) s);
 	}
 
 	@Override

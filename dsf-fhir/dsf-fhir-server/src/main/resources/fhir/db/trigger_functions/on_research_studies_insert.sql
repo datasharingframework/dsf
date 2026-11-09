@@ -16,6 +16,7 @@
 
 CREATE OR REPLACE FUNCTION on_research_studies_insert() RETURNS TRIGGER AS $$
 BEGIN
+	UPDATE research_studies SET current = false WHERE research_study_id = NEW.research_study_id AND current AND version <> NEW.version;
 	PERFORM on_resources_insert(NEW.research_study_id, NEW.version, NEW.research_study);
 	RETURN NEW;
 END;

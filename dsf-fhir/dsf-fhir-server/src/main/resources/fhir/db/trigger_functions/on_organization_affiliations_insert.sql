@@ -24,6 +24,7 @@ DECLARE
 	binary_insert_count INT;
 	delete_count INT;
 BEGIN
+	UPDATE organization_affiliations SET current = false WHERE organization_affiliation_id = NEW.organization_affiliation_id AND current AND version <> NEW.version;
 	PERFORM on_resources_insert(NEW.organization_affiliation_id, NEW.version, NEW.organization_affiliation);
 
 	IF ((NEW.organization_affiliation->>'active' = 'false') AND organization_affiliation_exists_active_roles IS NOT NULL)

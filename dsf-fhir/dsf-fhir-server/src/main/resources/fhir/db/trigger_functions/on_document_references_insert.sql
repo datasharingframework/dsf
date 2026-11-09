@@ -16,6 +16,7 @@
 
 CREATE OR REPLACE FUNCTION on_document_references_insert() RETURNS TRIGGER AS $$
 BEGIN
+	UPDATE document_references SET current = false WHERE document_reference_id = NEW.document_reference_id AND current AND version <> NEW.version;
 	PERFORM on_resources_insert(NEW.document_reference_id, NEW.version, NEW.document_reference);
 	RETURN NEW;
 END;

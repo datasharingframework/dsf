@@ -22,18 +22,9 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.hl7.fhir.r4.model.Resource;
-import org.postgresql.util.PGobject;
 
-import ca.uhn.fhir.parser.IParser;
-
-interface PreparedStatementFactory<R extends Resource>
+interface PreparedStatementFactory<R extends Resource> extends PgObjectFactory
 {
-	IParser getJsonParser();
-
-	PGobject resourceToPgObject(R resource);
-
-	PGobject uuidToPgObject(UUID uuid);
-
 	String getCreateSql();
 
 	void configureCreateStatement(LargeObjectManager largeObjectManager, PreparedStatement statement, R resource,

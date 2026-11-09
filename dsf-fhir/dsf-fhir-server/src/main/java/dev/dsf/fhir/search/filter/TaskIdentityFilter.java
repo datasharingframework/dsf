@@ -25,6 +25,8 @@ import dev.dsf.common.auth.conf.OrganizationIdentity;
 import dev.dsf.common.auth.conf.PractitionerIdentity;
 import dev.dsf.fhir.authentication.FhirServerRole;
 import dev.dsf.fhir.authentication.FhirServerRoleImpl;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory.ReferenceParameter;
 
 public class TaskIdentityFilter extends AbstractIdentityFilter
 {
@@ -57,25 +59,25 @@ public class TaskIdentityFilter extends AbstractIdentityFilter
 			if (identity instanceof OrganizationIdentity)
 			{
 				if (identity.isLocalIdentity())
-					return resourceColumn + "->'restriction'->'recipient' @> ?::jsonb";
+					return resourceColumn + "->'restriction'->'recipient' @> ?";
 				else
 					return resourceColumn + "->'requester'->>'reference' = ?";
 			}
 			else if (identity instanceof PractitionerIdentity p)
 			{
 				if (p.hasPractionerRole("DSF_ADMIN"))
-					return resourceColumn + "->'restriction'->'recipient' @> ?::jsonb";
-				else if (p.getPractitionerIdentifierValue().isPresent())
+					return resourceColumn + "->'restriction'->'recipient' @> ?";
+				else if (p.getPractitionerIdentifierValue() != null)
 				{
 					return "((" + resourceColumn + "->'requester'->'identifier'->>'system' = '"
 							+ PractitionerIdentity.PRACTITIONER_IDENTIFIER_SYSTEM + "' AND " + resourceColumn
 							+ "->'requester'->'identifier'->>'value' = ?) OR (" + resourceColumn
-							+ "->>'status' = 'draft' AND " + resourceColumn + "->'restriction'->'recipient' @> ?::jsonb"
+							+ "->>'status' = 'draft' AND " + resourceColumn + "->'restriction'->'recipient' @> ?"
 							+ "))";
 				}
 				else
 					return "(" + resourceColumn + "->>'status' = 'draft' AND " + resourceColumn
-							+ "->'restriction'->'recipient' @> ?::jsonb" + ")";
+							+ "->'restriction'->'recipient' @> ?" + ")";
 			}
 		}
 
@@ -93,7 +95,7 @@ public class TaskIdentityFilter extends AbstractIdentityFilter
 			{
 				if (p.hasPractionerRole("DSF_ADMIN"))
 					return 1;
-				else if (p.getPractitionerIdentifierValue().isPresent())
+				else if (p.getPractitionerIdentifierValue() != null)
 					return 2;
 				else
 					return 1;
@@ -104,8 +106,8 @@ public class TaskIdentityFilter extends AbstractIdentityFilter
 	}
 
 	@Override
-	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
-			throws SQLException
+	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
+			PgObjectFactory pgObjectFactory) throws SQLException
 	{
 		if (identity.hasDsfRole(operationRole) && identity.hasDsfRole(READ_ROLE))
 		{
@@ -113,8 +115,9 @@ public class TaskIdentityFilter extends AbstractIdentityFilter
 			{
 				if (identity.isLocalIdentity())
 				{
-					statement.setString(parameterIndex, "[{\"reference\": \""
-							+ identity.getOrganization().getIdElement().toUnqualifiedVersionless().getValue() + "\"}]");
+					statement.setObject(parameterIndex,
+							pgObjectFactory.jsonParameterToPgObjectAsArray(new ReferenceParameter(
+									identity.getOrganization().getIdElement().toUnqualifiedVersionless().getValue())));
 				}
 				else
 				{
@@ -126,24 +129,26 @@ public class TaskIdentityFilter extends AbstractIdentityFilter
 			{
 				if (p.hasPractionerRole("DSF_ADMIN"))
 				{
-					statement.setString(parameterIndex, "[{\"reference\": \""
-							+ identity.getOrganization().getIdElement().toUnqualifiedVersionless().getValue() + "\"}]");
+					statement.setObject(parameterIndex,
+							pgObjectFactory.jsonParameterToPgObjectAsArray(new ReferenceParameter(
+									identity.getOrganization().getIdElement().toUnqualifiedVersionless().getValue())));
 				}
-				else if (p.getPractitionerIdentifierValue().isPresent())
+				else if (p.getPractitionerIdentifierValue() != null)
 				{
 					if (subqueryParameterIndex == 1)
-						statement.setString(parameterIndex, p.getPractitionerIdentifierValue().get());
+						statement.setString(parameterIndex, p.getPractitionerIdentifierValue());
 					else if (subqueryParameterIndex == 2)
 					{
-						statement.setString(parameterIndex, "[{\"reference\": \""
-								+ identity.getOrganization().getIdElement().toUnqualifiedVersionless().getValue()
-								+ "\"}]");
+						statement.setObject(parameterIndex,
+								pgObjectFactory.jsonParameterToPgObjectAsArray(new ReferenceParameter(identity
+										.getOrganization().getIdElement().toUnqualifiedVersionless().getValue())));
 					}
 				}
 				else
 				{
-					statement.setString(parameterIndex, "[{\"reference\": \""
-							+ identity.getOrganization().getIdElement().toUnqualifiedVersionless().getValue() + "\"}]");
+					statement.setObject(parameterIndex,
+							pgObjectFactory.jsonParameterToPgObjectAsArray(new ReferenceParameter(
+									identity.getOrganization().getIdElement().toUnqualifiedVersionless().getValue())));
 				}
 			}
 		}

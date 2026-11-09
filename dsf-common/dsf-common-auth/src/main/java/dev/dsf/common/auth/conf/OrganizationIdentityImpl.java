@@ -20,7 +20,6 @@ import java.util.Collection;
 import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Organization;
 
-// TODO implement equals, hashCode, toString methods based on the DSF organization identifier to fully comply with the java.security.Principal specification
 public class OrganizationIdentityImpl extends AbstractIdentity implements OrganizationIdentity
 {
 	/**
@@ -44,12 +43,12 @@ public class OrganizationIdentityImpl extends AbstractIdentity implements Organi
 	@Override
 	public String getName()
 	{
-		return getOrganizationIdentifierValue().orElse("?");
+		return getOrganizationIdentifierValue();
 	}
 
 	@Override
 	public String getDisplayName()
 	{
-		return getOrganizationIdentifierValue().orElse("?");
+		return getOrganizationIdentifierValue();
 	}
 }

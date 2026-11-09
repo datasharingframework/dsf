@@ -43,7 +43,14 @@ public class InitialDataLoaderImpl implements InitialDataLoader, InitializingBea
 		org.addIdentifier().setSystem(ReadAccessHelper.ORGANIZATION_IDENTIFIER_SYSTEM).setValue("initial.data.loader");
 
 		INITIAL_DATA_LOADER = new OrganizationIdentityImpl(true, org, null, FhirServerRoleImpl.INITIAL_DATA_LOADER,
-				null);
+				null)
+		{
+			@Override
+			public boolean isNotExpired()
+			{
+				return true;
+			}
+		};
 	}
 
 	private static final Logger logger = LoggerFactory.getLogger(InitialDataLoaderImpl.class);

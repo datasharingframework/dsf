@@ -22,6 +22,7 @@ import org.postgresql.util.PGobject;
 
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.fhir.authentication.FhirServerRole;
+import dev.dsf.fhir.dao.jdbc.PgObjectFactory;
 
 abstract class AbstractMetaTagAuthorizationRoleIdentityFilter extends AbstractIdentityFilter
 {
@@ -59,8 +60,8 @@ abstract class AbstractMetaTagAuthorizationRoleIdentityFilter extends AbstractId
 	}
 
 	@Override
-	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement)
-			throws SQLException
+	public void modifyStatement(int parameterIndex, int subqueryParameterIndex, PreparedStatement statement,
+			PgObjectFactory pgObjectFactory) throws SQLException
 	{
 		if (identity.hasDsfRole(operationRole) && identity.hasDsfRole(readRole))
 		{

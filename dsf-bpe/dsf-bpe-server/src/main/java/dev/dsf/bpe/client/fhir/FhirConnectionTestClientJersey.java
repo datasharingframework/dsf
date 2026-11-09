@@ -22,7 +22,7 @@ import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import org.glassfish.jersey.SslConfigurator;
-import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
+import org.glassfish.jersey.apache5.connector.Apache5ConnectorProvider;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
@@ -88,7 +88,7 @@ public class FhirConnectionTestClientJersey implements FhirConnectionTestClient
 				.register((ClientRequestFilter) r -> r.getHeaders().add(HttpHeaders.USER_AGENT, userAgentValue));
 
 		ClientConfig config = new ClientConfig();
-		config.connectorProvider(new ApacheConnectorProvider());
+		config.connectorProvider(new Apache5ConnectorProvider());
 		if (proxyConfig.isEnabled(fhirClientConfig.baseUrl()))
 		{
 			config.property(ClientProperties.PROXY_URI, proxyConfig.getUrl());

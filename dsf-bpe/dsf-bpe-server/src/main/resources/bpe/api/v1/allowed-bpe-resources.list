@@ -14,3 +14,6 @@
 # limitations under the License.
 #
 
+META-INF/services/org.operaton.bpm.model.bpmn.BpmnFactory
+META-INF/services/org.operaton.bpm.model.bpmn.BpmnParserFactory
+META-INF/mailcap

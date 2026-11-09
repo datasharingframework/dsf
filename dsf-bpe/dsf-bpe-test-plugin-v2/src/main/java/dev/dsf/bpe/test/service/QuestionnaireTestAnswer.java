@@ -162,9 +162,9 @@ public class QuestionnaireTestAnswer extends AbstractTest implements ServiceTask
 				expectNotNull(idExts);
 				expectSame(3, idExts.size());
 
-				idExts.stream().filter(Extension::hasValue).filter(e -> e.getValue() instanceof Identifier)
+				expectTrue(idExts.stream().filter(Extension::hasValue).filter(e -> e.getValue() instanceof Identifier)
 						.map(e -> (Identifier) e.getValue()).map(Identifier::getSystem)
-						.allMatch(NamingSystems.PractitionerIdentifier.SID::equals);
+						.allMatch(NamingSystems.PractitionerIdentifier.SID::equals));
 
 				List<String> values = idExts.stream().filter(Extension::hasValue)
 						.filter(e -> e.getValue() instanceof Identifier).map(e -> (Identifier) e.getValue())

@@ -75,6 +75,10 @@ public class HttpClientWithGetRetry extends HttpClient
 				}
 				catch (InterruptedException e1)
 				{
+					logger.warn("Thread interrupted; not trying again");
+					Thread.currentThread().interrupt();
+					e.addSuppressed(e1);
+					throw e;
 				}
 
 				return GETWithRetryOnConnectException(--times, uri);
@@ -90,6 +94,10 @@ public class HttpClientWithGetRetry extends HttpClient
 				}
 				catch (InterruptedException e1)
 				{
+					logger.warn("Thread interrupted; not trying again");
+					Thread.currentThread().interrupt();
+					e.addSuppressed(e1);
+					throw e;
 				}
 
 				return GETWithRetryOnConnectException(--times, uri);

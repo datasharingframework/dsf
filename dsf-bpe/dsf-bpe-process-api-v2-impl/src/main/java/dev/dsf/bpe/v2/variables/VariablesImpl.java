@@ -38,9 +38,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.dsf.bpe.api.Constants;
-import dev.dsf.bpe.v2.client.dsf.DsfClient;
 import dev.dsf.bpe.v2.constants.BpmnExecutionVariables;
 import dev.dsf.bpe.v2.listener.ListenerVariables;
+import dev.dsf.bpe.v2.service.DsfClientProvider;
 import dev.dsf.bpe.v2.service.StartTaskUpdater;
 import dev.dsf.bpe.v2.service.StartTaskUpdaterImpl;
 import dev.dsf.bpe.v2.variables.FhirResourceValues.FhirResourceValue;
@@ -94,25 +94,28 @@ public class VariablesImpl implements Variables, ListenerVariables
 	 *            not <code>null</code>
 	 * @param objectMapper
 	 *            not <code>null</code>
-	 * @param client
+	 * @param dsfClientProvider
 	 *            not <code>null</code>
 	 */
-	public VariablesImpl(DelegateExecution execution, ObjectMapper objectMapper, DsfClient client)
+	public VariablesImpl(DelegateExecution execution, ObjectMapper objectMapper, DsfClientProvider dsfClientProvider)
 	{
 		this.execution = Objects.requireNonNull(execution, "execution");
 		this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper");
 
-		startTaskUpdater = new StartTaskUpdaterImpl(client, this::getStartTask, this::updateTask);
+		startTaskUpdater = new StartTaskUpdaterImpl(dsfClientProvider, this::getStartTask, this::updateTask);
 	}
 
 	private JsonHolder toJsonHolder(Object json)
 	{
+		if (json == null)
+			return JsonHolder.empty();
+
 		try
 		{
 			byte[] data = objectMapper.writeValueAsBytes(json);
 			String dataClassName = json.getClass().getName();
 
-			return new JsonHolder(dataClassName, data);
+			return JsonHolder.of(dataClassName, data);
 		}
 		catch (JsonProcessingException e)
 		{
@@ -123,11 +126,15 @@ public class VariablesImpl implements Variables, ListenerVariables
 	@SuppressWarnings("unchecked")
 	private <T> T fromJsonHolder(JsonHolder holder)
 	{
+		if (holder.isEmpty())
+			return null;
+
 		try
 		{
 			byte[] data = holder.getData();
-			Class<?> dataClass = getClassLoader().loadClass(holder.getDataClassName());
+			String dataClassName = holder.getDataClassName();
 
+			Class<?> dataClass = getClassLoader().loadClass(dataClassName);
 			return (T) objectMapper.readValue(data, dataClass);
 		}
 		catch (ClassNotFoundException | IOException e)

@@ -16,6 +16,7 @@
 
 CREATE OR REPLACE FUNCTION on_groups_insert() RETURNS TRIGGER AS $$
 BEGIN
+	UPDATE groups SET current = false WHERE group_id = NEW.group_id AND current AND version <> NEW.version;
 	PERFORM on_resources_insert(NEW.group_id, NEW.version, NEW.group_json);
 	RETURN NEW;
 END;

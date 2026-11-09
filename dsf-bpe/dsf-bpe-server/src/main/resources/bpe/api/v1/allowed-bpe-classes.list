@@ -14,15 +14,16 @@
 # limitations under the License.
 #
 
-com.fasterxml.jackson.annotation
-com.fasterxml.jackson.core
-com.fasterxml.jackson.databind
+com.fasterxml.jackson
 com.google.common
+com.sun.mail
 dev.dsf.bpe.api
-jakarta.ws.rs
+jakarta.activation
+jakarta.inject
 org.apache.commons.codec
 org.apache.commons.io
 org.apache.commons.lang3
+org.apache.commons.logging
 org.apache.commons.text
 org.apache.http
 org.bouncycastle
@@ -33,6 +34,7 @@ org.operaton.bpm.engine.impl.variable.serializer
 org.operaton.bpm.engine.ProcessEngine
 org.operaton.bpm.engine.RuntimeService
 org.operaton.bpm.engine.variable
+org.operaton.bpm.model.bpmn.impl
 org.operaton.bpm.model.bpmn.instance
 org.joda.time
 org.glassfish.jersey

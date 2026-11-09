@@ -18,6 +18,7 @@ CREATE OR REPLACE FUNCTION on_binaries_insert() RETURNS TRIGGER AS $$
 DECLARE
 	binary_insert_count INT;
 BEGIN
+	UPDATE binaries SET current = false WHERE binary_id = NEW.binary_id AND current AND version <> NEW.version;
 	PERFORM on_resources_insert(NEW.binary_id, NEW.version, NEW.binary_json);
 	
 	IF (NEW.binary_json->'securityContext'->>'reference' IS NOT NULL) THEN

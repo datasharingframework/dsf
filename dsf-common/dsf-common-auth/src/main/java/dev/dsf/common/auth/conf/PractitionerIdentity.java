@@ -34,7 +34,7 @@ public interface PractitionerIdentity extends Identity
 	 */
 	Practitioner getPractitioner();
 
-	Optional<String> getPractitionerIdentifierValue();
+	String getPractitionerIdentifierValue();
 
 	/**
 	 * @return never <code>null</code>

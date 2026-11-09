@@ -17,6 +17,8 @@ package dev.dsf.fhir.adapter;
 
 import org.hl7.fhir.r4.model.Binary;
 
+import dev.dsf.fhir.authorization.media.InlineMediaTypePolicy;
+import dev.dsf.fhir.help.ParameterConverter;
 import dev.dsf.fhir.webservice.RangeRequest;
 
 public class ResourceBinary extends AbstractResource<Binary>
@@ -24,17 +26,20 @@ public class ResourceBinary extends AbstractResource<Binary>
 	private static final String[] UNITS = { "Byte", "KiB", "MiB", "GiB", "TiB" };
 	private static final long UNIT = 1024;
 
-	private static record Element(String contentType, ElementId securityContext, String dataSize, String download)
+	private static record Element(String contentType, ElementId securityContext, String dataSize, String download,
+			String inlineDisplay, String inlineOpen)
 	{
 	}
 
 	private final String serverBase;
+	private final InlineMediaTypePolicy inlineMediaTypePolicy;
 
-	public ResourceBinary(String serverBase)
+	public ResourceBinary(String serverBase, InlineMediaTypePolicy inlineMediaTypePolicy)
 	{
 		super(Binary.class, null);
 
 		this.serverBase = serverBase;
+		this.inlineMediaTypePolicy = inlineMediaTypePolicy;
 	}
 
 	@Override
@@ -49,9 +54,12 @@ public class ResourceBinary extends AbstractResource<Binary>
 
 		String dataSize = resource.hasDataElement() ? toDataSize(resource) : "";
 
-		String download = resource.getIdElement().withServerBase(serverBase, "Binary").getValue();
+		String downloadUrl = resource.getIdElement().withServerBase(serverBase, "Binary").getValue();
+		String inlineUrl = downloadUrl + "?_format=" + ParameterConverter.INLINE_FORMAT;
+		String inlineDisplay = inlineMediaTypePolicy.isInlineDisplayAllowed(contentType) ? inlineUrl : null;
+		String inlineOpen = inlineMediaTypePolicy.isInlineOpenAllowed(contentType) ? inlineUrl : null;
 
-		return new Element(contentType, securityContext, dataSize, download);
+		return new Element(contentType, securityContext, dataSize, downloadUrl, inlineDisplay, inlineOpen);
 	}
 
 	private String toDataSize(Binary resource)
@@ -70,7 +78,7 @@ public class ResourceBinary extends AbstractResource<Binary>
 			unitIndex++;
 		}
 
-		if (value == (long) value)
+		if (Math.abs(value - (long) value) < .0000001)
 			return String.format("%d %s", (long) value, UNITS[unitIndex]);
 		else
 			return String.format("%.2f %s", value, UNITS[unitIndex]);

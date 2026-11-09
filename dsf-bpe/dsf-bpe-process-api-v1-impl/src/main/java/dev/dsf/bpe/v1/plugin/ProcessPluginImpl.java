@@ -65,7 +65,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import dev.dsf.bpe.api.logging.PluginMdc;
+import dev.dsf.bpe.api.context.PluginContext;
 import dev.dsf.bpe.api.plugin.AbstractProcessPlugin;
 import dev.dsf.bpe.api.plugin.FhirResourceModifier;
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
@@ -78,7 +78,7 @@ import dev.dsf.bpe.v1.activity.DefaultUserTaskListener;
 import dev.dsf.bpe.v1.constants.CodeSystems.BpmnMessage;
 import dev.dsf.bpe.v1.constants.NamingSystems.OrganizationIdentifier;
 import dev.dsf.bpe.v1.constants.NamingSystems.TaskIdentifier;
-import dev.dsf.bpe.v1.logging.PluginMdcImpl;
+import dev.dsf.bpe.v1.context.PluginContextImpl;
 import dev.dsf.bpe.v1.variables.FhirResourceValues;
 import dev.dsf.bpe.v1.variables.VariablesImpl;
 
@@ -89,7 +89,7 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<TaskListener> imple
 	private final ProcessPluginDefinition processPluginDefinition;
 	private final ProcessPluginApi processPluginApi;
 
-	private final PluginMdcImpl pluginMdc;
+	private final PluginContextImpl pluginContext;
 
 	public ProcessPluginImpl(ProcessPluginDefinition processPluginDefinition, int processPluginApiVersion,
 			boolean draft, Path jarFile, ClassLoader classLoader, ConfigurableEnvironment environment,
@@ -103,14 +103,15 @@ public class ProcessPluginImpl extends AbstractProcessPlugin<TaskListener> imple
 		this.processPluginDefinition = processPluginDefinition;
 		processPluginApi = apiApplicationContext.getBean(ProcessPluginApi.class);
 
-		pluginMdc = new PluginMdcImpl(processPluginApiVersion, processPluginDefinition.getName(),
-				processPluginDefinition.getVersion(), jarFile.toString(), serverBaseUrl, VariablesImpl::new);
+		pluginContext = new PluginContextImpl(processPluginApiVersion, processPluginDefinition.getName(),
+				processPluginDefinition.getVersion(), jarFile.toString(), classLoader, serverBaseUrl,
+				VariablesImpl::new);
 	}
 
 	@Override
-	public PluginMdc getPluginMdc()
+	public PluginContext getPluginContext()
 	{
-		return pluginMdc;
+		return pluginContext;
 	}
 
 	@Override

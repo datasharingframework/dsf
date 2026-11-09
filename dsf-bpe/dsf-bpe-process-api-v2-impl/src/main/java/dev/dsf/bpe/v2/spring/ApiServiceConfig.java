@@ -286,7 +286,7 @@ public class ApiServiceConfig
 	@Bean
 	public Function<DelegateExecution, ListenerVariables> listenerVariablesFactory()
 	{
-		return execution -> new VariablesImpl(execution, objectMapper(), dsfClientProvider().getLocal());
+		return execution -> new VariablesImpl(execution, objectMapper(), dsfClientProvider());
 	}
 
 	@Bean
@@ -299,7 +299,7 @@ public class ApiServiceConfig
 	public ExecutionListener endListener()
 	{
 		return new EndListener(dsfClientConfig.getLocalConfig().getBaseUrl(), listenerVariablesFactory(),
-				dsfClientProvider().getLocal());
+				dsfClientProvider());
 	}
 
 	@Bean

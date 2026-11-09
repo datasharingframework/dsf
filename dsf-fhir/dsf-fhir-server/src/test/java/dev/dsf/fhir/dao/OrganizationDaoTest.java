@@ -16,6 +16,7 @@
 package dev.dsf.fhir.dao;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -200,8 +201,8 @@ public class OrganizationDaoTest extends AbstractReadAccessDaoTest<Organization,
 	{
 		CodeSystem c = new CodeSystem();
 		new ReadAccessHelperImpl().addOrganization(c, "organization.com");
-		CodeSystem createdC = new CodeSystemDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext)
-				.create(c);
+		CodeSystem createdC = new CodeSystemDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext,
+				objectMapper, ReadByUrlDaoTest.createReadByUrlDao()).create(c);
 
 		try (Connection connection = defaultDataSource.getConnection();
 				PreparedStatement statement = connection
@@ -266,7 +267,7 @@ public class OrganizationDaoTest extends AbstractReadAccessDaoTest<Organization,
 		new ReadAccessHelperImpl().addOrganization(binary, "organization.com");
 
 		BinaryDaoJdbc binaryDao = new BinaryDaoJdbc(defaultDataSource, permanentDeleteDataSource, fhirContext,
-				DATABASE_USERS_GROUP);
+				objectMapper, DATABASE_USERS_GROUP);
 		Binary createdBinary = binaryDao.create(binary);
 		assertNotNull(createdBinary);
 
@@ -275,7 +276,7 @@ public class OrganizationDaoTest extends AbstractReadAccessDaoTest<Organization,
 
 	private static class TaskAsCsvGeneratorReader extends Reader
 	{
-		public static final int TASK_ROW_LINE_LENGTH = 1615;
+		public static final int TASK_ROW_LINE_LENGTH = 1614;
 
 		private final int maxTasks;
 		private int currentTask;
@@ -318,7 +319,7 @@ public class OrganizationDaoTest extends AbstractReadAccessDaoTest<Organization,
 		private String generateLine()
 		{
 			String id = UUID.randomUUID().toString();
-			return "${id},3,,\"{\"\"resourceType\"\":\"\"Task\"\",\"\"id\"\":\"\"${id}\"\",\"\"meta\"\":{\"\"versionId\"\":\"\"3\"\",\"\"lastUpdated\"\":\"\"2024-10-01T18:22:06.765+02:00\"\",\"\"profile\"\":[\"\"http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-execute|1.0\"\"]},\"\"instantiatesCanonical\"\":\"\"http://medizininformatik-initiative.de/bpe/Process/feasibilityExecute|1.0\"\",\"\"status\"\":\"\"completed\"\",\"\"intent\"\":\"\"order\"\",\"\"authoredOn\"\":\"\"2024-10-01T18:22:07+02:00\"\",\"\"requester\"\":{\"\"type\"\":\"\"Organization\"\",\"\"identifier\"\":{\"\"system\"\":\"\"http://dsf.dev/sid/organization-identifier\"\",\"\"value\"\":\"\"organization.com\"\"}},\"\"restriction\"\":{\"\"recipient\"\":[{\"\"type\"\":\"\"Organization\"\",\"\"identifier\"\":{\"\"system\"\":\"\"http://dsf.dev/sid/organization-identifier\"\",\"\"value\"\":\"\"organization.com\"\"}}]},\"\"input\"\":[{\"\"type\"\":{\"\"coding\"\":[{\"\"system\"\":\"\"http://dsf.dev/fhir/CodeSystem/bpmn-message\"\",\"\"code\"\":\"\"message-name\"\"}]},\"\"valueString\"\":\"\"feasibilityExecuteMessage\"\"},{\"\"type\"\":{\"\"coding\"\":[{\"\"system\"\":\"\"http://dsf.dev/fhir/CodeSystem/bpmn-message\"\",\"\"code\"\":\"\"business-key\"\"}]},\"\"valueString\"\":\"\"${business-key}\"\"},{\"\"type\"\":{\"\"coding\"\":[{\"\"system\"\":\"\"http://dsf.dev/fhir/CodeSystem/bpmn-message\"\",\"\"code\"\":\"\"correlation-key\"\"}]},\"\"valueString\"\":\"\"${correlation-key}\"\"},{\"\"type\"\":{\"\"coding\"\":[{\"\"system\"\":\"\"http://medizininformatik-initiative.de/fhir/CodeSystem/feasibility\"\",\"\"code\"\":\"\"measure-reference\"\"}]},\"\"valueReference\"\":{\"\"reference\"\":\"\"https://dsf.fdpg.test.forschen-fuer-gesundheit.de/fhir/Measure/02bb7540-0d99-4c0e-8764-981e545cf646\"\"}}]}\"\n"
+			return "${id},3,\"{\"\"resourceType\"\":\"\"Task\"\",\"\"id\"\":\"\"${id}\"\",\"\"meta\"\":{\"\"versionId\"\":\"\"3\"\",\"\"lastUpdated\"\":\"\"2024-10-01T18:22:06.765+02:00\"\",\"\"profile\"\":[\"\"http://medizininformatik-initiative.de/fhir/StructureDefinition/feasibility-task-execute|1.0\"\"]},\"\"instantiatesCanonical\"\":\"\"http://medizininformatik-initiative.de/bpe/Process/feasibilityExecute|1.0\"\",\"\"status\"\":\"\"completed\"\",\"\"intent\"\":\"\"order\"\",\"\"authoredOn\"\":\"\"2024-10-01T18:22:07+02:00\"\",\"\"requester\"\":{\"\"type\"\":\"\"Organization\"\",\"\"identifier\"\":{\"\"system\"\":\"\"http://dsf.dev/sid/organization-identifier\"\",\"\"value\"\":\"\"organization.com\"\"}},\"\"restriction\"\":{\"\"recipient\"\":[{\"\"type\"\":\"\"Organization\"\",\"\"identifier\"\":{\"\"system\"\":\"\"http://dsf.dev/sid/organization-identifier\"\",\"\"value\"\":\"\"organization.com\"\"}}]},\"\"input\"\":[{\"\"type\"\":{\"\"coding\"\":[{\"\"system\"\":\"\"http://dsf.dev/fhir/CodeSystem/bpmn-message\"\",\"\"code\"\":\"\"message-name\"\"}]},\"\"valueString\"\":\"\"feasibilityExecuteMessage\"\"},{\"\"type\"\":{\"\"coding\"\":[{\"\"system\"\":\"\"http://dsf.dev/fhir/CodeSystem/bpmn-message\"\",\"\"code\"\":\"\"business-key\"\"}]},\"\"valueString\"\":\"\"${business-key}\"\"},{\"\"type\"\":{\"\"coding\"\":[{\"\"system\"\":\"\"http://dsf.dev/fhir/CodeSystem/bpmn-message\"\",\"\"code\"\":\"\"correlation-key\"\"}]},\"\"valueString\"\":\"\"${correlation-key}\"\"},{\"\"type\"\":{\"\"coding\"\":[{\"\"system\"\":\"\"http://medizininformatik-initiative.de/fhir/CodeSystem/feasibility\"\",\"\"code\"\":\"\"measure-reference\"\"}]},\"\"valueReference\"\":{\"\"reference\"\":\"\"https://dsf.fdpg.test.forschen-fuer-gesundheit.de/fhir/Measure/02bb7540-0d99-4c0e-8764-981e545cf646\"\"}}]}\"\n"
 					.replace("${id}", id).replace("${business-key}", UUID.randomUUID().toString())
 					.replace("${correlation-key}", UUID.randomUUID().toString());
 		}
@@ -342,8 +343,8 @@ public class OrganizationDaoTest extends AbstractReadAccessDaoTest<Organization,
 		{
 			CopyManager copyManager = new CopyManager(connection.unwrap(BaseConnection.class));
 			TaskAsCsvGeneratorReader taskGenerator = new TaskAsCsvGeneratorReader(taskCount);
-			long insertedRows = copyManager.copyIn("COPY tasks FROM STDIN (FORMAT csv)", taskGenerator,
-					TaskAsCsvGeneratorReader.TASK_ROW_LINE_LENGTH);
+			long insertedRows = copyManager.copyIn("COPY tasks (task_id, version, task) FROM STDIN (FORMAT csv)",
+					taskGenerator, TaskAsCsvGeneratorReader.TASK_ROW_LINE_LENGTH);
 
 			assertEquals(taskCount, insertedRows);
 		}
@@ -361,5 +362,105 @@ public class OrganizationDaoTest extends AbstractReadAccessDaoTest<Organization,
 
 		logger.info("Organization updates executed in {} ms", t1 - t0);
 		assertTrue("Organization updates took longer then 500 ms", t1 - t0 <= 500);
+	}
+
+	@Test
+	public void testExistsNotDeletedByThumbprintWithTransaction() throws Exception
+	{
+		final String certHex = Hex.encodeHexString("FooBarBaz".getBytes(StandardCharsets.UTF_8));
+
+		Organization org = new Organization();
+		org.setActive(true);
+		org.setName("Test");
+		org.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
+				.setValue(new StringType(certHex));
+
+		Organization created = dao.create(org);
+		assertNotNull(created);
+
+		try (Connection connection = defaultDataSource.getConnection())
+		{
+			boolean exists = dao.existsNotDeletedByThumbprintWithTransaction(connection, certHex);
+			assertTrue(exists);
+		}
+	}
+
+	@Test
+	public void testExistsNotDeletedByThumbprintWithTransactionNotActive() throws Exception
+	{
+		final String certHex = Hex.encodeHexString("FooBarBaz".getBytes(StandardCharsets.UTF_8));
+
+		Organization org = new Organization();
+		org.setActive(false);
+		org.setName("Test");
+		org.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
+				.setValue(new StringType(certHex));
+
+		Organization created = dao.create(org);
+		assertNotNull(created);
+
+		try (Connection connection = defaultDataSource.getConnection())
+		{
+			boolean exists = dao.existsNotDeletedByThumbprintWithTransaction(connection, certHex);
+			assertTrue(exists);
+		}
+
+		Optional<Organization> read2 = dao.read(UUID.fromString(created.getIdElement().getIdPart()));
+		assertNotNull(read2);
+		assertTrue(read2.isPresent());
+	}
+
+	@Test
+	public void testExistsNotDeletedByThumbprintWithTransactionDeleted() throws Exception
+	{
+		final String certHex = Hex.encodeHexString("FooBarBaz".getBytes(StandardCharsets.UTF_8));
+
+		Organization org = new Organization();
+		org.setActive(false);
+		org.setName("Test");
+		org.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-certificate-thumbprint")
+				.setValue(new StringType(certHex));
+
+		Organization created = dao.create(org);
+		assertNotNull(created);
+		dao.delete(UUID.fromString(created.getIdElement().getIdPart()));
+
+		try (Connection connection = defaultDataSource.getConnection())
+		{
+			boolean exists = dao.existsNotDeletedByThumbprintWithTransaction(connection, certHex);
+			assertFalse(exists);
+		}
+	}
+
+	@Test
+	public void testExistsNotDeletedByThumbprintWithTransactionNotExisting() throws Exception
+	{
+		final String certHex = Hex.encodeHexString("FooBarBaz".getBytes(StandardCharsets.UTF_8));
+
+		try (Connection connection = defaultDataSource.getConnection())
+		{
+			boolean exists = dao.existsNotDeletedByThumbprintWithTransaction(connection, certHex);
+			assertFalse(exists);
+		}
+	}
+
+	@Test
+	public void testExistsNotDeletedByThumbprintWithTransactionNull() throws Exception
+	{
+		try (Connection connection = defaultDataSource.getConnection())
+		{
+			boolean exists = dao.existsNotDeletedByThumbprintWithTransaction(connection, null);
+			assertFalse(exists);
+		}
+	}
+
+	@Test
+	public void testExistsNotDeletedByThumbprintWithTransactionBlank() throws Exception
+	{
+		try (Connection connection = defaultDataSource.getConnection())
+		{
+			boolean exists = dao.existsNotDeletedByThumbprintWithTransaction(connection, "  ");
+			assertFalse(exists);
+		}
 	}
 }

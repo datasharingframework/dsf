@@ -30,6 +30,12 @@ public class TestOrganizationIdentity extends OrganizationIdentityImpl
 		super(localIdentity, organization, null, roles, null);
 	}
 
+	@Override
+	public boolean isNotExpired()
+	{
+		return true;
+	}
+
 	public static TestOrganizationIdentity local(Organization organization)
 	{
 		return new TestOrganizationIdentity(true, organization, FhirServerRoleImpl.LOCAL_ORGANIZATION);

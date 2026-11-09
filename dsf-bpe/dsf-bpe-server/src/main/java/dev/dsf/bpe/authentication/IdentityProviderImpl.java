@@ -80,14 +80,14 @@ public class IdentityProviderImpl extends AbstractIdentityProvider<BpeServerRole
 			Organization o = localOrganization.get();
 			Endpoint e = localEndpoint.get();
 
-			return new PractitionerIdentityImpl(o, e, getDsfRolesFor(p, certWrapper.thumbprint(), null, null),
-					certWrapper, p, getPractitionerRolesFor(p, certWrapper.thumbprint(), null, null), null);
+			return new PractitionerIdentityImpl(o, e, getDsfRolesFor(p, certWrapper.getThumbprint(), null, null),
+					certWrapper, p, getPractitionerRolesFor(p, certWrapper.getThumbprint(), null, null), null);
 		}
 		else
 		{
 			logger.warn(
 					"Certificate with thumbprint '{}' for '{}' unknown, not configured as local user or local organization unknown",
-					certWrapper.thumbprint(), certWrapper.subjectDn());
+					certWrapper.getThumbprint(), certWrapper.getSubjectDn());
 			return null;
 		}
 	}

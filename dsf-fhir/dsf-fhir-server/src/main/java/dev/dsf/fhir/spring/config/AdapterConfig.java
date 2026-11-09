@@ -86,6 +86,9 @@ public class AdapterConfig
 	@Autowired
 	private HelperConfig helperConfig;
 
+	@Autowired
+	private AuthorizationConfig authorizationConfig;
+
 	@Bean
 	public FhirAdapter fhirAdapter()
 	{
@@ -96,8 +99,9 @@ public class AdapterConfig
 	public ThymeleafTemplateService thymeleafTemplateService()
 	{
 		List<ThymeleafContext> thymeleafContexts = List.of(new ResourceActivityDefinition(),
-				new ResourceBinary(propertiesConfig.getDsfServerBaseUrl()), new ResourceCodeSystem(),
-				new ResourceDocumentReference(), new ResourceEndpoint(), new ResourceLibrary(), new ResourceMeasure(),
+				new ResourceBinary(propertiesConfig.getDsfServerBaseUrl(), authorizationConfig.inlineMediaTypePolicy()),
+				new ResourceCodeSystem(), new ResourceDocumentReference(), new ResourceEndpoint(),
+				new ResourceLibrary(), new ResourceMeasure(),
 				new ResourceMeasureReport(propertiesConfig.getDsfServerBaseUrl()), new ResourceNamingSystem(),
 				new ResourceOperationOutcome(buildInfoReaderConfig.buildInfoReader(), daoConfig.statisticsDao(),
 						helperConfig.exceptionHandler()),

@@ -177,7 +177,10 @@ public class ResourceTask extends AbstractResource<Task>
 				id = id + '|' + count;
 			}
 			else
+			{
 				idCounter.put(id, 0);
+				id = id + '|' + 0;
+			}
 
 			String label = i.hasType() && i.getType().hasCoding() ? i.getType().getCoding().stream()
 					.filter(Coding::hasSystemElement).filter(c -> c.getSystemElement().hasValue())

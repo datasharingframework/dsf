@@ -19,8 +19,8 @@ import java.net.UnknownHostException;
 import java.time.Duration;
 import java.util.function.Supplier;
 
-import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.conn.HttpHostConnectException;
+import org.apache.hc.client5.http.ConnectTimeoutException;
+import org.apache.hc.client5.http.HttpHostConnectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +68,7 @@ public abstract class AbstractDsfClientJerseyWithRetry
 						if (tryNumber > 0)
 							delay = delayStrategy.getNextDelay(delay);
 
-						logger.warn("Caught {} - {}; trying again in {}{}", e.getClass(), e.getMessage(),
+						logger.warn("Caught {} - {}; trying again in {}{}", e.getClass().getName(), e.getMessage(),
 								delay.toString(),
 								nTimes == RetryClient.RETRY_FOREVER ? " (retry " + (tryNumber + 1) + ")" : "");
 
@@ -78,11 +78,15 @@ public abstract class AbstractDsfClientJerseyWithRetry
 						}
 						catch (InterruptedException e1)
 						{
+							logger.warn("Thread interrupted; not trying again");
+							Thread.currentThread().interrupt();
+							e.addSuppressed(e1);
+							throw e;
 						}
 					}
 					else
 					{
-						logger.warn("Caught {} - {}; not trying again", e.getClass(), e.getMessage());
+						logger.warn("Caught {} - {}; not trying again", e.getClass().getName(), e.getMessage());
 					}
 
 					if (caughtException != null)
