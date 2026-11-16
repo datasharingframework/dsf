@@ -124,16 +124,19 @@ public class LintPluginMojo extends AbstractMojo
 
 			OverallLinterResult result = new DsfLinter(config).lint();
 
+			String msg = "DSF Linter: " + result.getPluginErrors() + " error(s), " + result.getPluginWarnings()
+					+ " warning(s)";
+
+			// success() is false only when failOnErrors is set and the linter found errors
+			// or failed plugins. With failOnErrors=false the result stays successful, so
+			// remaining errors are reported as a warning instead of a build failure.
 			if (!result.success())
 			{
-				String msg = "DSF Linter: " + result.getTotalErrors() + " error(s), " + result.getPluginWarnings()
-						+ " warning(s)";
+				throw new MojoFailureException(msg);
+			}
 
-				if (failOnErrors)
-				{
-					throw new MojoFailureException(msg);
-				}
-
+			if (result.getPluginErrors() > 0)
+			{
 				getLog().warn(msg);
 			}
 			else
