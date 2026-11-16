@@ -39,9 +39,9 @@
 	<baseDefinition value="http://dsf.dev/fhir/StructureDefinition/task" />
 	<derivation value="constraint" />
 	<differential>
-		<element id="Task.instantiatesUri">
-			<path value="Task.instantiatesUri" />
-			<fixedUri value="http://dsf.dev/bpe/Process/test/#{version}" />
+		<element id="Task.instantiatesCanonical">
+			<path value="Task.instantiatesCanonical" />
+			<fixedCanonical value="http://dsf.dev/bpe/Process/test|#{version}" />
 		</element>
 		<element id="Task.input">
 			<path value="Task.input" />
