@@ -1,0 +1,10 @@
+{
+  "affectsExitStatus": false,
+  "rules": [
+    {
+      "type": "BPMN_NO_ACTIVITY_DEFINITION_FOUND_FOR_MESSAGE",
+      "file": "test.bpmn",
+      "messageContains": "continue-send-test"
+    }
+  ]
+}
