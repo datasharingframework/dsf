@@ -55,6 +55,27 @@
         <dependency>
             <groupId>dev.dsf.linter</groupId>
             <artifactId>linter-core</artifactId>
+            <exclusions>
+                <!-- Runtime stubs from linter-core collide with this plugin's own
+                     HAPI 8.x / process-API / BPMN stack and break other goals
+                     (e.g. generate-fhir-bundle: missing ca.uhn.fhir.util.Logs). -->
+                <exclusion>
+                    <groupId>ca.uhn.hapi.fhir</groupId>
+                    <artifactId>hapi-fhir-base</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.camunda.bpm</groupId>
+                    <artifactId>camunda-engine</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>dev.dsf</groupId>
+                    <artifactId>dsf-bpe-process-api-v1</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>dev.dsf</groupId>
+                    <artifactId>dsf-bpe-process-api-v2</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

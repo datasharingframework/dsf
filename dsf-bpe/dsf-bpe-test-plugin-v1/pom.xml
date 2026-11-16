@@ -65,6 +65,10 @@
                         <goals>
                             <goal>lint</goal>
                         </goals>
+                        <configuration>
+                            <!-- Test fixtures intentionally trigger lint findings. -->
+                            <failOnErrors>false</failOnErrors>
+                        </configuration>
                     </execution>
                 </executions>
                 <configuration>
