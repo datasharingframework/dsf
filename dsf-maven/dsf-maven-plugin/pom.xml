@@ -82,10 +82,12 @@
 			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-bpe-process-api-v1</artifactId>
 			<exclusions>
+				<!-- Brought in explicitly below without Camunda's old HAPI transitive. -->
 				<exclusion>
 					<groupId>org.camunda.bpm</groupId>
 					<artifactId>camunda-engine</artifactId>
 				</exclusion>
+				<!-- Brought in explicitly below for @Bean/@Scope reflection in lint. -->
 				<exclusion>
 					<groupId>org.springframework</groupId>
 					<artifactId>spring-context</artifactId>
@@ -115,6 +117,20 @@
 			</exclusions>
 		</dependency>
 
+		<!-- Lint reflection: JavaDelegate / AbstractServiceDelegate assignability.
+		     Exclude Camunda's transitive HAPI so generate-fhir-bundle keeps HAPI 8.x. -->
+		<dependency>
+			<groupId>org.camunda.bpm</groupId>
+			<artifactId>camunda-engine</artifactId>
+			<version>7.24.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
 		<dependency>
 			<groupId>org.operaton.bpm.model</groupId>
 			<artifactId>operaton-bpmn-model</artifactId>
@@ -122,6 +138,17 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-beans</artifactId>
+		</dependency>
+		<!-- Lint reflection: @Bean / @Scope on plugin @Configuration classes. -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.reflections</groupId>
