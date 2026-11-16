@@ -71,11 +71,13 @@ public class LintPluginMojo extends AbstractMojo
 	private boolean verbose;
 
 	/**
-	 * Path to a JSON file containing exclusion rules. Excluded items are hidden from HTML and JSON reports.
-	 * When omitted, the plugin also looks for {@code dsf-linter-exclusions.json} in the project build
-	 * directory automatically.
+	 * Path to a JSON file containing exclusion rules. Excluded items are hidden from HTML and JSON reports. When
+	 * omitted, the plugin also looks for {@code dsf-linter-exclusions.json} in the project build directory
+	 * automatically.
 	 *
-	 * <p>Example: {@code -Ddsf.lint.exclusionsFile=path/to/dsf-linter-exclusions.json}</p>
+	 * <p>
+	 * Example: {@code -Ddsf.lint.exclusionsFile=path/to/dsf-linter-exclusions.json}
+	 * </p>
 	 */
 	@Parameter(property = "dsf.lint.exclusionsFile")
 	private File exclusionsFile;
@@ -158,9 +160,9 @@ public class LintPluginMojo extends AbstractMojo
 	}
 
 	/**
-	 * Loads the exclusion config from an explicit file ({@code dsf.lint.exclusionsFile}) or
-	 * auto-discovers {@code dsf-linter-exclusions.json} in the extracted project directory.
-	 * Returns {@code null} when no exclusion file is found or configured.
+	 * Loads the exclusion config from an explicit file ({@code dsf.lint.exclusionsFile}) or auto-discovers
+	 * {@code dsf-linter-exclusions.json} in the extracted project directory. Returns {@code null} when no exclusion
+	 * file is found or configured.
 	 */
 	private ExclusionConfig loadExclusionConfig(Path projectRoot) throws MojoExecutionException
 	{
@@ -170,9 +172,9 @@ public class LintPluginMojo extends AbstractMojo
 			if (exclusionsFile != null)
 			{
 				ExclusionConfig config = loader.load(exclusionsFile.toPath());
-				getLog().info("DSF Linter: loaded exclusion rules from " + exclusionsFile
-						+ " (" + config.getRules().size() + " rule(s), affectsExitStatus="
-						+ config.isAffectsExitStatus() + ")");
+				getLog().info(
+						"DSF Linter: loaded exclusion rules from " + exclusionsFile + " (" + config.getRules().size()
+								+ " rule(s), affectsExitStatus=" + config.isAffectsExitStatus() + ")");
 				return config;
 			}
 
@@ -181,9 +183,8 @@ public class LintPluginMojo extends AbstractMojo
 			{
 				ExclusionConfig config = auto.get();
 				getLog().info("DSF Linter: auto-discovered exclusion rules from "
-						+ projectRoot.resolve(ExclusionConfigLoader.DEFAULT_FILENAME)
-						+ " (" + config.getRules().size() + " rule(s), affectsExitStatus="
-						+ config.isAffectsExitStatus() + ")");
+						+ projectRoot.resolve(ExclusionConfigLoader.DEFAULT_FILENAME) + " (" + config.getRules().size()
+						+ " rule(s), affectsExitStatus=" + config.isAffectsExitStatus() + ")");
 				return config;
 			}
 
