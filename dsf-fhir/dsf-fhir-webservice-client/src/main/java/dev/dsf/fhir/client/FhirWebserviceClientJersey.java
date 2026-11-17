@@ -31,7 +31,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CapabilityStatement;
@@ -946,7 +945,7 @@ public class FhirWebserviceClientJersey extends AbstractJerseyClient implements 
 		if (resourceType != null)
 			target = target.path(resourceType.getAnnotation(ResourceDef.class).name());
 
-		if (!StringUtils.isBlank(id))
+		if (id != null && !id.isBlank())
 			target = target.path(id);
 
 		if (page != Integer.MIN_VALUE)
