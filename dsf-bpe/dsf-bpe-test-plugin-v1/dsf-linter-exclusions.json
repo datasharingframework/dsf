@@ -1,0 +1,10 @@
+{
+  "affectsExitStatus": false,
+  "rules": [
+    {
+      "type": "ACTIVITY_DEFINITION_PROFILE_NO_PLACEHOLDER",
+      "file": "dsf-test.xml",
+      "messageContains": "activity-definition|1.0.0"
+    }
+  ]
+}

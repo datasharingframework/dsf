@@ -69,6 +69,7 @@
                 </executions>
                 <configuration>
                     <configDocPackages>dev.dsf.bpe.test.spring.config</configDocPackages>
+                    <exclusionsFile>${project.basedir}/dsf-linter-exclusions.json</exclusionsFile>
                 </configuration>
             </plugin>
         </plugins>
