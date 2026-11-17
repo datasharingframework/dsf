@@ -82,7 +82,7 @@
 			<groupId>dev.dsf</groupId>
 			<artifactId>dsf-bpe-process-api-v1</artifactId>
 			<exclusions>
-				<!-- Brought in explicitly below without Camunda's old HAPI transitive. -->
+				<!-- Brought in explicitly below for JavaDelegate reflection in lint. -->
 				<exclusion>
 					<groupId>org.camunda.bpm</groupId>
 					<artifactId>camunda-engine</artifactId>
@@ -117,18 +117,14 @@
 			</exclusions>
 		</dependency>
 
-		<!-- Lint reflection: JavaDelegate / AbstractServiceDelegate assignability.
-		     Exclude Camunda's transitive HAPI so generate-fhir-bundle keeps HAPI 8.x. -->
+		<!-- Lint reflection only: JavaDelegate must be loadable for ClassInspector.
+		     Declared directly (not via linter-core) so the version stays explicit.
+		     camunda-engine 7.24.0 does not pull HAPI; old HAPI 5.7.9 is excluded on
+		     linter-core above. -->
 		<dependency>
 			<groupId>org.camunda.bpm</groupId>
 			<artifactId>camunda-engine</artifactId>
 			<version>7.24.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>ca.uhn.hapi.fhir</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<dependency>
