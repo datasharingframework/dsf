@@ -76,9 +76,9 @@ public class BaseOidcClientJersey implements BaseOidcClient
 	 * @param userAgentValue
 	 *            may be <code>null</code>
 	 * @param connectTimeout
-	 *            not <code>null</code>
+	 *            not <code>null</code>, not negative, 0 represents infinity
 	 * @param readTimeout
-	 *            not <code>null</code>
+	 *            not <code>null</code>, not negative, 0 represents infinity
 	 * @param logRequestsAndResponses
 	 */
 	public BaseOidcClientJersey(String baseUrl, String discoveryPath, KeyStore trustStore, KeyStore keyStore,

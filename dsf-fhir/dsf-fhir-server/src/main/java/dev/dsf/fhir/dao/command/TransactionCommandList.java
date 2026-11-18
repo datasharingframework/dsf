@@ -21,6 +21,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 import javax.sql.DataSource;
@@ -50,6 +51,22 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 	private final Function<Connection, TransactionResources> transactionResourceFactory;
 	private final ResponseGenerator responseGenerator;
 
+	/**
+	 * @param dataSource
+	 *            not <code>null</code>
+	 * @param permanentDeleteDataSource
+	 *            not <code>null</code>
+	 * @param dbUsersGroup
+	 *            not <code>null</code>
+	 * @param exceptionHandler
+	 *            not <code>null</code>
+	 * @param commands
+	 *            may be <code>null</code>
+	 * @param transactionResourceFactory
+	 *            not <code>null</code>
+	 * @param responseGenerator
+	 *            not <code>null</code>
+	 */
 	public TransactionCommandList(DataSource dataSource, DataSource permanentDeleteDataSource, String dbUsersGroup,
 			ExceptionHandler exceptionHandler, List<? extends Command> commands,
 			Function<Connection, TransactionResources> transactionResourceFactory, ResponseGenerator responseGenerator)
@@ -57,8 +74,9 @@ public class TransactionCommandList extends AbstractCommandList implements Comma
 		super(dataSource, permanentDeleteDataSource, dbUsersGroup, exceptionHandler, commands,
 				Comparator.comparing(Command::getTransactionPriority).thenComparing(Command::getIndex));
 
-		this.transactionResourceFactory = transactionResourceFactory;
-		this.responseGenerator = responseGenerator;
+		this.transactionResourceFactory = Objects.requireNonNull(transactionResourceFactory,
+				"transactionResourceFactory");
+		this.responseGenerator = Objects.requireNonNull(responseGenerator, "responseGenerator");
 	}
 
 	@Override

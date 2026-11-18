@@ -21,28 +21,25 @@ import java.util.Objects;
 import org.operaton.bpm.engine.impl.variable.serializer.PrimitiveValueSerializer;
 import org.operaton.bpm.engine.impl.variable.serializer.ValueFields;
 import org.operaton.bpm.engine.variable.impl.value.UntypedValueImpl;
-import org.springframework.beans.factory.InitializingBean;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.dsf.bpe.v2.variables.TargetValues.TargetValue;
 
-public class TargetSerializer extends PrimitiveValueSerializer<TargetValue> implements InitializingBean
+public class TargetSerializer extends PrimitiveValueSerializer<TargetValue>
 {
 	private final ObjectMapper objectMapper;
 
+	/**
+	 * @param objectMapper
+	 *            not <code>null</code>
+	 */
 	public TargetSerializer(ObjectMapper objectMapper)
 	{
 		super(TargetValues.VALUE_TYPE);
 
-		this.objectMapper = objectMapper;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(objectMapper, "objectMapper");
+		this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper");
 	}
 
 	@Override

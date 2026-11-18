@@ -15,8 +15,7 @@
  */
 package dev.dsf.bpe.subscription;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
@@ -28,13 +27,17 @@ public class PingEventResourceHandlerImpl<R extends Resource> implements PingEve
 
 	private final ExistingResourceLoader<R> loader;
 
+	/**
+	 * @param loader
+	 *            not <code>null</code>
+	 */
 	public PingEventResourceHandlerImpl(ExistingResourceLoader<R> loader)
 	{
-		this.loader = loader;
+		this.loader = Objects.requireNonNull(loader, "loader");
 	}
 
 	@Override
-	public void onPing(String ping, String subscriptionIdPart, Map<String, List<String>> searchCriteriaQueryParameters)
+	public void onPing(String ping, String subscriptionIdPart)
 	{
 		logger.trace("Ping for subscription {} received", ping);
 		if (!subscriptionIdPart.equals(ping))
@@ -44,6 +47,6 @@ public class PingEventResourceHandlerImpl<R extends Resource> implements PingEve
 			return;
 		}
 
-		loader.readExistingResources(searchCriteriaQueryParameters);
+		loader.readExistingResources();
 	}
 }

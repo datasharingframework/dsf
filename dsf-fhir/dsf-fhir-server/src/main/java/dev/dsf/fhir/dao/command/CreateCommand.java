@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -81,6 +82,41 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 	protected Response responseResult;
 	protected ValidationResult validationResult;
 
+	/**
+	 * @param index
+	 * @param identity
+	 * @param returnType
+	 *            not <code>null</code>
+	 * @param bundle
+	 *            not <code>null</code>
+	 * @param entry
+	 *            not <code>null</code>
+	 * @param serverBase
+	 *            not <code>null</code>
+	 * @param authorizationHelper
+	 *            not <code>null</code>
+	 * @param resource
+	 *            not <code>null</code>
+	 * @param dao
+	 *            not <code>null</code>
+	 * @param exceptionHandler
+	 *            not <code>null</code>
+	 * @param parameterConverter
+	 *            not <code>null</code>
+	 * @param responseGenerator
+	 *            not <code>null</code>
+	 * @param referenceExtractor
+	 *            not <code>null</code>
+	 * @param referenceResolver
+	 *            not <code>null</code>
+	 * @param referenceCleaner
+	 *            not <code>null</code>
+	 * @param eventGenerator
+	 *            not <code>null</code>
+	 * @param defaultProfileProvider
+	 *            not <code>null</code>
+	 * @param enableValidation
+	 */
 	public CreateCommand(int index, Identity identity, PreferReturnType returnType, Bundle bundle,
 			BundleEntryComponent entry, String serverBase, AuthorizationHelper authorizationHelper, R resource, D dao,
 			ExceptionHandler exceptionHandler, ParameterConverter parameterConverter, ValidationRules validationRules,
@@ -92,11 +128,11 @@ public class CreateCommand<R extends Resource, D extends ResourceDao<R>> extends
 				exceptionHandler, parameterConverter, validationRules, responseGenerator, referenceExtractor,
 				referenceResolver);
 
-		this.responseGenerator = responseGenerator;
-		this.referenceCleaner = referenceCleaner;
+		this.responseGenerator = Objects.requireNonNull(responseGenerator, "responseGenerator");
+		this.referenceCleaner = Objects.requireNonNull(referenceCleaner, "referenceCleaner");
 
-		this.eventGenerator = eventGenerator;
-		this.defaultProfileProvider = defaultProfileProvider;
+		this.eventGenerator = Objects.requireNonNull(eventGenerator, "eventGenerator");
+		this.defaultProfileProvider = Objects.requireNonNull(defaultProfileProvider, "defaultProfileProvider");
 		this.enableValidation = enableValidation;
 
 		if (PreferReturnType.OPERATION_OUTCOME.equals(returnType) && !enableValidation)

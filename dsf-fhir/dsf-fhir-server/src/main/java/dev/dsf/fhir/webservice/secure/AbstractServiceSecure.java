@@ -19,7 +19,6 @@ import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.fhir.help.ResponseGenerator;
 import dev.dsf.fhir.service.ReferenceResolver;
@@ -28,7 +27,6 @@ import dev.dsf.fhir.webservice.base.BasicService;
 import jakarta.ws.rs.core.Response;
 
 public abstract class AbstractServiceSecure<S extends BasicService> extends AbstractDelegatingBasicService<S>
-		implements InitializingBean
 {
 	protected static final Logger audit = LoggerFactory.getLogger("dsf-audit-logger");
 
@@ -36,24 +34,24 @@ public abstract class AbstractServiceSecure<S extends BasicService> extends Abst
 	protected final ResponseGenerator responseGenerator;
 	protected final ReferenceResolver referenceResolver;
 
+	/**
+	 * @param delegate
+	 *            not <code>null</code>
+	 * @param serverBase
+	 *            not <code>null</code>
+	 * @param responseGenerator
+	 *            not <code>null</code>
+	 * @param referenceResolver
+	 *            not <code>null</code>
+	 */
 	public AbstractServiceSecure(S delegate, String serverBase, ResponseGenerator responseGenerator,
 			ReferenceResolver referenceResolver)
 	{
 		super(delegate);
 
-		this.serverBase = serverBase;
-		this.referenceResolver = referenceResolver;
-		this.responseGenerator = responseGenerator;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		super.afterPropertiesSet();
-
-		Objects.requireNonNull(serverBase, "serverBase");
-		Objects.requireNonNull(responseGenerator, "responseGenerator");
-		Objects.requireNonNull(referenceResolver, "referenceResolver");
+		this.serverBase = Objects.requireNonNull(serverBase, "serverBase");
+		this.referenceResolver = Objects.requireNonNull(referenceResolver, "referenceResolver");
+		this.responseGenerator = Objects.requireNonNull(responseGenerator, "responseGenerator");
 	}
 
 	protected final Response forbidden(String operation)

@@ -390,7 +390,7 @@ public abstract class AbstractTaskMessageSend implements JavaDelegate, Initializ
 	 * 		Stream&lt;ParameterComponent&gt; additionalInputParameters)
 	 * {
 	 * 	String alternativeBusinesKey = createAndSaveAlternativeBusinessKey();
-	 * 	super.sendTask(execution, target, instantiatesUri, messageName, alternativeBusinesKey, profile,
+	 * 	super.sendTask(execution, target, instantiatesCanonical, messageName, alternativeBusinesKey, profile,
 	 * 			additionalInputParameters);
 	 * }
 	 * </pre>

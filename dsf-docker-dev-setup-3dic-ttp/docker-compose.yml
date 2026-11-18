@@ -104,28 +104,31 @@ services:
       - 127.0.0.1:8443:8443
     environment:
       TZ: Europe/Berlin
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_DB: dev-file
+      KC_HOSTNAME: keycloak
+      KC_HTTPS_CERTIFICATE_FILE: /run/secrets/keycloak.chain.crt
+      KC_HTTPS_CERTIFICATE_KEY_FILE: /run/secrets/keycloak.key.plain
+      KC_TRUSTSTORE_PATHS: /run/secrets/root_ca.crt
+      KC_FEATURES_DISABLED: admin-fine-grained-authz,authorization,ciba,client-auth-federated,client-policies,client-secret-rotation,device-flow,dpop,identity-brokering-api,impersonation,jwt-authorization-grant,kerberos,kubernetes-service-accounts,log-mdc,opentelemetry,organization,par,passkeys,recovery-codes,scim-api,step-up-authentication,step-up-authentication-saml,token-exchange-standard,twitter-broker,update-email,user-event-metrics,web-authn,workflows
+      KC_SPI_STICKY_SESSION_ENCODER__INFINISPAN__SHOULD_ATTACH_ROUTE: 'false'
     secrets:
       - keycloak.chain.crt
       - keycloak.key.plain
-      - keycloak_trust_store.jks
+      - root_ca.crt
     volumes:
       - type: bind
-        source: ./keycloak
+        source: ./keycloak/realms
         target: /opt/keycloak/data/import
+        read_only: true
+      - type: bind
+        source: ./keycloak/themes
+        target: /opt/keycloak/themes
+        read_only: true
     networks:
       - internet
-    command: >-
-      start
-      --db dev-file
-      --hostname keycloak
-      --import-realm
-      --https-certificate-file=/run/secrets/keycloak.chain.crt
-      --https-certificate-key-file=/run/secrets/keycloak.key.plain
-      --spi-truststore-file-file=/run/secrets/keycloak_trust_store.jks
-      --spi-truststore-file-password=password
-      --features-disabled=twitter-broker,identity-brokering-api
+    command: start --import-realm
 
   forward-proxy:
     build: ./forward-proxy
@@ -135,6 +138,19 @@ services:
     networks:
       forward-proxy:
       internet:
+
+  forward-proxy-tls:
+    build: ./forward-proxy-tls
+    restart: "no"
+    secrets:
+      - forward-proxy-tls.chain.crt
+      - forward-proxy-tls.key.plain
+    environment:
+      TZ: Europe/Berlin
+    networks:
+      - forward-proxy
+    depends_on:
+      - forward-proxy
 
   dic1-fhir:
     build: ../dsf-fhir/dsf-fhir-server-jetty/docker
@@ -207,7 +223,7 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_AUTHORIZATION_CODE_FLOW: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BACK_CHANNEL_LOGOUT: 'true'
       DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN: 'true'
-      DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN_AUDIENCE: 'account'
+      DEV_DSF_SERVER_AUTH_OIDC_BEARER_TOKEN_AUDIENCE: 'dic1-fhir'
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_REALM_BASE_URL: https://keycloak:8443/realms/dic1
       DEV_DSF_SERVER_AUTH_OIDC_PROVIDER_CLIENT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic1-fhir
@@ -552,10 +568,9 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic1-bpe
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_dic1_bpe.secret
       DEV_DSF_SERVER_AUTH_TRUST_REVERSE_PROXY: 172.20.0.66
-      DEV_DSF_PROXY_URL: http://forward-proxy:8080
+      DEV_DSF_PROXY_URL: https://forward-proxy-tls:8443
       DEV_DSF_PROXY_USERNAME: proxy_user
       DEV_DSF_PROXY_PASSWORD: proxy_password
-      DEV_DSF_PROXY_NOPROXY: keycloak
       DEV_DSF_BPE_FHIR_CLIENT_CONNECTIONS_CONFIG: |
         ttp-fhir-cert-auth:
           base-url: https://ttp/fhir
@@ -579,7 +594,7 @@ services:
             test-connection-on-startup: yes
             client-id: dic1-bpe
             client-secret-file: /run/secrets/oidc_client_dic1_bpe.secret
-            required-audience: account
+            required-audience: dic1-fhir
       DEV_DSF_BPE_FHIR_CLIENT_CONNECTIONS_CONFIG_DEFAULT_TRUST_SERVER_CERTIFICATE_CAS: /run/secrets/root_ca.crt
     networks:
       dic1-bpe-frontend:
@@ -592,7 +607,7 @@ services:
       - dic1-fhir
       - mailhog
       - keycloak
-      - forward-proxy
+      - forward-proxy-tls
 
   dic2-bpe:
     build: ../dsf-bpe/dsf-bpe-server-jetty/docker
@@ -673,16 +688,21 @@ services:
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_ID: dic2-bpe
       DEV_DSF_SERVER_AUTH_OIDC_CLIENT_SECRET_FILE: /run/secrets/oidc_client_dic2_bpe.secret
       DEV_DSF_SERVER_AUTH_TRUST_REVERSE_PROXY: 172.20.0.82
+      DEV_DSF_PROXY_URL: http://forward-proxy:8080
+      DEV_DSF_PROXY_USERNAME: proxy_user
+      DEV_DSF_PROXY_PASSWORD: proxy_password
     networks:
       dic2-bpe-frontend:
         ipv4_address: 172.20.0.83
       dic2-bpe-backend:
       internet:
+      forward-proxy:
     depends_on:
       - db
       - dic2-fhir
       - mailhog
       - keycloak
+      - forward-proxy
 
   dic3-bpe:
     build: ../dsf-bpe/dsf-bpe-server-jetty/docker
@@ -904,6 +924,11 @@ secrets:
     file: ./secrets/ttp.key
   ttp.key.password:
     file: ./secrets/ttp.key.password
+
+  forward-proxy-tls.chain.crt:
+    file: ./secrets/forward-proxy-tls.chain.crt
+  forward-proxy-tls.key.plain:
+    file: ./secrets/forward-proxy-tls.key.plain
 
   root_ca.crt:
     file: ./secrets/root_ca.crt

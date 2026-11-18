@@ -17,6 +17,7 @@ package dev.dsf.fhir.dao.command;
 
 import java.sql.Connection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -49,15 +50,28 @@ public final class ReferencesHelperImpl<R extends Resource> implements Reference
 	private final ReferenceResolver referenceResolver;
 	private final ResponseGenerator responseGenerator;
 
+	/**
+	 * @param index
+	 * @param resource
+	 *            not <code>null</code>
+	 * @param serverBase
+	 *            not <code>null</code>
+	 * @param referenceExtractor
+	 *            not <code>null</code>
+	 * @param referenceResolver
+	 *            not <code>null</code>
+	 * @param responseGenerator
+	 *            not <code>null</code>
+	 */
 	public ReferencesHelperImpl(int index, R resource, String serverBase, ReferenceExtractor referenceExtractor,
 			ReferenceResolver referenceResolver, ResponseGenerator responseGenerator)
 	{
 		this.index = index;
-		this.resource = resource;
-		this.serverBase = serverBase;
-		this.referenceExtractor = referenceExtractor;
-		this.referenceResolver = referenceResolver;
-		this.responseGenerator = responseGenerator;
+		this.resource = Objects.requireNonNull(resource, "resource");
+		this.serverBase = Objects.requireNonNull(serverBase, "serverBase");
+		this.referenceExtractor = Objects.requireNonNull(referenceExtractor, "referenceExtractor");
+		this.referenceResolver = Objects.requireNonNull(referenceResolver, "referenceResolver");
+		this.responseGenerator = Objects.requireNonNull(responseGenerator, "responseGenerator");
 	}
 
 	@Override

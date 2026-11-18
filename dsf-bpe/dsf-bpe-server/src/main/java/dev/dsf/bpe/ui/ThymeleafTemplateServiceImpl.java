@@ -19,7 +19,6 @@ import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.util.Objects;
 
-import org.springframework.beans.factory.InitializingBean;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.templatemode.TemplateMode;
@@ -28,7 +27,7 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import dev.dsf.common.ui.theme.Theme;
 import jakarta.ws.rs.core.StreamingOutput;
 
-public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, InitializingBean
+public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService
 {
 	private final String serverBaseUrl;
 	private final Theme theme;
@@ -47,7 +46,7 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 	 */
 	public ThymeleafTemplateServiceImpl(String serverBaseUrl, Theme theme, boolean cacheEnabled, boolean modCssExists)
 	{
-		this.serverBaseUrl = serverBaseUrl;
+		this.serverBaseUrl = Objects.requireNonNull(serverBaseUrl, "serverBaseUrl");
 		this.theme = theme;
 		this.cacheEnabled = cacheEnabled;
 		this.modCssExists = modCssExists;
@@ -59,12 +58,6 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		resolver.setCacheable(cacheEnabled);
 
 		templateEngine.setTemplateResolver(resolver);
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(serverBaseUrl, "serverBaseUrl");
 	}
 
 	@Override

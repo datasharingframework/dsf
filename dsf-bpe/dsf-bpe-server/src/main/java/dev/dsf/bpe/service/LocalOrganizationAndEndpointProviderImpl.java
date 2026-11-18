@@ -28,11 +28,10 @@ import org.hl7.fhir.r4.model.Endpoint;
 import org.hl7.fhir.r4.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.bpe.client.dsf.ClientProvider;
 
-public class LocalOrganizationAndEndpointProviderImpl implements LocalOrganizationAndEndpointProvider, InitializingBean
+public class LocalOrganizationAndEndpointProviderImpl implements LocalOrganizationAndEndpointProvider
 {
 	private static final Logger logger = LoggerFactory.getLogger(LocalOrganizationAndEndpointProviderImpl.class);
 
@@ -53,17 +52,9 @@ public class LocalOrganizationAndEndpointProviderImpl implements LocalOrganizati
 	public LocalOrganizationAndEndpointProviderImpl(TemporalAmount cacheTimeout, ClientProvider clientProvider,
 			String localEndpointAddress)
 	{
-		this.cacheTimeout = cacheTimeout;
-		this.clientProvider = clientProvider;
-		this.localEndpointAddress = localEndpointAddress;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(cacheTimeout, "cacheTimeout");
-		Objects.requireNonNull(clientProvider, "clientProvider");
-		Objects.requireNonNull(localEndpointAddress, "localEndpointAddress");
+		this.cacheTimeout = Objects.requireNonNull(cacheTimeout, "cacheTimeout");
+		this.clientProvider = Objects.requireNonNull(clientProvider, "clientProvider");
+		this.localEndpointAddress = Objects.requireNonNull(localEndpointAddress, "localEndpointAddress");
 	}
 
 	@Override

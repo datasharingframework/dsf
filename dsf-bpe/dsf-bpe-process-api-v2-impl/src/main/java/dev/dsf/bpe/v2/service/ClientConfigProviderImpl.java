@@ -34,30 +34,28 @@ import java.util.stream.Collectors;
 
 import javax.net.ssl.SSLContext;
 
-import org.springframework.beans.factory.InitializingBean;
-
 import de.hsheilbronn.mi.utils.crypto.context.SSLContextFactory;
 import dev.dsf.bpe.v2.client.fhir.ClientConfig;
 import dev.dsf.bpe.v2.client.fhir.ClientConfigs;
 
-public class ClientConfigProviderImpl implements ClientConfigProvider, InitializingBean
+public class ClientConfigProviderImpl implements ClientConfigProvider
 {
 	private final Map<String, ClientConfig> clientConfigsByFhirServerId = new HashMap<>();
 	private final KeyStore defaultTrustStore;
 
+	/**
+	 * @param defaultTrustStore
+	 *            not <code>null</code>
+	 * @param clientConfigs
+	 *            may be <code>null</code>
+	 */
 	public ClientConfigProviderImpl(KeyStore defaultTrustStore, ClientConfigs clientConfigs)
 	{
-		this.defaultTrustStore = defaultTrustStore;
+		this.defaultTrustStore = Objects.requireNonNull(defaultTrustStore, "defaultTrustStore");
 
 		if (clientConfigs != null)
 			clientConfigsByFhirServerId.putAll(clientConfigs.getConfigs().stream()
 					.collect(Collectors.toMap(ClientConfig::getFhirServerId, Function.identity())));
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(defaultTrustStore, "defaultTrustStore");
 	}
 
 	@Override

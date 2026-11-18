@@ -45,6 +45,22 @@ public class ActivityDefinitionAuthorizationRule
 
 	private final ProcessAuthorizationHelper processAuthorizationHelper;
 
+	/**
+	 * @param daoProvider
+	 *            not <code>null</code>
+	 * @param serverBase
+	 *            not <code>null</code>
+	 * @param referenceResolver
+	 *            not <code>null</code>
+	 * @param organizationProvider
+	 *            not <code>null</code>
+	 * @param readAccessHelper
+	 *            not <code>null</code>
+	 * @param parameterConverter
+	 *            not <code>null</code>
+	 * @param processAuthorizationHelper
+	 *            not <code>null</code>
+	 */
 	public ActivityDefinitionAuthorizationRule(DaoProvider daoProvider, String serverBase,
 			ReferenceResolver referenceResolver, OrganizationProvider organizationProvider,
 			ReadAccessHelper readAccessHelper, ParameterConverter parameterConverter,
@@ -53,15 +69,8 @@ public class ActivityDefinitionAuthorizationRule
 		super(ActivityDefinition.class, daoProvider, serverBase, referenceResolver, organizationProvider,
 				readAccessHelper, parameterConverter);
 
-		this.processAuthorizationHelper = processAuthorizationHelper;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		super.afterPropertiesSet();
-
-		Objects.requireNonNull(processAuthorizationHelper, "processAuthorizationHelper");
+		this.processAuthorizationHelper = Objects.requireNonNull(processAuthorizationHelper,
+				"processAuthorizationHelper");
 	}
 
 	@Override

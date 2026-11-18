@@ -158,7 +158,7 @@ public class DaoConfig
 				jsonConfig.objectMapper(), readByUrlDaoFactory());
 	}
 
-	@Bean(destroyMethod = "stopLargeObjectUnlinker")
+	@Bean(initMethod = "executeLargeObjectUnlink", destroyMethod = "stopLargeObjectUnlinker")
 	public BinaryDao binaryDao()
 	{
 		return new BinaryDaoJdbc(dataSource(), permanentDeleteDataSource(), fhirConfig.fhirContext(),
@@ -357,14 +357,14 @@ public class DaoConfig
 	@Bean
 	public HistoryDao historyDao()
 	{
-		return new HistoryDaoJdbc(dataSource(), fhirConfig.fhirContext(), (BinaryDaoJdbc) binaryDao(),
+		return new HistoryDaoJdbc(dataSource(), (BinaryDaoJdbc) binaryDao(),
 				new PgObjectFactoryImpl(fhirConfig.fhirContext(), jsonConfig.objectMapper()));
 	}
 
 	@Bean
 	public ReadAccessDao readAccessDao()
 	{
-		return new ReadAccessDaoJdbc(dataSource());
+		return new ReadAccessDaoJdbc();
 	}
 
 	@Bean

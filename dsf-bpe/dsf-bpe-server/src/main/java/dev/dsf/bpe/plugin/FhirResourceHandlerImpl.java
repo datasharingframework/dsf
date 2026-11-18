@@ -36,7 +36,6 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -46,7 +45,7 @@ import dev.dsf.bpe.client.dsf.PreferReturnMinimal;
 import dev.dsf.bpe.client.dsf.WebserviceClient;
 import dev.dsf.bpe.dao.ProcessPluginResourcesDao;
 
-public class FhirResourceHandlerImpl implements FhirResourceHandler, InitializingBean
+public class FhirResourceHandlerImpl implements FhirResourceHandler
 {
 	private static final Logger logger = LoggerFactory.getLogger(FhirResourceHandlerImpl.class);
 
@@ -56,25 +55,28 @@ public class FhirResourceHandlerImpl implements FhirResourceHandler, Initializin
 	private final int fhirServerRequestMaxRetries;
 	private final Duration fhirServerRetryDelay;
 
+	/**
+	 * @param localWebserviceClient
+	 *            not <code>null</code>
+	 * @param dao
+	 *            not <code>null</code>
+	 * @param fhirContext
+	 *            not <code>null</code>
+	 * @param fhirServerRequestMaxRetries
+	 *            &gt;= -1
+	 * @param fhirServerRetryDelay
+	 *            not <code>null</code>
+	 */
 	public FhirResourceHandlerImpl(WebserviceClient localWebserviceClient, ProcessPluginResourcesDao dao,
 			FhirContext fhirContext, int fhirServerRequestMaxRetries, Duration fhirServerRetryDelay)
 	{
-		this.localWebserviceClient = localWebserviceClient;
-		this.dao = dao;
-		this.fhirContext = fhirContext;
-		this.fhirServerRequestMaxRetries = fhirServerRequestMaxRetries;
-		this.fhirServerRetryDelay = fhirServerRetryDelay;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(localWebserviceClient, "localWebserviceClient");
-		Objects.requireNonNull(dao, "dao");
-		Objects.requireNonNull(fhirContext, "fhirContext");
+		this.localWebserviceClient = Objects.requireNonNull(localWebserviceClient, "localWebserviceClient");
+		this.dao = Objects.requireNonNull(dao, "dao");
+		this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext");
 		if (fhirServerRequestMaxRetries < -1)
 			throw new IllegalArgumentException("fhirServerRequestMaxRetries < -1");
-		Objects.requireNonNull(fhirServerRetryDelay, "fhirServerRetryDelay");
+		this.fhirServerRequestMaxRetries = fhirServerRequestMaxRetries;
+		this.fhirServerRetryDelay = Objects.requireNonNull(fhirServerRetryDelay, "fhirServerRetryDelay");
 	}
 
 	private PreferReturnMinimal minimalReturnRetryClient()

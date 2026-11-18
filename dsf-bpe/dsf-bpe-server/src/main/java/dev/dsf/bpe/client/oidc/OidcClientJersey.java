@@ -95,9 +95,9 @@ public class OidcClientJersey extends BaseOidcClientJersey
 	 * @param userAgentValue
 	 *            may be <code>null</code>
 	 * @param connectTimeout
-	 *            not <code>null</code>
+	 *            not <code>null</code>, not negative, 0 represents infinity
 	 * @param readTimeout
-	 *            not <code>null</code>
+	 *            not <code>null</code>, not negative, 0 represents infinity
 	 * @param logRequestsAndResponses
 	 * @param notBeforeIssuedAtExpiresAtLeewaySeconds
 	 *            not <code>null</code>

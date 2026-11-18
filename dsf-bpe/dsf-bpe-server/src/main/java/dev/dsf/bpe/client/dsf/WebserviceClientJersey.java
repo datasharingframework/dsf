@@ -15,7 +15,6 @@
  */
 package dev.dsf.bpe.client.dsf;
 
-import java.io.InputStream;
 import java.security.KeyStore;
 import java.time.Duration;
 import java.util.List;
@@ -32,7 +31,6 @@ import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.logging.LoggingFeature;
 import org.glassfish.jersey.logging.LoggingFeature.Verbosity;
-import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
@@ -53,7 +51,6 @@ import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
@@ -173,64 +170,6 @@ public class WebserviceClientJersey implements WebserviceClient
 		return preferReturnMinimal;
 	}
 
-	PreferReturn create(PreferReturnType returnType, Resource resource)
-	{
-		Objects.requireNonNull(returnType, "returnType");
-		Objects.requireNonNull(resource, "resource");
-
-		Response response = getResource().path(resource.getClass().getAnnotation(ResourceDef.class).name()).request()
-				.header(Constants.HEADER_PREFER, returnType.getHeaderValue()).accept(Constants.CT_FHIR_JSON_NEW)
-				.post(Entity.entity(resource, Constants.CT_FHIR_JSON_NEW));
-
-		logStatusAndHeaders(response);
-
-		if (Status.CREATED.getStatusCode() == response.getStatus())
-			return toPreferReturn(returnType, resource.getClass(), response);
-		else
-			throw handleError(response);
-	}
-
-	PreferReturn createConditionally(PreferReturnType returnType, Resource resource, String ifNoneExistCriteria)
-	{
-		Objects.requireNonNull(returnType, "returnType");
-		Objects.requireNonNull(resource, "resource");
-		Objects.requireNonNull(ifNoneExistCriteria, "ifNoneExistCriteria");
-
-		Response response = getResource().path(resource.getClass().getAnnotation(ResourceDef.class).name()).request()
-				.header(Constants.HEADER_PREFER, returnType.getHeaderValue())
-				.header(Constants.HEADER_IF_NONE_EXIST, ifNoneExistCriteria).accept(Constants.CT_FHIR_JSON_NEW)
-				.post(Entity.entity(resource, Constants.CT_FHIR_JSON_NEW));
-
-		logStatusAndHeaders(response);
-
-		if (Status.CREATED.getStatusCode() == response.getStatus())
-			return toPreferReturn(returnType, resource.getClass(), response);
-		else
-			throw handleError(response);
-	}
-
-	PreferReturn createBinary(PreferReturnType returnType, InputStream in, MediaType mediaType,
-			String securityContextReference)
-	{
-		Objects.requireNonNull(returnType, "returnType");
-		Objects.requireNonNull(in, "in");
-		Objects.requireNonNull(mediaType, "mediaType");
-		// securityContextReference may be null
-
-		Builder request = getResource().path("Binary").request().header(Constants.HEADER_PREFER,
-				returnType.getHeaderValue());
-		if (securityContextReference != null && !securityContextReference.isBlank())
-			request = request.header(Constants.HEADER_X_SECURITY_CONTEXT, securityContextReference);
-		Response response = request.accept(Constants.CT_FHIR_JSON_NEW).post(Entity.entity(in, mediaType));
-
-		logStatusAndHeaders(response);
-
-		if (Status.CREATED.getStatusCode() == response.getStatus())
-			return toPreferReturn(returnType, Binary.class, response);
-		else
-			throw handleError(response);
-	}
-
 	PreferReturn update(PreferReturnType returnType, Resource resource)
 	{
 		Objects.requireNonNull(returnType, "returnType");
@@ -249,58 +188,6 @@ public class WebserviceClientJersey implements WebserviceClient
 
 		if (Status.OK.getStatusCode() == response.getStatus())
 			return toPreferReturn(returnType, resource.getClass(), response);
-		else
-			throw handleError(response);
-	}
-
-	PreferReturn updateConditionally(PreferReturnType returnType, Resource resource, Map<String, List<String>> criteria)
-	{
-		Objects.requireNonNull(returnType, "returnType");
-		Objects.requireNonNull(resource, "resource");
-		Objects.requireNonNull(criteria, "criteria");
-		if (criteria.isEmpty())
-			throw new IllegalArgumentException("criteria map empty");
-
-		WebTarget target = getResource().path(resource.getClass().getAnnotation(ResourceDef.class).name());
-
-		for (Entry<String, List<String>> entry : criteria.entrySet())
-			target = target.queryParam(entry.getKey(), entry.getValue().toArray());
-
-		Builder builder = target.request().accept(Constants.CT_FHIR_JSON_NEW).header(Constants.HEADER_PREFER,
-				returnType.getHeaderValue());
-
-		if (resource.getMeta().hasVersionId())
-			builder.header(Constants.HEADER_IF_MATCH, new EntityTag(resource.getMeta().getVersionId(), true));
-
-		Response response = builder.put(Entity.entity(resource, Constants.CT_FHIR_JSON_NEW));
-
-		logStatusAndHeaders(response);
-
-		if (Status.CREATED.getStatusCode() == response.getStatus() || Status.OK.getStatusCode() == response.getStatus())
-			return toPreferReturn(returnType, resource.getClass(), response);
-		else
-			throw handleError(response);
-	}
-
-	PreferReturn updateBinary(PreferReturnType returnType, String id, InputStream in, MediaType mediaType,
-			String securityContextReference)
-	{
-		Objects.requireNonNull(returnType, "returnType");
-		Objects.requireNonNull(id, "id");
-		Objects.requireNonNull(in, "in");
-		Objects.requireNonNull(mediaType, "mediaType");
-		// securityContextReference may be null
-
-		Builder request = getResource().path("Binary").path(id).request().header(Constants.HEADER_PREFER,
-				returnType.getHeaderValue());
-		if (securityContextReference != null && !securityContextReference.isBlank())
-			request = request.header(Constants.HEADER_X_SECURITY_CONTEXT, securityContextReference);
-		Response response = request.accept(Constants.CT_FHIR_JSON_NEW).put(Entity.entity(in, mediaType));
-
-		logStatusAndHeaders(response);
-
-		if (Status.CREATED.getStatusCode() == response.getStatus())
-			return toPreferReturn(returnType, Binary.class, response);
 		else
 			throw handleError(response);
 	}

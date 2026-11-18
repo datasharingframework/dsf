@@ -17,6 +17,7 @@ package dev.dsf.fhir.websocket;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Objects;
@@ -31,7 +32,6 @@ import org.eclipse.jetty.websocket.core.exception.CloseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.common.auth.conf.DsfRole;
 import dev.dsf.common.auth.conf.Identity;
@@ -46,7 +46,7 @@ import jakarta.websocket.MessageHandler.Whole;
 import jakarta.websocket.PongMessage;
 import jakarta.websocket.Session;
 
-public class ServerEndpoint extends Endpoint implements InitializingBean, DisposableBean
+public class ServerEndpoint extends Endpoint implements DisposableBean
 {
 	private static final Logger logger = LoggerFactory.getLogger(ServerEndpoint.class);
 
@@ -56,19 +56,17 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 	private static final String BIND_MESSAGE_START = "bind ";
 
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2,
-			r -> new Thread(r, "websocket-server-endpoint-scheduler"));
+			Thread.ofPlatform().name("websocket-server-endpoint-scheduler-", 0).factory());
 
 	private final WebSocketSubscriptionManager subscriptionManager;
 
+	/**
+	 * @param subscriptionManager
+	 *            not <code>null</code>
+	 */
 	public ServerEndpoint(WebSocketSubscriptionManager subscriptionManager)
 	{
-		this.subscriptionManager = subscriptionManager;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(subscriptionManager, "subscriptionManager");
+		this.subscriptionManager = Objects.requireNonNull(subscriptionManager, "subscriptionManager");
 	}
 
 	@Override
@@ -170,6 +168,8 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 	{
 		if (throwable == null)
 			logger.info("Websocket closed with error, session {}: unknown error", session.getId());
+		else if (throwable instanceof ClosedChannelException)
+			logger.debug("Websocket closed");
 		else if (throwable instanceof CloseException close)
 		{
 			String status = String.valueOf(close.getStatusCode());
@@ -177,7 +177,7 @@ public class ServerEndpoint extends Endpoint implements InitializingBean, Dispos
 			if (c instanceof CloseCodes cc)
 				status += " - " + cc.name();
 
-			logger.info("Websocket closed with status {}, session {}", status, session.getId());
+			logger.debug("Websocket closed with status {}, session {}", status, session.getId());
 		}
 		else
 		{

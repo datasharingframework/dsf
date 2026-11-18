@@ -89,7 +89,7 @@ public class PropertiesConfig extends AbstractCertificateAndProxyConfig implemen
 	@Value("${dev.dsf.fhir.server.base.url}")
 	private String serverBaseUrl;
 
-	@Documentation(description = "Page size returned by the DSF FHIR server when reading/searching fhir resources")
+	@Documentation(description = "Page size returned by the DSF FHIR server when reading/searching fhir resources, >= 0")
 	@Value("${dev.dsf.fhir.server.page.count:20}")
 	private int defaultPageCount;
 
@@ -125,11 +125,11 @@ public class PropertiesConfig extends AbstractCertificateAndProxyConfig implemen
 	@Value("${dev.dsf.fhir.client.certificate.private.key.password:#{null}}")
 	private char[] dsfClientCertificatePrivateKeyFilePassword;
 
-	@Documentation(description = "Timeout until a reading a resource from a remote DSF FHIR server is aborted", recommendation = "Change default value only if timeout exceptions occur")
+	@Documentation(description = "Timeout until a reading a resource from a remote DSF FHIR server is aborted, not negative, 0 represents infinity", recommendation = "Change default value only if timeout exceptions occur")
 	@Value("${dev.dsf.fhir.client.timeout.read:PT10S}")
 	private String dsfClientReadTimeout;
 
-	@Documentation(description = "Timeout until a connection is established between this DSF FHIR server and a remote DSF FHIR server", recommendation = "Change default value only if timeout exceptions occur")
+	@Documentation(description = "Timeout until a connection is established between this DSF FHIR server and a remote DSF FHIR server, not negative, 0 represents infinity", recommendation = "Change default value only if timeout exceptions occur")
 	@Value("${dev.dsf.fhir.client.timeout.connect:PT2S}")
 	private String dsfClientConnectTimeout;
 

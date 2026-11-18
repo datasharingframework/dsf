@@ -41,8 +41,8 @@ public class WebsocketConfig
 	@Bean
 	public ServerEndpointRegistration subscriptionEndpointRegistration()
 	{
-		return new ServerEndpointRegistrationForAuthentication(containerDefaultConfigurator(), ServerEndpoint.PATH,
-				subscriptionEndpoint());
+		return new ServerEndpointRegistrationForAuthentication(ServerEndpoint.PATH, subscriptionEndpoint(),
+				containerDefaultConfigurator());
 	}
 
 	@Bean

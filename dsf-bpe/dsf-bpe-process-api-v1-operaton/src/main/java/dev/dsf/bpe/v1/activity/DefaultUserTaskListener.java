@@ -37,7 +37,6 @@ import org.operaton.bpm.engine.delegate.DelegateTask;
 import org.operaton.bpm.engine.delegate.TaskListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Bean;
 
 import dev.dsf.bpe.v1.ProcessPluginApi;
@@ -56,7 +55,7 @@ import dev.dsf.bpe.v1.variables.Variables;
  * {@link QuestionnaireResponse}, extend this class, register it as a prototype {@link Bean} and specify the class name
  * as a task listener with event type 'create' in the BPMN.
  */
-public class DefaultUserTaskListener implements TaskListener, InitializingBean
+public class DefaultUserTaskListener implements TaskListener
 {
 	private static final Logger logger = LoggerFactory.getLogger(DefaultUserTaskListener.class);
 
@@ -68,13 +67,7 @@ public class DefaultUserTaskListener implements TaskListener, InitializingBean
 	 */
 	public DefaultUserTaskListener(ProcessPluginApi api)
 	{
-		this.api = api;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(api, "api");
+		this.api = Objects.requireNonNull(api, "api");
 	}
 
 	@Override

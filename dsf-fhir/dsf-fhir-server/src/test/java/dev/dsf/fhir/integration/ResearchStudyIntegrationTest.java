@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
@@ -517,7 +516,7 @@ public class ResearchStudyIntegrationTest extends AbstractIntegrationTest
 		researchStudy.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-participating-ttp")
 				.setValue(new Reference().setType("Organization").setIdentifier(new Identifier()
 						.setSystem("http://dsf.dev/sid/organization-identifier").setValue("Test_Organization")));
-		if (!StringUtils.isBlank(url))
+		if (url != null && !url.isBlank())
 			researchStudy.addRelatedArtifact().setType(RelatedArtifactType.DOCUMENTATION).setUrl(url);
 
 		researchStudy.addExtension().setUrl("http://dsf.dev/fhir/StructureDefinition/extension-participating-dic")

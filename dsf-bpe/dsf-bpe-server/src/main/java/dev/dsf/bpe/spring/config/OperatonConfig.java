@@ -22,13 +22,11 @@ import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.operaton.bpm.engine.ProcessEngine;
-import org.operaton.bpm.engine.impl.jobexecutor.DefaultJobExecutor;
 import org.operaton.bpm.engine.impl.persistence.StrongUuidGenerator;
 import org.operaton.bpm.engine.spring.ProcessEngineFactoryBean;
 import org.operaton.bpm.engine.spring.SpringProcessEngineConfiguration;
 import org.postgresql.Driver;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -38,6 +36,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import dev.dsf.bpe.api.plugin.ProcessPluginFactory;
 import dev.dsf.bpe.engine.DelegateProvider;
 import dev.dsf.bpe.engine.DelegateProviderImpl;
+import dev.dsf.bpe.engine.EngineJobExecutor;
 import dev.dsf.bpe.engine.FallbackSerializerFactory;
 import dev.dsf.bpe.engine.FallbackSerializerFactoryImpl;
 import dev.dsf.bpe.engine.MultiVersionSpringProcessEngineConfiguration;
@@ -50,9 +49,6 @@ public class OperatonConfig
 {
 	@Autowired
 	private PropertiesConfig propertiesConfig;
-
-	@Autowired
-	private ApplicationContext applicationContext;
 
 	@Autowired
 	private List<ProcessPluginFactory> processPluginFactories;
@@ -131,7 +127,7 @@ public class OperatonConfig
 				processPluginFactories.stream().flatMap(ProcessPluginFactory::getSerializer).toList());
 		c.setFallbackSerializerFactory(fallbackSerializerFactory());
 
-		DefaultJobExecutor jobExecutor = new DefaultJobExecutor();
+		EngineJobExecutor jobExecutor = new EngineJobExecutor();
 		jobExecutor.setCorePoolSize(propertiesConfig.getProcessEngineJobExecutorCorePoolSize());
 		jobExecutor.setQueueSize(propertiesConfig.getProcessEngineJobExecutorQueueSize());
 		jobExecutor.setMaxPoolSize(propertiesConfig.getProcessEngineJobExecutorMaxPoolSize());
@@ -151,8 +147,7 @@ public class OperatonConfig
 	@Bean
 	public DelegateProvider delegateProvider()
 	{
-		return new DelegateProviderImpl(ClassLoader.getSystemClassLoader(), applicationContext,
-				dsfClientConfig.clientProvider().getWebserviceClient());
+		return new DelegateProviderImpl(dsfClientConfig.clientProvider().getWebserviceClient());
 	}
 
 	@Bean

@@ -24,7 +24,6 @@ import java.util.stream.IntStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -40,7 +39,7 @@ import dev.dsf.bpe.api.service.BpeMailService;
 import dev.dsf.bpe.api.service.BpeOidcClientProvider;
 import dev.dsf.bpe.api.service.BuildInfoProvider;
 
-public class ProcessPluginApiFactory implements InitializingBean
+public class ProcessPluginApiFactory
 {
 	private static final Logger logger = LoggerFactory.getLogger(ProcessPluginApiFactory.class);
 
@@ -60,37 +59,44 @@ public class ProcessPluginApiFactory implements InitializingBean
 	private final ProcessPluginApiClassLoaderFactory classLoaderFactory;
 	private final String serverBaseUrl;
 
+	/**
+	 * @param environment
+	 *            not <code>null</code>
+	 * @param dsfClientConfig
+	 *            not <code>null</code>
+	 * @param fhirClientConfigs
+	 *            not <code>null</code>
+	 * @param bpeProxyConfig
+	 *            not <code>null</code>
+	 * @param fhirValidationConfig
+	 *            not <code>null</code>
+	 * @param buildInfoProvider
+	 *            not <code>null</code>
+	 * @param bpeMailService
+	 *            not <code>null</code>
+	 * @param bpeOidcClientProvider
+	 *            not <code>null</code>
+	 * @param classLoaderFactory
+	 *            not <code>null</code>
+	 * @param serverBaseUrl
+	 *            not <code>null</code>
+	 */
 	public ProcessPluginApiFactory(ConfigurableEnvironment environment, DsfClientConfig dsfClientConfig,
 			FhirClientConfigs fhirClientConfigs, BpeProxyConfig bpeProxyConfig,
 			FhirValidationConfig fhirValidationConfig, BuildInfoProvider buildInfoProvider,
 			BpeMailService bpeMailService, BpeOidcClientProvider bpeOidcClientProvider,
 			ProcessPluginApiClassLoaderFactory classLoaderFactory, String serverBaseUrl)
 	{
-		this.environment = environment;
-		this.dsfClientConfig = dsfClientConfig;
-		this.fhirClientConfigs = fhirClientConfigs;
-		this.bpeProxyConfig = bpeProxyConfig;
-		this.fhirValidationConfig = fhirValidationConfig;
-		this.buildInfoProvider = buildInfoProvider;
-		this.bpeMailService = bpeMailService;
-		this.bpeOidcClientProvider = bpeOidcClientProvider;
-		this.classLoaderFactory = classLoaderFactory;
-		this.serverBaseUrl = serverBaseUrl;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(environment, "environment");
-		Objects.requireNonNull(dsfClientConfig, "dsfClientConfig");
-		Objects.requireNonNull(fhirClientConfigs, "fhirClientConfigs");
-		Objects.requireNonNull(bpeProxyConfig, "bpeProxyConfig");
-		Objects.requireNonNull(fhirValidationConfig, "fhirValidationConfig");
-		Objects.requireNonNull(buildInfoProvider, "buildInfoProvider");
-		Objects.requireNonNull(bpeMailService, "bpeMailService");
-		Objects.requireNonNull(bpeOidcClientProvider, "bpeOidcClientProvider");
-		Objects.requireNonNull(classLoaderFactory, "classLoaderFactory");
-		Objects.requireNonNull(serverBaseUrl, "serverBaseUrl");
+		this.environment = Objects.requireNonNull(environment, "environment");
+		this.dsfClientConfig = Objects.requireNonNull(dsfClientConfig, "dsfClientConfig");
+		this.fhirClientConfigs = Objects.requireNonNull(fhirClientConfigs, "fhirClientConfigs");
+		this.bpeProxyConfig = Objects.requireNonNull(bpeProxyConfig, "bpeProxyConfig");
+		this.fhirValidationConfig = Objects.requireNonNull(fhirValidationConfig, "fhirValidationConfig");
+		this.buildInfoProvider = Objects.requireNonNull(buildInfoProvider, "buildInfoProvider");
+		this.bpeMailService = Objects.requireNonNull(bpeMailService, "bpeMailService");
+		this.bpeOidcClientProvider = Objects.requireNonNull(bpeOidcClientProvider, "bpeOidcClientProvider");
+		this.classLoaderFactory = Objects.requireNonNull(classLoaderFactory, "classLoaderFactory");
+		this.serverBaseUrl = Objects.requireNonNull(serverBaseUrl, "serverBaseUrl");
 	}
 
 	public List<ProcessPluginFactory> initialize()

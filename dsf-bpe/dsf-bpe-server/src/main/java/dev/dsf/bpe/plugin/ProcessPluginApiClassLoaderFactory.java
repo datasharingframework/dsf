@@ -35,9 +35,8 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
-public class ProcessPluginApiClassLoaderFactory implements InitializingBean
+public class ProcessPluginApiClassLoaderFactory
 {
 	private static final Logger logger = LoggerFactory.getLogger(ProcessPluginApiClassLoaderFactory.class);
 
@@ -51,10 +50,20 @@ public class ProcessPluginApiClassLoaderFactory implements InitializingBean
 	private final Map<Integer, Path> resourcesWithPriority = new HashMap<>();
 	private final Map<Integer, Path> allowedBpeResources = new HashMap<>();
 
+	/**
+	 * @param apiClassPathBaseDirectory
+	 *            not <code>null</code>
+	 * @param allowedBpeClasses
+	 *            may be <code>null</code>
+	 * @param resourcesWithPriority
+	 *            may be <code>null</code>
+	 * @param allowedBpeResources
+	 *            may be <code>null</code>
+	 */
 	public ProcessPluginApiClassLoaderFactory(Path apiClassPathBaseDirectory, Map<Integer, Path> allowedBpeClasses,
 			Map<Integer, Path> resourcesWithPriority, Map<Integer, Path> allowedBpeResources)
 	{
-		this.apiClassPathBaseDirectory = apiClassPathBaseDirectory;
+		this.apiClassPathBaseDirectory = Objects.requireNonNull(apiClassPathBaseDirectory, "apiClassPathBaseDirectory");
 
 		if (allowedBpeClasses != null)
 			this.allowedBpeClasses.putAll(allowedBpeClasses);
@@ -62,13 +71,6 @@ public class ProcessPluginApiClassLoaderFactory implements InitializingBean
 			this.resourcesWithPriority.putAll(resourcesWithPriority);
 		if (allowedBpeResources != null)
 			this.allowedBpeResources.putAll(allowedBpeResources);
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(apiClassPathBaseDirectory, "apiClassPathBaseDirectory");
-		// list files may be null
 	}
 
 	private List<Path> getApiClassPath(int apiVersion)

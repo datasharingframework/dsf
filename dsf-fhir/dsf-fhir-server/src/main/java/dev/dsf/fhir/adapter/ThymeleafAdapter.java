@@ -27,7 +27,6 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Resource;
-import org.springframework.beans.factory.InitializingBean;
 
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
@@ -41,7 +40,7 @@ import jakarta.ws.rs.ext.Provider;
 
 @Provider
 @Produces(MediaType.TEXT_HTML)
-public class ThymeleafAdapter implements MessageBodyWriter<Resource>, InitializingBean
+public class ThymeleafAdapter implements MessageBodyWriter<Resource>
 {
 	@Context
 	private volatile UriInfo uriInfo;
@@ -51,15 +50,13 @@ public class ThymeleafAdapter implements MessageBodyWriter<Resource>, Initializi
 
 	private final ThymeleafTemplateService thymeleafTemplateService;
 
+	/**
+	 * @param thymeleafTemplateService
+	 *            not <code>null</code>
+	 */
 	public ThymeleafAdapter(ThymeleafTemplateService thymeleafTemplateService)
 	{
-		this.thymeleafTemplateService = thymeleafTemplateService;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(thymeleafTemplateService, "thymeleafTemplateService");
+		this.thymeleafTemplateService = Objects.requireNonNull(thymeleafTemplateService, "thymeleafTemplateService");
 	}
 
 	@Override

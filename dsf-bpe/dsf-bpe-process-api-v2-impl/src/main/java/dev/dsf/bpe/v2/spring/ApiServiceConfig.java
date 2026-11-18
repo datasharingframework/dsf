@@ -169,8 +169,8 @@ public class ApiServiceConfig
 	@Bean
 	public FhirClientProvider fhirClientProvider()
 	{
-		return new FhirClientProviderImpl(fhirContext(), proxyConfigDelegate(), oidcClientProvider(),
-				buildInfoProvider.getUserAgentValue(), fhirClientConfigProvider());
+		return new FhirClientProviderImpl(fhirContext(), oidcClientProvider(), buildInfoProvider.getUserAgentValue(),
+				fhirClientConfigProvider());
 	}
 
 	@Bean

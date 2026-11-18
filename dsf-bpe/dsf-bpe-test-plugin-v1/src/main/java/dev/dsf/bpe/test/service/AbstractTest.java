@@ -28,6 +28,10 @@ import dev.dsf.bpe.v1.variables.Variables;
 
 public abstract class AbstractTest extends AbstractServiceDelegate
 {
+	/**
+	 * @param api
+	 *            not <code>null</code>
+	 */
 	public AbstractTest(ProcessPluginApi api)
 	{
 		super(api);

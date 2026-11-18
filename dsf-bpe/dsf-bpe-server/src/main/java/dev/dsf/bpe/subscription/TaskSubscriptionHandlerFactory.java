@@ -15,36 +15,38 @@
  */
 package dev.dsf.bpe.subscription;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.hl7.fhir.r4.model.Task;
-import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.bpe.client.dsf.WebserviceClient;
 import dev.dsf.bpe.dao.LastEventTimeDao;
 
-public class TaskSubscriptionHandlerFactory implements SubscriptionHandlerFactory<Task>, InitializingBean
+public class TaskSubscriptionHandlerFactory implements SubscriptionHandlerFactory<Task>
 {
 	private final ResourceHandler<Task> resourceHandler;
 	private final LastEventTimeDao lastEventTimeDao;
 
+	/**
+	 * @param resourceHandler
+	 *            not <code>null</code>
+	 * @param lastEventTimeDao
+	 *            not <code>null</code>
+	 */
 	public TaskSubscriptionHandlerFactory(ResourceHandler<Task> resourceHandler, LastEventTimeDao lastEventTimeDao)
 	{
-		this.resourceHandler = resourceHandler;
-		this.lastEventTimeDao = lastEventTimeDao;
+		this.resourceHandler = Objects.requireNonNull(resourceHandler, "resourceHandler");
+		this.lastEventTimeDao = Objects.requireNonNull(lastEventTimeDao, "lastEventTimeDao");
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception
+	public ExistingResourceLoader<Task> createExistingResourceLoader(WebserviceClient client,
+			Map<String, List<String>> subscriptionCriteria)
 	{
-		Objects.requireNonNull(resourceHandler, "resourceHandler");
-		Objects.requireNonNull(lastEventTimeDao, "lastEventTimeDao");
-	}
-
-	@Override
-	public ExistingResourceLoader<Task> createExistingResourceLoader(WebserviceClient client)
-	{
-		return new ExistingResourceLoaderImpl<>(lastEventTimeDao, resourceHandler, client, "Task", Task.class);
+		return new ExistingResourceLoaderImpl<>(lastEventTimeDao, resourceHandler, client, "Task", Task.class,
+				subscriptionCriteria);
 	}
 
 	@Override

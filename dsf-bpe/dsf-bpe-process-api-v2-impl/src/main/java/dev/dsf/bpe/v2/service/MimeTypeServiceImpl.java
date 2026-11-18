@@ -23,21 +23,18 @@ import org.apache.tika.detect.Detector;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
-import org.springframework.beans.factory.InitializingBean;
 
-public class MimeTypeServiceImpl implements MimeTypeService, InitializingBean
+public class MimeTypeServiceImpl implements MimeTypeService
 {
 	private final Detector detector;
 
+	/**
+	 * @param detector
+	 *            not <code>null</code>
+	 */
 	public MimeTypeServiceImpl(Detector detector)
 	{
-		this.detector = detector;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(detector, "detector");
+		this.detector = Objects.requireNonNull(detector, "detector");
 	}
 
 	@Override

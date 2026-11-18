@@ -48,7 +48,6 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Resource;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.web.util.HtmlUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -66,7 +65,7 @@ import jakarta.ws.rs.core.PathSegment;
 import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.UriInfo;
 
-public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, InitializingBean
+public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService
 {
 	private static final String RESOURCE_NAMES = "Account|ActivityDefinition|AdverseEvent|AllergyIntolerance|Appointment|AppointmentResponse|AuditEvent|Basic|Binary"
 			+ "|BiologicallyDerivedProduct|BodyStructure|Bundle|CapabilityStatement|CarePlan|CareTeam|CatalogEntry|ChargeItem|ChargeItemDefinition|Claim|ClaimResponse"
@@ -130,9 +129,9 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 	public ThymeleafTemplateServiceImpl(String serverBaseUrl, Theme theme, FhirContext fhirContext,
 			List<? extends ThymeleafContext> contexts, boolean cacheEnabled, boolean modCssExists)
 	{
-		this.serverBaseUrl = serverBaseUrl;
+		this.serverBaseUrl = Objects.requireNonNull(serverBaseUrl, "serverBaseUrl");
 		this.theme = theme;
-		this.fhirContext = fhirContext;
+		this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext");
 		this.modCssExists = modCssExists;
 
 		contextsByResourceType = contexts == null ? Map.of()
@@ -158,14 +157,6 @@ public class ThymeleafTemplateServiceImpl implements ThymeleafTemplateService, I
 		{
 			throw new RuntimeException(e);
 		}
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(serverBaseUrl, "serverBaseUrl");
-		Objects.requireNonNull(fhirContext, "fhirContext");
-		// theme may be null
 	}
 
 	@Override

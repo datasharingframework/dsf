@@ -15,16 +15,14 @@
  */
 package dev.dsf.common.status.webservice;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Objects;
-
-import javax.sql.DataSource;
+import java.util.List;
+import java.util.function.Predicate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
+import dev.dsf.common.status.health.HealthCheck;
+import dev.dsf.common.status.health.HealthStatus;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.GET;
@@ -40,25 +38,19 @@ import jakarta.ws.rs.core.UriInfo;
 @Path(StatusService.PATH)
 @Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 @RolesAllowed("STATUS_PORT_ROLE")
-public class StatusService implements InitializingBean
+public class StatusService
 {
 	public static final String PATH = "status";
 
 	private static final Logger logger = LoggerFactory.getLogger(StatusService.class);
 
-	private final DataSource dataSource;
 	private final int statusConnectorPort;
+	private final List<HealthCheck> healthChecks;
 
-	public StatusService(DataSource dataSource, int statusConnectorPort)
+	public StatusService(int statusConnectorPort, List<HealthCheck> healthChecks)
 	{
-		this.dataSource = dataSource;
 		this.statusConnectorPort = statusConnectorPort;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(dataSource, "dataSource");
+		this.healthChecks = healthChecks == null ? List.of() : List.copyOf(healthChecks);
 	}
 
 	@GET
@@ -70,40 +62,14 @@ public class StatusService implements InitializingBean
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
 
-		try (Connection _ = dataSource.getConnection())
-		{
+		if (healthChecks.stream().map(HealthCheck::check).allMatch(HealthStatus::ok))
 			return Response.ok().build();
-		}
-		catch (SQLException e)
+		else
 		{
-			String errorMessage = getErrorMessage(e);
+			healthChecks.stream().map(HealthCheck::check).filter(Predicate.not(HealthStatus::ok))
+					.forEach(s -> logger.debug("{}: {}", s.component(), s.message()));
 
-			logger.debug("Error while accessing DB", e);
-			logger.error("Error while accessing DB: {} - {}", e.getClass().getName(), errorMessage);
-
-			return Response.serverError().build();
+			return Response.status(Status.SERVICE_UNAVAILABLE).build();
 		}
-	}
-
-	private String getErrorMessage(Throwable e)
-	{
-		StringBuilder b = new StringBuilder();
-
-		while (true)
-		{
-			b.append(e.getClass().getSimpleName());
-			b.append(": ");
-			b.append(e.getMessage());
-
-			if (e.getCause() != null)
-			{
-				b.append(" -> ");
-				e = e.getCause();
-			}
-			else
-				break;
-		}
-
-		return b.toString();
 	}
 }

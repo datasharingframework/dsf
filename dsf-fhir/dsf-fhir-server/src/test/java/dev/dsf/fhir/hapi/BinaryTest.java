@@ -18,7 +18,6 @@ package dev.dsf.fhir.hapi;
 import java.util.Date;
 import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
@@ -129,11 +128,11 @@ public class BinaryTest
 		IBaseResource elem = new Patient();
 		String resourceName = "";
 		String versionId = elem.getMeta().getVersionId();
-		if (StringUtils.isBlank(elem.getIdElement().getIdPart()))
+		if (elem.getIdElement().getIdPart() == null || elem.getIdElement().getIdPart().isBlank())
 		{
 			// Resource has no ID
 		}
-		else if (StringUtils.isNotBlank(versionId))
+		else if (!versionId.isBlank())
 		{
 			elem.getIdElement()
 					.setValue(resourceName + "/" + elem.getIdElement().getIdPart() + "/_history/" + versionId);

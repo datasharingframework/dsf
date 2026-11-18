@@ -43,12 +43,12 @@ public class PostStartupConfig
 		pluginConfig.processPluginManager().loadAndDeployPlugins();
 		logger.info("Deploying process plugins [Done]");
 
-		logger.info("Starting process engine ...");
+		logger.info("Starting process engine JobExecutor ...");
 		operatonConfig.processEngineConfiguration().getJobExecutor().start();
-		logger.info("Starting process engine [Done]");
+		logger.info("Starting process engine JobExecutor [Done]");
 
-		fhirConfig.fhirConnectorTask().connect();
-		fhirConfig.fhirConnectorQuestionnaireResponse().connect();
+		fhirConfig.taskFhirConnector().connect();
+		fhirConfig.questionnaireResponseFhirConnector().connect();
 		// websocket connect is an async operation
 	}
 }

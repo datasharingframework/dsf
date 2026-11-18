@@ -41,7 +41,6 @@
 		<slf4j.version>2.0.20</slf4j.version>
 		<log4j.version>2.26.1</log4j.version>
 		<jetty.version>12.1.14</jetty.version>
-		<tyrus.version>2.2.2</tyrus.version>
 		<spring.version>7.0.9</spring.version>
 		<!-- operaton 2.1.5 not compatible with jackson 2.22.4 -->
 		<jackson.version>2.21.8</jackson.version>
@@ -257,6 +256,11 @@
 				<artifactId>jetty-security</artifactId>
 				<version>${jetty.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.eclipse.jetty.websocket</groupId>
+				<artifactId>jetty-websocket-jetty-client</artifactId>
+				<version>${jetty.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
@@ -287,18 +291,6 @@
 	    		<groupId>com.fasterxml.jackson.dataformat</groupId>
 	    		<artifactId>jackson-dataformat-yaml</artifactId>
 				<version>${jackson.version}</version>
-			</dependency>
-
-			<!-- tyrus -->
-			<dependency>
-				<groupId>org.glassfish.tyrus</groupId>
-				<artifactId>tyrus-client</artifactId>
-				<version>${tyrus.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish.tyrus</groupId>
-				<artifactId>tyrus-container-grizzly-client</artifactId>
-				<version>${tyrus.version}</version>
 			</dependency>
 
 			<!-- jaxb impl -->
@@ -736,6 +728,14 @@
 											<target>dsf-docker-dev-setup-3dic-ttp/secrets/ttp.crt</target>
 											<target>dsf-docker-dev-setup-3dic-ttp/secrets/ttp.key</target>
 											<target>dsf-docker-dev-setup-3dic-ttp/secrets/ttp.key.password</target>
+										</targets>
+									</cert>
+									<cert>
+										<cn>forward-proxy-tls</cn>
+										<type>SERVER</type>
+										<targets>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/forward-proxy-tls.chain.crt</target>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/forward-proxy-tls.key.plain</target>
 										</targets>
 									</cert>
 								</certs>

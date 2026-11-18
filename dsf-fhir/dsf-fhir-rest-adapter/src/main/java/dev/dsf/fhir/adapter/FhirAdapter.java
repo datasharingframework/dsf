@@ -64,10 +64,16 @@ public class FhirAdapter implements MessageBodyReader<BaseResource>, MessageBody
 	private final FhirContext fhirContext;
 	private final ReferenceCleaner referenceCleaner;
 
+	/**
+	 * @param fhirContext
+	 *            not <code>null</code>
+	 * @param referenceCleaner
+	 *            not <code>null</code>
+	 */
 	public FhirAdapter(FhirContext fhirContext, ReferenceCleaner referenceCleaner)
 	{
-		this.fhirContext = fhirContext;
-		this.referenceCleaner = referenceCleaner;
+		this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext");
+		this.referenceCleaner = Objects.requireNonNull(referenceCleaner, "referenceCleaner");
 	}
 
 	private IParser getParser(MediaType mediaType, Supplier<IParser> parserFactor)

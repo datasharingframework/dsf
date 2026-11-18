@@ -61,7 +61,6 @@ public class RootServiceSecureTest
 	{
 		rootServiceSecure = new RootServiceSecure(delegate, SERVER_BASE, new ResponseGenerator(SERVER_BASE),
 				mock(ReferenceResolver.class), authorizationRule);
-		rootServiceSecure.afterPropertiesSet();
 
 		rootServiceSecure.setCurrentIdentityProvider(currentIdentityProvider);
 
