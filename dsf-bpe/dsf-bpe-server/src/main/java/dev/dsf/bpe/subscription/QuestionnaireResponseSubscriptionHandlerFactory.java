@@ -15,6 +15,8 @@
  */
 package dev.dsf.bpe.subscription;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
@@ -42,10 +44,11 @@ public class QuestionnaireResponseSubscriptionHandlerFactory
 	}
 
 	@Override
-	public ExistingResourceLoader<QuestionnaireResponse> createExistingResourceLoader(WebserviceClient client)
+	public ExistingResourceLoader<QuestionnaireResponse> createExistingResourceLoader(WebserviceClient client,
+			Map<String, List<String>> subscriptionCriteria)
 	{
 		return new ExistingResourceLoaderImpl<>(lastEventTimeDao, resourceHandler, client, "QuestionnaireResponse",
-				QuestionnaireResponse.class);
+				QuestionnaireResponse.class, subscriptionCriteria);
 	}
 
 	@Override

@@ -16,13 +16,10 @@
 package dev.dsf.fhir.integration;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -46,7 +43,6 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Subscription;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -75,8 +71,6 @@ import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 import dev.dsf.fhir.authorization.read.ReadAccessHelperImpl;
 import dev.dsf.fhir.client.FhirWebserviceClient;
 import dev.dsf.fhir.client.FhirWebserviceClientJersey;
-import dev.dsf.fhir.client.WebsocketClient;
-import dev.dsf.fhir.client.WebsocketClientTyrus;
 import dev.dsf.fhir.dao.AbstractDbTest;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceCleanerImpl;
@@ -175,14 +169,6 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		return new FhirWebserviceClientJersey("https://localhost:" + apiPort + CONTEXT_PATH, trustStore, keyStore,
 				keyStorePassword, null, null, null, null, Duration.ZERO, Duration.ZERO, false,
 				"DSF Integration Test Client", fhirContext, referenceCleaner);
-	}
-
-	private static WebsocketClient createWebsocketClient(int apiPort, KeyStore trustStore, KeyStore keyStore,
-			char[] keyStorePassword, String subscriptionIdPart)
-	{
-		return new WebsocketClientTyrus(() ->
-		{}, URI.create("wss://localhost:" + apiPort + CONTEXT_PATH + "/ws"), trustStore, keyStore, keyStorePassword,
-				null, null, null, "Integration Test Client", subscriptionIdPart);
 	}
 
 	private static JettyServer startFhirServer(ServerSocketChannel statusConnectorChannel,
@@ -379,26 +365,6 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 	protected static FhirWebserviceClient getMinimalWebserviceClient()
 	{
 		return minimalWebserviceClient;
-	}
-
-	protected static WebsocketClient getWebsocketClient()
-	{
-		Bundle bundle = getWebserviceClient().searchWithStrictHandling(Subscription.class,
-				Map.of("criteria", List.of("Task?status=requested"), "status", List.of("active"), "type",
-						List.of("websocket"), "payload", List.of("application/fhir+json")));
-
-		assertNotNull(bundle);
-		assertEquals(1, bundle.getTotal());
-		assertNotNull(bundle.getEntryFirstRep());
-		assertTrue(bundle.getEntryFirstRep().getResource() instanceof Subscription);
-
-		Subscription subscription = (Subscription) bundle.getEntryFirstRep().getResource();
-		assertNotNull(subscription.getIdElement());
-		assertNotNull(subscription.getIdElement().getIdPart());
-
-		return createWebsocketClient(fhirServer.getApiPort(), certificates.getClientCertificate().trustStore(),
-				certificates.getClientCertificate().keyStore(), certificates.getClientCertificate().keyStorePassword(),
-				subscription.getIdElement().getIdPart());
 	}
 
 	protected static final ReadAccessHelper getReadAccessHelper()

@@ -56,6 +56,7 @@ import dev.dsf.common.db.migration.DbMigratorConfig;
 import dev.dsf.common.docker.secrets.DockerSecretsPropertySourceFactory;
 import dev.dsf.common.documentation.Documentation;
 import dev.dsf.common.ui.theme.Theme;
+import dev.dsf.fhir.client.WebsocketClientJetty.TimeConfig;
 
 @Configuration
 @PropertySource(value = "file:conf/config.properties", encoding = "UTF-8", ignoreResourceNotFound = true)
@@ -206,13 +207,29 @@ public class PropertiesConfig extends AbstractCertificateAndProxyConfig implemen
 	@Value("${dev.dsf.bpe.fhir.subscription.questionnaireresponse.search.parameter:?criteria:exact=QuestionnaireResponse%3Fstatus%3Dcompleted&status=active&type=websocket&payload=application/fhir%2Bjson}")
 	private String questionnaireResponseSubscriptionSearchParameter;
 
-	@Documentation(description = "Number of retries until a websocket connection can be established with the DSF FHIR server, `-1` means infinite number of retries")
-	@Value("${dev.dsf.bpe.fhir.subscription.retry.max:-1}")
-	private int websocketMaxRetries;
+	@Documentation(description = "Time between sending websocket ping frames to the DSF FHIR server")
+	@Value("${dev.dsf.bpe.fhir.subscription.ping.frame.interval:PT20S}")
+	private String websocketPingInterval;
 
-	@Documentation(description = "Time between two retries to establish a websocket connection with the DSF FHIR server")
-	@Value("${dev.dsf.bpe.fhir.subscription.retry.sleep:PT5S}")
-	private String websocketRetrySleep;
+	@Documentation(description = "Timeout until a websocket pong frame is considered missing, and a reconnect is being initiated")
+	@Value("${dev.dsf.bpe.fhir.subscription.pong.frame.timeout:PT2S}")
+	private String websocketPongTimeout;
+
+	@Documentation(description = "Initial reconnect delay before a websocket connection is reestablished")
+	@Value("${dev.dsf.bpe.fhir.subscription.reconnect.delay.initial:PT1S}")
+	private String websocketReconnectDelayInitial;
+
+	@Documentation(description = "Linear increase applied to the initial reconnect delay for each subsequent attempt")
+	@Value("${dev.dsf.bpe.fhir.subscription.reconnect.delay.increment:PT0.250S}")
+	private String websocketReconnectIncrement;
+
+	@Documentation(description = "Maximal reconnect delay between consecutive websocket reconnect attempts")
+	@Value("${dev.dsf.bpe.fhir.subscription.reconnect.delay.max:PT20S}")
+	private String websocketReconnectDelayMax;
+
+	@Documentation(description = "Timeout used for the nominal websocket connection shutdown")
+	@Value("${dev.dsf.bpe.fhir.subscription.close.timeout:PT2S}")
+	private String websocketCloseTimeout;
 
 	@Documentation(description = "Set to `false` to exclude WebSocket connection checks from the status webservice (e.g., Docker health checks)")
 	@Value("${dev.dsf.bpe.fhir.subscription.health.check:true}")
@@ -716,19 +733,9 @@ public class PropertiesConfig extends AbstractCertificateAndProxyConfig implemen
 		return questionnaireResponseSubscriptionSearchParameter;
 	}
 
-	public Duration getWebsocketRetrySleepMillis()
-	{
-		return Duration.parse(websocketRetrySleep);
-	}
-
 	public boolean getWebsocketHealthCheck()
 	{
 		return websocketHealthCheck;
-	}
-
-	public int getWebsocketMaxRetries()
-	{
-		return websocketMaxRetries;
 	}
 
 	public Path getProcessPluginDirectory()
@@ -1011,5 +1018,13 @@ public class PropertiesConfig extends AbstractCertificateAndProxyConfig implemen
 	public boolean getFhirValidationEnabled()
 	{
 		return fhirValidationEnabled;
+	}
+
+	public TimeConfig getWebsocketTimeConfig()
+	{
+		return new TimeConfig(getDsfClientConnectTimeoutLocal(), getDsfClientReadTimeoutLocal(),
+				Duration.parse(websocketPingInterval), Duration.parse(websocketPongTimeout),
+				Duration.parse(websocketReconnectDelayInitial), Duration.parse(websocketReconnectIncrement),
+				Duration.parse(websocketReconnectDelayMax), Duration.parse(websocketCloseTimeout));
 	}
 }

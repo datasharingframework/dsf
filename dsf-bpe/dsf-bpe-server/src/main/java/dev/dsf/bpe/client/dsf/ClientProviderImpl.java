@@ -18,27 +18,25 @@ package dev.dsf.bpe.client.dsf;
 import java.net.URI;
 import java.security.KeyStore;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.net.ssl.SSLContext;
+
+import org.glassfish.jersey.SslConfigurator;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.common.config.ProxyConfig;
+import dev.dsf.fhir.client.Endpoint;
 import dev.dsf.fhir.client.WebsocketClient;
-import dev.dsf.fhir.client.WebsocketClientTyrus;
+import dev.dsf.fhir.client.WebsocketClientJetty;
+import dev.dsf.fhir.client.WebsocketClientJetty.TimeConfig;
 
 public class ClientProviderImpl implements ClientProvider
 {
-	private static final Logger logger = LoggerFactory.getLogger(ClientProviderImpl.class);
-
-	private final Map<String, WebsocketClient> websocketClientsBySubscriptionId = new HashMap<>();
-
 	private final String baseUrl;
 
 	private final String websocketUrl;
+	private final TimeConfig websocketTimeConfig;
 	private final KeyStore websocketTrustStore;
 	private final KeyStore websocketKeyStore;
 	private final char[] websocketKeyStorePassword;
@@ -83,13 +81,15 @@ public class ClientProviderImpl implements ClientProvider
 	 */
 	public ClientProviderImpl(FhirContext fhirContext, String baseUrl, Duration readTimeout, Duration connectTimeout,
 			boolean logRequestsAndResponses, KeyStore webserviceTrustStore, KeyStore webserviceKeyStore,
-			char[] webserviceKeyStorePassword, String websocketUrl, KeyStore websocketTrustStore,
-			KeyStore websocketKeyStore, char[] websocketKeyStorePassword, ProxyConfig proxyConfig, String userAgent)
+			char[] webserviceKeyStorePassword, String websocketUrl, TimeConfig websocketTimeConfig,
+			KeyStore websocketTrustStore, KeyStore websocketKeyStore, char[] websocketKeyStorePassword,
+			ProxyConfig proxyConfig, String userAgent)
 	{
 		Objects.requireNonNull(fhirContext, "fhirContext");
 		Objects.requireNonNull(baseUrl, "baseUrl");
-		Objects.requireNonNull(readTimeout, "readTimeout");
 		Objects.requireNonNull(connectTimeout, "connectTimeout");
+		Objects.requireNonNull(readTimeout, "readTimeout");
+		Objects.requireNonNull(websocketTimeConfig, "websocketTimeConfig");
 		Objects.requireNonNull(webserviceTrustStore, "webserviceTrustStore");
 		Objects.requireNonNull(webserviceKeyStore, "webserviceKeyStore");
 		Objects.requireNonNull(webserviceKeyStorePassword, "webserviceKeyStorePassword");
@@ -97,6 +97,7 @@ public class ClientProviderImpl implements ClientProvider
 		this.baseUrl = baseUrl;
 
 		this.websocketUrl = Objects.requireNonNull(websocketUrl, "websocketUrl");
+		this.websocketTimeConfig = Objects.requireNonNull(websocketTimeConfig, "websocketTimeConfig");
 		this.websocketTrustStore = Objects.requireNonNull(websocketTrustStore, "websocketTrustStore");
 		this.websocketKeyStore = Objects.requireNonNull(websocketKeyStore, "websocketKeyStore");
 		this.websocketKeyStorePassword = Objects.requireNonNull(websocketKeyStorePassword, "websocketKeyStorePassword");
@@ -128,42 +129,24 @@ public class ClientProviderImpl implements ClientProvider
 	}
 
 	@Override
-	public WebsocketClient getWebsocketClient(Runnable reconnector, String subscriptionId)
+	public WebsocketClient createWebsocketClient(Endpoint endpoint, String resourceType)
 	{
-		if (!websocketClientsBySubscriptionId.containsKey(subscriptionId))
-		{
-			WebsocketClientTyrus client = createWebsocketClient(reconnector, subscriptionId);
-			websocketClientsBySubscriptionId.put(subscriptionId, client);
-			return client;
-		}
+		SSLContext sslContext;
+		if (websocketTrustStore != null && websocketKeyStore == null && websocketKeyStorePassword == null)
+			sslContext = SslConfigurator.newInstance().trustStore(websocketTrustStore).createSSLContext();
+		else if (websocketTrustStore != null && websocketKeyStore != null && websocketKeyStorePassword != null)
+			sslContext = SslConfigurator.newInstance().trustStore(websocketTrustStore).keyStore(websocketKeyStore)
+					.keyStorePassword(websocketKeyStorePassword).createSSLContext();
+		else
+			sslContext = SslConfigurator.getDefaultContext();
 
-		return websocketClientsBySubscriptionId.get(subscriptionId);
-	}
+		WebsocketClientJetty.ProxyConfig proxyConfig = null;
+		if (this.proxyConfig.isEnabled(websocketUrl))
+			proxyConfig = new WebsocketClientJetty.ProxyConfig(URI.create(this.proxyConfig.getUrl()),
+					this.proxyConfig.getUsername(), this.proxyConfig.getPassword());
 
-	protected WebsocketClientTyrus createWebsocketClient(Runnable reconnector, String subscriptionId)
-	{
-		return new WebsocketClientTyrus(reconnector, URI.create(websocketUrl), websocketTrustStore, websocketKeyStore,
-				websocketKeyStorePassword, proxyConfig.isEnabled(websocketUrl) ? proxyConfig.getUrl() : null,
-				proxyConfig.isEnabled(websocketUrl) ? proxyConfig.getUsername() : null,
-				proxyConfig.isEnabled(websocketUrl) ? proxyConfig.getPassword() : null, userAgent, subscriptionId);
-	}
-
-	@Override
-	public void disconnectAll()
-	{
-		for (WebsocketClient c : websocketClientsBySubscriptionId.values())
-		{
-			try
-			{
-				c.disconnect();
-			}
-			catch (Exception e)
-			{
-				logger.debug("Error while disconnecting websocket client", e);
-				logger.warn("Error while disconnecting websocket client: {} - {}", e.getClass().getName(),
-						e.getMessage());
-			}
-		}
+		return new WebsocketClientJetty(URI.create(websocketUrl), endpoint, userAgent, resourceType,
+				websocketTimeConfig, sslContext, proxyConfig);
 	}
 
 	@Override

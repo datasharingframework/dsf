@@ -17,14 +17,14 @@ package dev.dsf.bpe.health;
 
 import java.util.Objects;
 
-import dev.dsf.bpe.subscription.LocalFhirConnector;
+import dev.dsf.bpe.subscription.FhirSubscriptionConnector;
 import dev.dsf.common.status.health.HealthCheck;
 import dev.dsf.common.status.health.HealthStatus;
 
 public class WebsocketHealthCheck implements HealthCheck
 {
 	private final String component;
-	private final LocalFhirConnector connector;
+	private final FhirSubscriptionConnector connector;
 
 	/**
 	 * @param component
@@ -32,7 +32,7 @@ public class WebsocketHealthCheck implements HealthCheck
 	 * @param connector
 	 *            not <code>null</code>
 	 */
-	public WebsocketHealthCheck(String component, LocalFhirConnector connector)
+	public WebsocketHealthCheck(String component, FhirSubscriptionConnector connector)
 	{
 		this.component = Objects.requireNonNull(component, "component");
 		this.connector = Objects.requireNonNull(connector, "connector");

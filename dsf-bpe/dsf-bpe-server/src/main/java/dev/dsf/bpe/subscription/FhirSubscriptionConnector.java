@@ -15,9 +15,16 @@
  */
 package dev.dsf.bpe.subscription;
 
-public interface LocalFhirConnector
+import java.util.List;
+
+public interface FhirSubscriptionConnector extends AutoCloseable
 {
 	void connect();
 
 	boolean isConnected();
+
+	/**
+	 * Returns the last 10 websocket ping/pong frame turnaround times in milliseconds, oldest first
+	 */
+	List<Long> getWebsocketLatency();
 }

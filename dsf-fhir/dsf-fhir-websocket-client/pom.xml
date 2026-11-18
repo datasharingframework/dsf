@@ -38,19 +38,9 @@
 			<artifactId>hapi-fhir-structures-r4</artifactId>
 			<version>${hapi.fhir.version}</version>
 		</dependency>
-
 		<dependency>
-			<groupId>org.glassfish.jersey.core</groupId>
-			<artifactId>jersey-common</artifactId>
-			<version>${jersey.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish.tyrus</groupId>
-			<artifactId>tyrus-client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish.tyrus</groupId>
-			<artifactId>tyrus-container-grizzly-client</artifactId>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>jetty-websocket-jetty-client</artifactId>
 		</dependency>
 
 		<dependency>

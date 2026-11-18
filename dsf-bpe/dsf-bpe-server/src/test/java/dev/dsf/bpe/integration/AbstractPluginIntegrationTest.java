@@ -100,8 +100,7 @@ public abstract class AbstractPluginIntegrationTest extends AbstractIntegrationT
 	protected final void executePluginTest(Task task) throws InterruptedException
 	{
 		BlockingDeque<Resource> events = new LinkedBlockingDeque<>();
-		WebsocketClient websocketClient = getWebsocketClient();
-		websocketClient.setResourceHandler(events::add, PluginV1IntegrationTest::newJsonParser);
+		WebsocketClient websocketClient = createTaskWebsocketClient(events::add);
 		websocketClient.connect();
 
 		try
@@ -159,7 +158,7 @@ public abstract class AbstractPluginIntegrationTest extends AbstractIntegrationT
 			Thread.sleep(Duration.ofMillis(500));
 
 			if (websocketClient != null)
-				websocketClient.disconnect();
+				websocketClient.close();
 		}
 	}
 

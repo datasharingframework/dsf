@@ -17,6 +17,7 @@ package dev.dsf.fhir.websocket;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Objects;
@@ -167,6 +168,8 @@ public class ServerEndpoint extends Endpoint implements DisposableBean
 	{
 		if (throwable == null)
 			logger.info("Websocket closed with error, session {}: unknown error", session.getId());
+		else if (throwable instanceof ClosedChannelException)
+			logger.debug("Websocket closed");
 		else if (throwable instanceof CloseException close)
 		{
 			String status = String.valueOf(close.getStatusCode());
@@ -174,7 +177,7 @@ public class ServerEndpoint extends Endpoint implements DisposableBean
 			if (c instanceof CloseCodes cc)
 				status += " - " + cc.name();
 
-			logger.info("Websocket closed with status {}, session {}", status, session.getId());
+			logger.debug("Websocket closed with status {}, session {}", status, session.getId());
 		}
 		else
 		{

@@ -15,12 +15,7 @@
  */
 package dev.dsf.bpe.integration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
-import java.net.URI;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
@@ -37,7 +32,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -55,6 +52,7 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Subscription;
+import org.hl7.fhir.r4.model.Task;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -69,10 +67,10 @@ import org.testcontainers.utility.DockerImageName;
 import com.icegreen.greenmail.util.ServerSetupTest;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 import de.hsheilbronn.mi.utils.crypto.keystore.KeyStoreCreator;
 import de.hsheilbronn.mi.utils.test.PostgreSqlContainerLiquibaseTemplateClassRule;
 import de.hsheilbronn.mi.utils.test.PostgresTemplateRule;
+import dev.dsf.bpe.client.dsf.ClientProvider;
 import dev.dsf.bpe.dao.AbstractDbTest;
 import dev.dsf.common.auth.ClientCertificateAuthenticator;
 import dev.dsf.common.auth.DelegatingAuthenticator;
@@ -80,10 +78,10 @@ import dev.dsf.common.auth.DsfLoginService;
 import dev.dsf.common.auth.DsfSecurityHandler;
 import dev.dsf.common.auth.StatusPortAuthenticator;
 import dev.dsf.common.jetty.JettyServer;
+import dev.dsf.fhir.client.Endpoint;
 import dev.dsf.fhir.client.FhirWebserviceClient;
 import dev.dsf.fhir.client.FhirWebserviceClientJersey;
 import dev.dsf.fhir.client.WebsocketClient;
-import dev.dsf.fhir.client.WebsocketClientTyrus;
 import dev.dsf.fhir.service.ReferenceCleaner;
 import dev.dsf.fhir.service.ReferenceCleanerImpl;
 import dev.dsf.fhir.service.ReferenceExtractorImpl;
@@ -216,47 +214,34 @@ public abstract class AbstractIntegrationTest extends AbstractDbTest
 		return webserviceClient;
 	}
 
-	protected static WebsocketClient getWebsocketClient()
+	protected static WebsocketClient createTaskWebsocketClient(Consumer<Task> onResource)
 	{
-		Bundle bundle = getWebserviceClient().searchWithStrictHandling(Subscription.class,
-				Map.of("criteria:exact",
-						List.of("Task?_profile:below=http://dsf.dev/fhir/StructureDefinition/task-test"), "status",
-						List.of("active"), "type", List.of("websocket"), "payload", List.of("application/fhir+json")));
+		Endpoint endpoint = new Endpoint()
+		{
+			@Override
+			public Subscription getSubscription()
+			{
+				Bundle bundle = getWebserviceClient().searchWithStrictHandling(Subscription.class,
+						Map.of("criteria:exact",
+								List.of("Task?_profile:below=http://dsf.dev/fhir/StructureDefinition/task-test"),
+								"status", List.of("active"), "type", List.of("websocket"), "payload",
+								List.of("application/fhir+json")));
+				return (Subscription) bundle.getEntryFirstRep().getResource();
+			}
 
-		assertNotNull(bundle);
-		assertEquals(1, bundle.getTotal());
-		assertNotNull(bundle.getEntryFirstRep());
-		assertTrue(bundle.getEntryFirstRep().getResource() instanceof Subscription);
+			@Override
+			public CompletableFuture<Void> onMessage(Subscription subscription, String message)
+			{
+				Task resource = fhirContext.newJsonParser().parseResource(Task.class, message);
+				if (onResource != null)
+					onResource.accept(resource);
 
-		Subscription subscription = (Subscription) bundle.getEntryFirstRep().getResource();
-		assertNotNull(subscription.getIdElement());
-		assertNotNull(subscription.getIdElement().getIdPart());
+				return CompletableFuture.completedFuture(null);
+			}
+		};
 
-		return createWebsocketClient(fhirServer.getApiPort(), certificates.getClientCertificate().trustStore(),
-				certificates.getClientCertificate().keyStore(), certificates.getClientCertificate().keyStorePassword(),
-				subscription.getIdElement().getIdPart());
-	}
-
-	private static WebsocketClient createWebsocketClient(int fhirApiPort, KeyStore trustStore, KeyStore keyStore,
-			char[] keyStorePassword, String subscriptionIdPart)
-	{
-		return new WebsocketClientTyrus(() ->
-		{}, URI.create("wss://localhost:" + fhirApiPort + FHIR_CONTEXT_PATH + "/ws"), trustStore, keyStore,
-				keyStorePassword, null, null, null, "Integration Test Client", subscriptionIdPart);
-	}
-
-	protected static IParser newJsonParser()
-	{
-		return newParser(fhirContext::newJsonParser);
-	}
-
-	private static IParser newParser(Supplier<IParser> supplier)
-	{
-		IParser p = supplier.get();
-		p.setStripVersionsFromReferences(false);
-		p.setOverrideResourceIdWithBundleEntryFullUrl(false);
-		p.setPrettyPrint(true);
-		return p;
+		ClientProvider clientProvider = getBpeSpringWebApplicationContext().getBean(ClientProvider.class);
+		return clientProvider.createWebsocketClient(endpoint, "test-task");
 	}
 
 	private static JettyServer startFhirServer(ServerSocketChannel statusConnectorChannel,

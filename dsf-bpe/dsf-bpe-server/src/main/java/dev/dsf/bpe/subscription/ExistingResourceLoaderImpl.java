@@ -50,26 +50,31 @@ public class ExistingResourceLoaderImpl<R extends Resource> implements ExistingR
 	private final ResourceHandler<R> handler;
 	private final String resourceName;
 	private final Class<R> resourceClass;
+	private final Map<String, List<String>> searchCriteriaQueryParameters = new HashMap<>();
 
 	public ExistingResourceLoaderImpl(LastEventTimeDao lastEventTimeDao, ResourceHandler<R> handler,
-			WebserviceClient webserviceClient, String resourceName, Class<R> resourceClass)
+			WebserviceClient webserviceClient, String resourceName, Class<R> resourceClass,
+			Map<String, List<String>> searchCriteriaQueryParameters)
 	{
 		this.lastEventTimeDao = lastEventTimeDao;
 		this.handler = handler;
 		this.webserviceClient = webserviceClient;
 		this.resourceName = resourceName;
 		this.resourceClass = resourceClass;
+
+		if (searchCriteriaQueryParameters != null)
+			searchCriteriaQueryParameters.forEach((k, v) -> this.searchCriteriaQueryParameters.put(k, List.copyOf(v)));
 	}
 
 	@Override
-	public void readExistingResources(Map<String, List<String>> searchCriteriaQueryParameters)
+	public void readExistingResources()
 	{
 		// executing search until call results in no more found tasks
-		while (doReadExistingResources(searchCriteriaQueryParameters))
+		while (doReadExistingResources())
 			;
 	}
 
-	private boolean doReadExistingResources(Map<String, List<String>> searchCriteriaQueryParameters)
+	private boolean doReadExistingResources()
 	{
 		Map<String, List<String>> queryParams = new HashMap<>(searchCriteriaQueryParameters);
 		Optional<LocalDateTime> readLastEventTime = readLastEventTime();
