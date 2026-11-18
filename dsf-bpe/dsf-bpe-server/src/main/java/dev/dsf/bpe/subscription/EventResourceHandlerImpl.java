@@ -17,6 +17,7 @@ package dev.dsf.bpe.subscription;
 
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.Objects;
 
 import org.hl7.fhir.r4.model.Resource;
 import org.slf4j.Logger;
@@ -33,12 +34,20 @@ public class EventResourceHandlerImpl<R extends Resource> implements EventResour
 	private final ResourceHandler<R> handler;
 	private final Class<R> resourceClass;
 
+	/**
+	 * @param lastEventTimeDao
+	 *            not <code>null</code>
+	 * @param handler
+	 *            not <code>null</code>
+	 * @param resourceClass
+	 *            not <code>null</code>
+	 */
 	public EventResourceHandlerImpl(LastEventTimeDao lastEventTimeDao, ResourceHandler<R> handler,
 			Class<R> resourceClass)
 	{
-		this.lastEventTimeDao = lastEventTimeDao;
-		this.handler = handler;
-		this.resourceClass = resourceClass;
+		this.lastEventTimeDao = Objects.requireNonNull(lastEventTimeDao, "lastEventTimeDao");
+		this.handler = Objects.requireNonNull(handler, "handler");
+		this.resourceClass = Objects.requireNonNull(resourceClass, "resourceClass");
 	}
 
 	@Override
