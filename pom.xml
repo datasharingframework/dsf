@@ -38,19 +38,19 @@
 
 		<main.basedir>${project.basedir}</main.basedir>
 
-		<slf4j.version>2.0.17</slf4j.version>
-		<log4j.version>2.25.5</log4j.version>
-		<jetty.version>12.1.10</jetty.version>
-		<jersey.version>3.1.11</jersey.version>
+		<slf4j.version>2.0.20</slf4j.version>
+		<log4j.version>2.26.1</log4j.version>
+		<jetty.version>12.1.15</jetty.version>
+		<jersey.version>3.1.12</jersey.version>
 		<tyrus.version>2.2.2</tyrus.version>
 		<spring.version>6.2.19</spring.version>
-		<jackson.version>2.21.5</jackson.version>
-		<operaton.version>1.1.1</operaton.version>
+		<jackson.version>2.21.8</jackson.version>
+		<operaton.version>1.1.5</operaton.version>
 		<hapi.fhir.version.v1>5.1.0</hapi.fhir.version.v1>
 		<hapi.fhir.version.v2>8.4.2</hapi.fhir.version.v2>
 		<hapi.fhir.org.hl7.version.v2>6.5.27</hapi.fhir.org.hl7.version.v2>
 		<hapi.fhir.version>8.4.2</hapi.fhir.version>
-		<bouncycastle.version>1.84</bouncycastle.version>
+		<bouncycastle.version>1.87</bouncycastle.version>
 		<crypto-utils.version.v1>3.8.0</crypto-utils.version.v1>
 		<crypto-utils.version.v2>5.2.1</crypto-utils.version.v2>
 		<crypto-utils.version>5.2.1</crypto-utils.version>
@@ -183,7 +183,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.7.13</version>
+				<version>42.7.14</version>
 			</dependency>
 			<dependency>
 				<groupId>org.checkerframework</groupId>
@@ -205,7 +205,7 @@
 			<dependency>
 				<groupId>com.auth0</groupId>
 				<artifactId>java-jwt</artifactId>
-				<version>4.5.1</version>
+				<version>4.6.2</version>
 			</dependency>
 
 			<dependency>
@@ -443,7 +443,7 @@
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>33.5.0-jre</version>
+				<version>33.8.0-jre</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
