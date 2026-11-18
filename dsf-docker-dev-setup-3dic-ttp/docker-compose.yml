@@ -555,7 +555,6 @@ services:
       DEV_DSF_PROXY_URL: http://forward-proxy:8080
       DEV_DSF_PROXY_USERNAME: proxy_user
       DEV_DSF_PROXY_PASSWORD: proxy_password
-      DEV_DSF_PROXY_NOPROXY: keycloak
       DEV_DSF_BPE_FHIR_CLIENT_CONNECTIONS_CONFIG: |
         ttp-fhir-cert-auth:
           base-url: https://ttp/fhir

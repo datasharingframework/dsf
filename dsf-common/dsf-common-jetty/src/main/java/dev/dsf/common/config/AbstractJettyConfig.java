@@ -16,10 +16,7 @@
 package dev.dsf.common.config;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -35,10 +32,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.eclipse.jetty.client.Authentication;
+import org.eclipse.jetty.client.BasicAuthentication;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.HttpProxy;
 import org.eclipse.jetty.client.Origin.Address;
-import org.eclipse.jetty.client.ProxyConfiguration.Proxy;
 import org.eclipse.jetty.client.transport.HttpClientTransportOverHTTP;
 import org.eclipse.jetty.ee11.servlet.SessionHandler;
 import org.eclipse.jetty.ee11.webapp.WebAppContext;
@@ -528,28 +526,6 @@ public abstract class AbstractJettyConfig extends AbstractCertificateAndProxyCon
 			return duration;
 	}
 
-	private Proxy oidcClientProxy()
-	{
-		ProxyConfig config = proxyConfig();
-		if (config.isEnabled(oidcProviderRealmBaseUrl))
-		{
-			try
-			{
-				URL proxyUrl = new URI(config.getUrl()).toURL();
-
-				Address address = new Address(proxyUrl.getHost(),
-						proxyUrl.getPort() < 0 ? proxyUrl.getDefaultPort() : proxyUrl.getPort());
-				return new HttpProxy(address, "https".equals(proxyUrl.getProtocol()));
-			}
-			catch (MalformedURLException | URISyntaxException e)
-			{
-				throw new RuntimeException(e);
-			}
-		}
-		else
-			return null;
-	}
-
 	@Bean
 	@Lazy
 	public ProxyConfig proxyConfig()
@@ -607,16 +583,38 @@ public abstract class AbstractJettyConfig extends AbstractCertificateAndProxyCon
 		connector.setExecutor(threadPool);
 		connector.setScheduler(new ScheduledExecutorScheduler("oidc-client-scheduler", true));
 		connector.setSslContextFactory(sslContextFactory);
-		connector.setIdleTimeout(oidcProviderClientTimeoutRead());
 		connector.setConnectTimeout(oidcProviderClientTimeoutConnect());
+		connector.setIdleTimeout(oidcProviderClientTimeoutRead());
 
 		HttpClient httpClient = new HttpClientWithGetRetry(new HttpClientTransportOverHTTP(connector), 5);
-		if (oidcClientProxy() != null)
-			httpClient.getProxyConfiguration().addProxy(oidcClientProxy());
-
 		httpClient.setUserAgentField(new HttpField(HttpHeader.USER_AGENT, buildInfoReader().getUserAgentValue()));
 
+		if (proxyConfig().isEnabled(oidcProviderRealmBaseUrl))
+		{
+			httpClient.getProxyConfiguration().addProxy(getProxy(sslContextFactory));
+			if (proxyConfig().getUsername() != null && proxyConfig().getPassword() != null)
+				httpClient.getAuthenticationStore().addAuthentication(getProxyAuthentication());
+		}
+
+
 		return httpClient;
+	}
+
+	private HttpProxy getProxy(SslContextFactory.Client sslFactory)
+	{
+		ProxyConfig proxyConfig = proxyConfig();
+		URI uri = URI.create(proxyConfig.getUrl());
+
+		return new HttpProxy(new Address(uri.getHost(), uri.getPort()),
+				"https".equals(uri.getScheme()) ? sslFactory : null);
+	}
+
+	private BasicAuthentication getProxyAuthentication()
+	{
+		ProxyConfig proxyConfig = proxyConfig();
+
+		return new BasicAuthentication(URI.create(proxyConfig.getUrl()), Authentication.ANY_REALM,
+				proxyConfig.getUsername(), new String(proxyConfig.getPassword()));
 	}
 
 	@Bean
