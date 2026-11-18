@@ -50,7 +50,8 @@ import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.resource.PathResourceFactory;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
-import org.eclipse.jetty.util.thread.QueuedThreadPool;
+import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
+import org.eclipse.jetty.util.thread.VirtualThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -264,7 +265,12 @@ public final class JettyServer
 			List<Class<? extends ServletContainerInitializer>> servletContainerInitializers,
 			Map<String, String> initParameters, BiConsumer<WebAppContext, Supplier<Integer>> securityHandlerConfigurer)
 	{
-		server = new Server(threadPool());
+		VirtualThreadPool virtualThreadPool = new VirtualThreadPool(200);
+		virtualThreadPool.setName("jetty-virtual-");
+
+		ScheduledExecutorScheduler scheduler = new ScheduledExecutorScheduler("jetty-scheduler", false);
+
+		server = new Server(virtualThreadPool, scheduler, null);
 		apiConnector = apiConnectorProvider.apply(server);
 		server.addConnector(apiConnector);
 		statusConnector = statusConnectorProvider.apply(server);
@@ -276,13 +282,6 @@ public final class JettyServer
 
 		server.setHandler(webAppContext);
 		server.setErrorHandler(statusCodeOnlyErrorHandler());
-	}
-
-	private QueuedThreadPool threadPool()
-	{
-		QueuedThreadPool threadPool = new QueuedThreadPool();
-		threadPool.setName("jetty-server");
-		return threadPool;
 	}
 
 	private WebAppContext webAppContext(String serverMavenModuleName, String contextPath,
@@ -369,7 +368,7 @@ public final class JettyServer
 
 	public void addShutdownHook()
 	{
-		Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
+		Runtime.getRuntime().addShutdownHook(Thread.ofPlatform().name("jetty-shutdown").unstarted(this::stop));
 	}
 
 	public void stop()

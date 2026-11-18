@@ -75,6 +75,7 @@ public class WebsocketConfig
 
 		ThreadPoolExecutor executor = new ThreadPoolExecutor(corePoolSize, corePoolSize, 30, TimeUnit.MINUTES,
 				new LinkedBlockingQueue<>(),
+				Thread.ofPlatform().name("resource-executor-" + resource + "-", 0).factory(),
 				(_, _) -> logger.error("Unable to handle {} - execution rejected", resource));
 		executor.allowCoreThreadTimeOut(true);
 

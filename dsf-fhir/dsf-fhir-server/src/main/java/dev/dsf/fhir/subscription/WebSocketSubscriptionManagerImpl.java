@@ -146,7 +146,8 @@ public class WebSocketSubscriptionManagerImpl implements WebSocketSubscriptionMa
 		}
 	}
 
-	private final ExecutorService executor = Executors.newCachedThreadPool();
+	private final ExecutorService executor = Executors
+			.newCachedThreadPool(Thread.ofPlatform().name("websocket-subscription-manager-", 0).factory());
 
 	private final DaoProvider daoProvider;
 	private final SubscriptionDao subscriptionDao;

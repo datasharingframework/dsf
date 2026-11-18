@@ -22,7 +22,6 @@ import javax.sql.DataSource;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.operaton.bpm.engine.ProcessEngine;
-import org.operaton.bpm.engine.impl.jobexecutor.DefaultJobExecutor;
 import org.operaton.bpm.engine.impl.persistence.StrongUuidGenerator;
 import org.operaton.bpm.engine.spring.ProcessEngineFactoryBean;
 import org.operaton.bpm.engine.spring.SpringProcessEngineConfiguration;
@@ -37,6 +36,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import dev.dsf.bpe.api.plugin.ProcessPluginFactory;
 import dev.dsf.bpe.engine.DelegateProvider;
 import dev.dsf.bpe.engine.DelegateProviderImpl;
+import dev.dsf.bpe.engine.EngineJobExecutor;
 import dev.dsf.bpe.engine.FallbackSerializerFactory;
 import dev.dsf.bpe.engine.FallbackSerializerFactoryImpl;
 import dev.dsf.bpe.engine.MultiVersionSpringProcessEngineConfiguration;
@@ -127,7 +127,7 @@ public class OperatonConfig
 				processPluginFactories.stream().flatMap(ProcessPluginFactory::getSerializer).toList());
 		c.setFallbackSerializerFactory(fallbackSerializerFactory());
 
-		DefaultJobExecutor jobExecutor = new DefaultJobExecutor();
+		EngineJobExecutor jobExecutor = new EngineJobExecutor();
 		jobExecutor.setCorePoolSize(propertiesConfig.getProcessEngineJobExecutorCorePoolSize());
 		jobExecutor.setQueueSize(propertiesConfig.getProcessEngineJobExecutorQueueSize());
 		jobExecutor.setMaxPoolSize(propertiesConfig.getProcessEngineJobExecutorMaxPoolSize());

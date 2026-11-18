@@ -52,6 +52,8 @@ import org.eclipse.jetty.security.openid.OpenIdConfiguration;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.eclipse.jetty.util.thread.ScheduledExecutorScheduler;
+import org.eclipse.jetty.util.thread.VirtualThreadPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -597,7 +599,13 @@ public abstract class AbstractJettyConfig extends AbstractCertificateAndProxyCon
 			sslContextFactory.setKeyStorePassword(String.valueOf(oidcClientKeyStorePassword));
 		}
 
+		VirtualThreadPool threadPool = new VirtualThreadPool();
+		threadPool.setMaxConcurrentTasks(200);
+		threadPool.setName("oidc-client-pool-");
+
 		ClientConnector connector = new ClientConnector();
+		connector.setExecutor(threadPool);
+		connector.setScheduler(new ScheduledExecutorScheduler("oidc-client-scheduler", true));
 		connector.setSslContextFactory(sslContextFactory);
 		connector.setIdleTimeout(oidcProviderClientTimeoutRead());
 		connector.setConnectTimeout(oidcProviderClientTimeoutConnect());

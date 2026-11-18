@@ -51,7 +51,7 @@ public class DsfClientProviderImpl implements DsfClientProvider, DisposableBean
 	private final ClientConfigProvider configProvider;
 
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(8,
-			r -> new Thread(r, "dsf-client-async-scheduler"));
+			Thread.ofPlatform().name("dsf-client-async-scheduler-", 0).factory());
 
 	/**
 	 * @param fhirContext

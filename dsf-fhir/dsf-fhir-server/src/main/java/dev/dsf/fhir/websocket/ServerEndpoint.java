@@ -55,7 +55,7 @@ public class ServerEndpoint extends Endpoint implements DisposableBean
 	private static final String BIND_MESSAGE_START = "bind ";
 
 	private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2,
-			r -> new Thread(r, "websocket-server-endpoint-scheduler"));
+			Thread.ofPlatform().name("websocket-server-endpoint-scheduler-", 0).factory());
 
 	private final WebSocketSubscriptionManager subscriptionManager;
 
