@@ -16,5 +16,7 @@
 
 FROM alpine:3.24
 RUN apk add --no-cache tinyproxy
-COPY tinyproxy.conf /etc/tinyproxy/tinyproxy.conf
-CMD ["tinyproxy", "-d"]
+COPY --chmod=0444 tinyproxy.conf /etc/tinyproxy/tinyproxy.conf
+USER nobody
+ENTRYPOINT ["tinyproxy"]
+CMD ["-d"]

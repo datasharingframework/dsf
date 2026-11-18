@@ -738,6 +738,14 @@
 											<target>dsf-docker-dev-setup-3dic-ttp/secrets/ttp.key.password</target>
 										</targets>
 									</cert>
+									<cert>
+										<cn>forward-proxy-tls</cn>
+										<type>SERVER</type>
+										<targets>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/forward-proxy-tls.chain.crt</target>
+											<target>dsf-docker-dev-setup-3dic-ttp/secrets/forward-proxy-tls.key.plain</target>
+										</targets>
+									</cert>
 								</certs>
 								<rootCa>
 									<targets>
