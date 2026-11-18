@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-FROM docker.io/library/httpd:2.4-alpine@sha256:3440c39d8d6f54fa9ad2549e5a60c19ddd435faadc29c1ad28aa795f71888889
+FROM docker.io/library/httpd:2.4-alpine@sha256:32bd0639bcc4917ef1fd9363a1d9dd2dd9c498565118b062a10d51e43a5c3a24
 LABEL org.opencontainers.image.source=https://github.com/datasharingframework/dsf
 LABEL org.opencontainers.image.description="DSF BPE Reverse Proxy"
 LABEL org.opencontainers.image.licenses="Apache License, Version 2.0"
