@@ -15,6 +15,7 @@
  */
 package dev.dsf.bpe.api.client.oidc;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -31,6 +32,8 @@ public interface Jwks
 		String getCrv();
 
 		String getUse();
+
+		List<String> getKeyOps();
 
 		String getN();
 
