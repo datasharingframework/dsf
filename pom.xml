@@ -483,6 +483,13 @@
 				<version>3.3.3</version>
 			</dependency>
 
+            <!-- dsf linter -->
+            <dependency>
+                <groupId>dev.dsf.linter</groupId>
+                <artifactId>linter-core</artifactId>
+                <version>0.1.3</version>
+            </dependency>
+
 			<!-- maven plugin -->
 			<dependency>
 				<groupId>org.apache.maven</groupId>
