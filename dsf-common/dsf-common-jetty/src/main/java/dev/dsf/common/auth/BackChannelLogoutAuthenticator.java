@@ -114,7 +114,7 @@ public class BackChannelLogoutAuthenticator implements Authenticator, HttpSessio
 
 		try
 		{
-			DecodedJWT jwt = jwtVerifier.verifyBackchannelLogout(logoutTokenField.getValue());
+			DecodedJWT jwt = jwtVerifier.verifyBackchannelLogoutToken(logoutTokenField.getValue());
 
 			if (!jwt.getClaims().containsKey("sub") && !jwt.getClaims().containsKey("sid"))
 			{
@@ -130,12 +130,12 @@ public class BackChannelLogoutAuthenticator implements Authenticator, HttpSessio
 
 			logger.debug("Invalidating session for sub/sid {}/{}", sub, sid);
 
-			HttpSession sessionBySub = sessionsBySub.get(sub);
+			HttpSession sessionBySub = sub == null ? null : sessionsBySub.get(sub);
 			if (sessionBySub != null)
 				sessionBySub.invalidate();
 
 			// session will have been removed if found by sub and invalidated
-			HttpSession sessionBySid = sessionsBySid.get(sid);
+			HttpSession sessionBySid = sid == null ? null : sessionsBySid.get(sid);
 			if (sessionBySid != null)
 				sessionBySid.invalidate();
 

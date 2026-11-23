@@ -173,6 +173,10 @@ public abstract class AbstractJettyConfig extends AbstractCertificateAndProxyCon
 	@Value("${dev.dsf.server.auth.oidc.bearer.token.audience:#{null}}")
 	private String oidcBearerTokenAudience;
 
+	@Documentation(description = "OIDC bearer tokens time validation leeway for 'Not Before', 'Issued At' and 'Expires At' values")
+	@Value("${dev.dsf.server.auth.oidc.bearer.token.time.validation.leeway:PT10S}")
+	private String oidcBearerTokenNotBeforeIssuedAtExpiresAtLeeway;
+
 	@Documentation(description = "OIDC provider realm base url", example = "https://keycloak.test.com:8443/realms/example-realm-name")
 	@Value("${dev.dsf.server.auth.oidc.provider.realm.base.url:#{null}}")
 	private String oidcProviderRealmBaseUrl;
@@ -228,6 +232,10 @@ public abstract class AbstractJettyConfig extends AbstractCertificateAndProxyCon
 	@Documentation(description = "Path called by the OIDC provide to request back-channel logout")
 	@Value("${dev.dsf.server.auth.oidc.back.channel.logout.path:/back-channel-logout}")
 	private String oidcBackChannelPath;
+
+	@Documentation(description = "OIDC back-channel logout tokens time validation leeway for 'Not Before', 'Issued At' and 'Expires At' values")
+	@Value("${dev.dsf.server.auth.oidc.back.channel.logout.token.time.validation.leeway:PT10S}")
+	private String oidcBackChannelNotBeforeIssuedAtExpiresAtLeeway;
 
 	@Documentation(description = "Maximum inactivity period after which the server session for OIDC logins is invalidated; the access token may expire earlier, resulting in earlier session invalidation")
 	@Value("${dev.dsf.server.auth.oidc.session.timeout:PT30M}")
@@ -454,11 +462,23 @@ public abstract class AbstractJettyConfig extends AbstractCertificateAndProxyCon
 		sessionHandler.addEventListener(backChannelLogoutAuthenticator);
 	}
 
+	private Duration getOidcBearerTokenNotBeforeIssuedAtExpiresAtLeeway()
+	{
+		return assertPositive(Duration.parse(oidcBearerTokenNotBeforeIssuedAtExpiresAtLeeway));
+	}
+
+	private Duration getOidcBackChannelNotBeforeIssuedAtExpiresAtLeeway()
+	{
+		return assertPositive(Duration.parse(oidcBackChannelNotBeforeIssuedAtExpiresAtLeeway));
+	}
+
 	@Bean
 	@Lazy
 	public JwtVerifier jwtVerifier()
 	{
-		return new JwtVerifierImpl(oidcProviderRealmBaseUrl, oidcClientId, oidcBearerTokenAudience, baseOidcClient());
+		return new JwtVerifierImpl(oidcProviderRealmBaseUrl, oidcClientId, oidcBearerTokenAudience,
+				getOidcBearerTokenNotBeforeIssuedAtExpiresAtLeeway(),
+				getOidcBackChannelNotBeforeIssuedAtExpiresAtLeeway(), baseOidcClient());
 	}
 
 	@Bean
@@ -510,7 +530,7 @@ public abstract class AbstractJettyConfig extends AbstractCertificateAndProxyCon
 
 	private int oidcSessionTimeout()
 	{
-		long seconds = assertPositive(Duration.parse(oidcSessionTimeout)).getSeconds();
+		long seconds = assertPositive(Duration.parse(oidcSessionTimeout)).toSeconds();
 
 		if (seconds >= Integer.MAX_VALUE)
 			seconds = Integer.MAX_VALUE;

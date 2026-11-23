@@ -15,25 +15,21 @@
  */
 package dev.dsf.common.oidc;
 
+import java.time.Duration;
 import java.util.Objects;
-import java.util.Optional;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import com.auth0.jwt.interfaces.Verification;
 
-import dev.dsf.common.oidc.Jwks.JwksKey;
-
 public class JwtVerifierImpl implements JwtVerifier
 {
-	private final String issuer;
 	private final String clientId;
 	private final String bearerTokenAudience;
 
-	private final BaseOidcClient oidcClient;
+	private final BaseJwtVerifier backchannelLogoutTokenVerifier;
+	private final BaseJwtVerifier bearerTokenVerifier;
 
 	/**
 	 * @param issuer
@@ -42,34 +38,30 @@ public class JwtVerifierImpl implements JwtVerifier
 	 *            not <code>null</code>
 	 * @param bearerTokenAudience
 	 *            if <code>null</code>, uses value from <b>clientId</b>, will not check audience if value is blank
+	 * @param bearerTokenNotBeforeIssuedAtExpiresAtLeeway
+	 *            not <code>null</code>
+	 * @param backchannelLogoutNotBeforeIssuedAtExpiresAtLeeway
+	 *            not <code>null</code>
 	 * @param oidcClient
 	 *            not <code>null</code>
 	 */
-	public JwtVerifierImpl(String issuer, String clientId, String bearerTokenAudience, BaseOidcClient oidcClient)
+	public JwtVerifierImpl(String issuer, String clientId, String bearerTokenAudience,
+			Duration bearerTokenNotBeforeIssuedAtExpiresAtLeeway,
+			Duration backchannelLogoutNotBeforeIssuedAtExpiresAtLeeway, BaseOidcClient oidcClient)
 	{
-		this.issuer = Objects.requireNonNull(issuer, "issuer");
 		this.clientId = Objects.requireNonNull(clientId, "clientId");
 		this.bearerTokenAudience = bearerTokenAudience == null ? clientId : bearerTokenAudience;
-		this.oidcClient = Objects.requireNonNull(oidcClient, "oidcClient");
+
+		this.backchannelLogoutTokenVerifier = new BaseJwtVerifierImpl("Logout", issuer, oidcClient::getJwks,
+				backchannelLogoutNotBeforeIssuedAtExpiresAtLeeway);
+		this.bearerTokenVerifier = new BaseJwtVerifierImpl("Bearer", issuer, oidcClient::getJwks,
+				bearerTokenNotBeforeIssuedAtExpiresAtLeeway);
 	}
 
 	@Override
-	public DecodedJWT verifyBackchannelLogout(String token) throws JWTVerificationException, OidcClientException
+	public DecodedJWT verifyBackchannelLogoutToken(String token) throws JWTVerificationException, OidcClientException
 	{
-		final String keyId = JWT.decode(token).getKeyId();
-
-		Optional<JwksKey> key = oidcClient.getJwks().getKey(keyId);
-		if (key.isEmpty() || !key.get().use().equals("sig"))
-			throw new OidcClientException("Logout token key with kid '" + keyId + "'  and use 'sig' not in JWKS");
-
-		Optional<Algorithm> algorithm = key.flatMap(JwksKey::toAlgorithm);
-		if (key.isEmpty())
-		{
-			throw new OidcClientException("Logout token key with kid '" + keyId
-					+ "' has unsupported type (kty) / algorithm (alg) / key-size in JWKS");
-		}
-
-		JWTVerifier verifier = createVerification(algorithm.get()).withAudience(clientId)
+		JWTVerifier verifier = backchannelLogoutTokenVerifier.createVerification(token).withAudience(clientId)
 				.withClaim("events",
 						(claim, _) -> claim.asMap().containsKey("http://schemas.openid.net/event/backchannel-logout"))
 				.build();
@@ -77,28 +69,10 @@ public class JwtVerifierImpl implements JwtVerifier
 		return verifier.verify(token);
 	}
 
-	private Verification createVerification(Algorithm algorithm)
-	{
-		return JWT.require(algorithm).withIssuer(issuer).acceptLeeway(1);
-	}
-
 	@Override
 	public DecodedJWT verifyBearerToken(String token) throws JWTVerificationException, OidcClientException
 	{
-		final String keyId = JWT.decode(token).getKeyId();
-
-		Optional<JwksKey> key = oidcClient.getJwks().getKey(keyId);
-		if (key.isEmpty() || !key.get().use().equals("sig"))
-			throw new OidcClientException("Bearer token key with kid '" + keyId + "'  and use 'sig' not in JWKS");
-
-		Optional<Algorithm> algorithm = key.flatMap(JwksKey::toAlgorithm);
-		if (key.isEmpty())
-		{
-			throw new OidcClientException("Bearer token key with kid '" + keyId
-					+ "' has unsupported type (kty) / algorithm (alg) / key-size in JWKS");
-		}
-
-		Verification verification = createVerification(algorithm.get());
+		Verification verification = bearerTokenVerifier.createVerification(token);
 
 		if (!bearerTokenAudience.isBlank())
 			verification.withAnyOfAudience(bearerTokenAudience);
