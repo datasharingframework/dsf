@@ -38,20 +38,24 @@ public class RootServiceSecure extends AbstractServiceSecure<RootService> implem
 
 	private final AuthorizationRule<Resource> authorizationRule;
 
+	/**
+	 * @param delegate
+	 *            not <code>null</code>
+	 * @param serverBase
+	 *            not <code>null</code>
+	 * @param responseGenerator
+	 *            not <code>null</code>
+	 * @param referenceResolver
+	 *            not <code>null</code>
+	 * @param authorizationRule
+	 *            not <code>null</code>
+	 */
 	public RootServiceSecure(RootService delegate, String serverBase, ResponseGenerator responseGenerator,
 			ReferenceResolver referenceResolver, AuthorizationRule<Resource> authorizationRule)
 	{
 		super(delegate, serverBase, responseGenerator, referenceResolver);
 
-		this.authorizationRule = authorizationRule;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		super.afterPropertiesSet();
-
-		Objects.requireNonNull(authorizationRule, "authorizationRule");
+		this.authorizationRule = Objects.requireNonNull(authorizationRule, "authorizationRule");
 	}
 
 	@Override

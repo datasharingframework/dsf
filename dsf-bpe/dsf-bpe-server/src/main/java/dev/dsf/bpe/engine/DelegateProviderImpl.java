@@ -44,38 +44,27 @@ import org.operaton.bpm.engine.delegate.VariableScope;
 import org.operaton.bpm.engine.impl.bpmn.parser.FieldDeclaration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationContext;
 
 import dev.dsf.bpe.api.Constants;
 import dev.dsf.bpe.api.plugin.ProcessIdAndVersion;
 import dev.dsf.bpe.api.plugin.ProcessPlugin;
 import dev.dsf.bpe.client.dsf.WebserviceClient;
 
-public class DelegateProviderImpl implements DelegateProvider, InitializingBean
+public class DelegateProviderImpl implements DelegateProvider
 {
 	private static final Logger logger = LoggerFactory.getLogger(DelegateProviderImpl.class);
 
-	private final ClassLoader defaultClassLoader;
-	private final ApplicationContext defaultApplicationContext;
 	private final WebserviceClient webserviceClient;
 
 	private final Map<ProcessIdAndVersion, ProcessPlugin> processPluginsByProcessIdAndVersion = new HashMap<>();
 
-	public DelegateProviderImpl(ClassLoader mainClassLoader, ApplicationContext mainApplicationContext,
-			WebserviceClient webserviceClient)
+	/**
+	 * @param webserviceClient
+	 *            not <code>null</code>
+	 */
+	public DelegateProviderImpl(WebserviceClient webserviceClient)
 	{
-		this.defaultClassLoader = mainClassLoader;
-		this.defaultApplicationContext = mainApplicationContext;
-		this.webserviceClient = webserviceClient;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(defaultClassLoader, "defaultClassLoader");
-		Objects.requireNonNull(defaultApplicationContext, "defaultApplicationContext");
-		Objects.requireNonNull(webserviceClient, "webserviceClient");
+		this.webserviceClient = Objects.requireNonNull(webserviceClient, "webserviceClient");
 	}
 
 	@Override

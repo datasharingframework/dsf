@@ -33,6 +33,22 @@ abstract class AbstractPreparedStatementFactory<R extends Resource> extends PgOb
 	private final String readByIdAndVersionSql;
 	private final String updateSql;
 
+	/**
+	 * @param fhirContext
+	 *            not <code>null</code>
+	 * @param objectMapper
+	 *            not <code>null</code>
+	 * @param resourceType
+	 *            not <code>null</code>
+	 * @param createSql
+	 *            not <code>null</code>
+	 * @param readByIdSql
+	 *            not <code>null</code>
+	 * @param readByIdAndVersionSql
+	 *            not <code>null</code>
+	 * @param updateSql
+	 *            not <code>null</code>
+	 */
 	protected AbstractPreparedStatementFactory(FhirContext fhirContext, ObjectMapper objectMapper,
 			Class<R> resourceType, String createSql, String readByIdSql, String readByIdAndVersionSql, String updateSql)
 	{

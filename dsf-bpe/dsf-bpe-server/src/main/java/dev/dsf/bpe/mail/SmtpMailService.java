@@ -80,12 +80,11 @@ import org.bouncycastle.mail.smime.SMIMESignedGenerator;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import de.hsheilbronn.mi.utils.crypto.context.SSLContextFactory;
 import dev.dsf.bpe.api.service.BpeMailService;
 
-public class SmtpMailService implements BpeMailService, InitializingBean
+public class SmtpMailService implements BpeMailService
 {
 	private static final Logger logger = LoggerFactory.getLogger(SmtpMailService.class);
 
@@ -227,7 +226,7 @@ public class SmtpMailService implements BpeMailService, InitializingBean
 
 	/**
 	 * @param fromAddress
-	 *            not <code>null</code>
+	 *            not <code>null</code>, not blank
 	 * @param toAddresses
 	 *            not <code>null</code>, at least one
 	 * @param toAddressesCc
@@ -280,6 +279,11 @@ public class SmtpMailService implements BpeMailService, InitializingBean
 		log4jAppender = !mailOnErrorLogEvent ? null
 				: new Log4jAppender(session, createMimeMessage("DSF BPE Error", null), "DSF BPE Error",
 						mailOnErrorLogEventBufferSize, debugLogLocation);
+
+		if (this.fromAddress == null)
+			throw new IllegalArgumentException("no valid from address configured");
+		if (this.toAddresses.length == 0)
+			throw new IllegalArgumentException("no valid to addresses configured");
 	}
 
 	private Optional<InternetAddress> toInternetAddress(String fromAddress)
@@ -299,15 +303,6 @@ public class SmtpMailService implements BpeMailService, InitializingBean
 
 			return Optional.empty();
 		}
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		if (fromAddress == null)
-			throw new IllegalArgumentException("no valid from address configured");
-		if (toAddresses.length == 0)
-			throw new IllegalArgumentException("no valid to addresses configured");
 	}
 
 	private Session createSession(boolean useSmtps, String mailServerHostname, int mailServerPort,

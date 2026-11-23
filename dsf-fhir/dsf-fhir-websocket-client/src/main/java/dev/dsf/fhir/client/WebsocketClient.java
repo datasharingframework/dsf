@@ -15,20 +15,38 @@
  */
 package dev.dsf.fhir.client;
 
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
-import org.hl7.fhir.r4.model.Resource;
-
-import ca.uhn.fhir.parser.IParser;
-
-public interface WebsocketClient
+public interface WebsocketClient extends AutoCloseable
 {
-	void connect();
+	/**
+	 * @return <code>true</code> if the client is currently connected
+	 */
+	boolean isConnected();
 
-	void disconnect();
+	/**
+	 * Initiates a connection or returns immediately if already connected
+	 *
+	 * @return a future completed when the connection is established
+	 */
+	CompletableFuture<Void> connect();
 
-	void setResourceHandler(Consumer<Resource> handler, Supplier<IParser> parserFactory);
+	/**
+	 * Returns the last 10 ping/pong turnaround times in milliseconds, oldest first
+	 */
+	List<Long> getPingHistory();
 
-	void setPingHandler(Consumer<String> handler);
+	/**
+	 * Initiates a shutdown without waiting for completion
+	 */
+	@Override
+	void close();
+
+	/**
+	 * Initiates an asynchronous shutdown
+	 *
+	 * @return a future completed when the shutdown operation finishes
+	 */
+	CompletableFuture<Void> closeAsync();
 }

@@ -15,25 +15,37 @@
  */
 package dev.dsf.bpe.spring.config;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Task;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 
-import dev.dsf.bpe.subscription.ConcurrentSubscriptionHandlerFactory;
-import dev.dsf.bpe.subscription.LocalFhirConnector;
-import dev.dsf.bpe.subscription.LocalFhirConnectorImpl;
+import dev.dsf.bpe.health.WebsocketHealthCheck;
+import dev.dsf.bpe.subscription.FhirSubscriptionConnector;
+import dev.dsf.bpe.subscription.FhirSubscriptionConnectorImpl;
 import dev.dsf.bpe.subscription.QuestionnaireResponseHandler;
 import dev.dsf.bpe.subscription.QuestionnaireResponseSubscriptionHandlerFactory;
 import dev.dsf.bpe.subscription.ResourceHandler;
 import dev.dsf.bpe.subscription.SubscriptionHandlerFactory;
 import dev.dsf.bpe.subscription.TaskHandler;
 import dev.dsf.bpe.subscription.TaskSubscriptionHandlerFactory;
+import dev.dsf.common.status.health.HealthCheck;
 
 @Configuration
 public class WebsocketConfig
 {
+	private static final Logger logger = LoggerFactory.getLogger(WebsocketConfig.class);
+
 	@Autowired
 	private PropertiesConfig propertiesConfig;
 
@@ -52,6 +64,22 @@ public class WebsocketConfig
 	@Autowired
 	private PluginConfig pluginConfig;
 
+
+	@Bean
+	@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+	public ExecutorService resourceExecutor(String resource)
+	{
+		int corePoolSize = propertiesConfig.getProcessStartOrContinueThreads();
+
+		ThreadPoolExecutor executor = new ThreadPoolExecutor(corePoolSize, corePoolSize, 30, TimeUnit.MINUTES,
+				new LinkedBlockingQueue<>(),
+				Thread.ofPlatform().name("resource-executor-" + resource + "-", 0).factory(),
+				(_, _) -> logger.error("Unable to handle {} - execution rejected", resource));
+		executor.allowCoreThreadTimeOut(true);
+
+		return executor;
+	}
+
 	@Bean
 	public ResourceHandler<Task> taskHandler()
 	{
@@ -64,17 +92,21 @@ public class WebsocketConfig
 	@Bean
 	public SubscriptionHandlerFactory<Task> taskSubscriptionHandlerFactory()
 	{
-		return new ConcurrentSubscriptionHandlerFactory<>(propertiesConfig.getProcessStartOrContinueThreads(),
-				new TaskSubscriptionHandlerFactory(taskHandler(), daoConfig.lastEventTimeDaoTask()));
+		return new TaskSubscriptionHandlerFactory(taskHandler(), daoConfig.lastEventTimeDaoTask());
 	}
 
 	@Bean
-	public LocalFhirConnector fhirConnectorTask()
+	public FhirSubscriptionConnector taskFhirConnector()
 	{
-		return new LocalFhirConnectorImpl<>(Task.class, dsfClientConfig.clientProvider(),
-				taskSubscriptionHandlerFactory(), fhirConfig.fhirContext(),
-				propertiesConfig.getTaskSubscriptionSearchParameter(), propertiesConfig.getWebsocketRetrySleepMillis(),
-				propertiesConfig.getWebsocketMaxRetries());
+		return new FhirSubscriptionConnectorImpl<>(fhirConfig.fhirContext(), Task.class, resourceExecutor("task"),
+				dsfClientConfig.clientProvider(), taskSubscriptionHandlerFactory(),
+				propertiesConfig.getTaskSubscriptionSearchParameter());
+	}
+
+	@Bean
+	public HealthCheck taskWebsocketHealthCheck()
+	{
+		return new WebsocketHealthCheck("Task", taskFhirConnector());
 	}
 
 	@Bean
@@ -89,17 +121,22 @@ public class WebsocketConfig
 	@Bean
 	public SubscriptionHandlerFactory<QuestionnaireResponse> questionnaireResponseSubscriptionHandlerFactory()
 	{
-		return new ConcurrentSubscriptionHandlerFactory<>(propertiesConfig.getProcessStartOrContinueThreads(),
-				new QuestionnaireResponseSubscriptionHandlerFactory(questionnaireResponseHandler(),
-						daoConfig.lastEventTimeDaoQuestionnaireResponse()));
+		return new QuestionnaireResponseSubscriptionHandlerFactory(questionnaireResponseHandler(),
+				daoConfig.lastEventTimeDaoQuestionnaireResponse());
 	}
 
 	@Bean
-	public LocalFhirConnector fhirConnectorQuestionnaireResponse()
+	public FhirSubscriptionConnector questionnaireResponseFhirConnector()
 	{
-		return new LocalFhirConnectorImpl<>(QuestionnaireResponse.class, dsfClientConfig.clientProvider(),
-				questionnaireResponseSubscriptionHandlerFactory(), fhirConfig.fhirContext(),
-				propertiesConfig.getQuestionnaireResponseSubscriptionSearchParameter(),
-				propertiesConfig.getWebsocketRetrySleepMillis(), propertiesConfig.getWebsocketMaxRetries());
+		return new FhirSubscriptionConnectorImpl<>(fhirConfig.fhirContext(), QuestionnaireResponse.class,
+				resourceExecutor("questionnaire-response"), dsfClientConfig.clientProvider(),
+				questionnaireResponseSubscriptionHandlerFactory(),
+				propertiesConfig.getQuestionnaireResponseSubscriptionSearchParameter());
+	}
+
+	@Bean
+	public HealthCheck questionnaireResponseWebsocketHealthCheck()
+	{
+		return new WebsocketHealthCheck("QuestionnaireResponse", questionnaireResponseFhirConnector());
 	}
 }

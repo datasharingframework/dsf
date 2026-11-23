@@ -82,6 +82,26 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 	private final FhirContext fhirContext;
 	private final EndpointProvider endpointProvider;
 
+	/**
+	 * @param daoProvider
+	 *            not <code>null</code>
+	 * @param serverBase
+	 *            not <code>null</code>
+	 * @param referenceResolver
+	 *            not <code>null</code>
+	 * @param organizationProvider
+	 *            not <code>null</code>
+	 * @param readAccessHelper
+	 *            not <code>null</code>
+	 * @param parameterConverter
+	 *            not <code>null</code>
+	 * @param processAuthorizationHelper
+	 *            not <code>null</code>
+	 * @param fhirContext
+	 *            not <code>null</code>
+	 * @param endpointProvider
+	 *            not <code>null</code>
+	 */
 	public TaskAuthorizationRule(DaoProvider daoProvider, String serverBase, ReferenceResolver referenceResolver,
 			OrganizationProvider organizationProvider, ReadAccessHelper readAccessHelper,
 			ParameterConverter parameterConverter, ProcessAuthorizationHelper processAuthorizationHelper,
@@ -90,19 +110,10 @@ public class TaskAuthorizationRule extends AbstractAuthorizationRule<Task, TaskD
 		super(Task.class, daoProvider, serverBase, referenceResolver, organizationProvider, readAccessHelper,
 				parameterConverter);
 
-		this.processAuthorizationHelper = processAuthorizationHelper;
-		this.fhirContext = fhirContext;
-		this.endpointProvider = endpointProvider;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		super.afterPropertiesSet();
-
-		Objects.requireNonNull(processAuthorizationHelper, "processAuthorizationHelper");
-		Objects.requireNonNull(fhirContext, "fhirContext");
-		Objects.requireNonNull(endpointProvider, "endpointProvider");
+		this.processAuthorizationHelper = Objects.requireNonNull(processAuthorizationHelper,
+				"processAuthorizationHelper");
+		this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext");
+		this.endpointProvider = Objects.requireNonNull(endpointProvider, "endpointProvider");
 	}
 
 	private boolean isLocalOrganization(Organization organization)

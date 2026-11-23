@@ -60,13 +60,13 @@ public class DsfClientConfig implements InitializingBean
 						: "disabled");
 		logger.info(
 				"Local DSF websocket client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
-						+ " url: {}, proxy: {}}",
+						+ " url: {}, proxy: {}, timeConfig: {}}",
 				propertiesConfig.getDsfClientTrustedServerCasFileOrFolder(),
 				propertiesConfig.getDsfClientCertificateFile(),
 				propertiesConfig.getDsfClientCertificatePrivateKeyFile(),
 				propertiesConfig.getDsfClientCertificatePrivateKeyFilePassword() != null ? "***" : "null",
-				getWebsocketUrl(),
-				propertiesConfig.proxyConfig().isEnabled(getWebsocketUrl()) ? "enabled" : "disabled");
+				getWebsocketUrl(), propertiesConfig.proxyConfig().isEnabled(getWebsocketUrl()) ? "enabled" : "disabled",
+				propertiesConfig.getWebsocketTimeConfig().toString());
 
 		logger.info(
 				"Remote DSF webservice client config: {trustStorePath: {}, certificatePath: {}, privateKeyPath: {}, privateKeyPassword: {},"
@@ -96,8 +96,8 @@ public class DsfClientConfig implements InitializingBean
 		return new ClientProviderImpl(fhirConfig.fhirContext(), propertiesConfig.getDsfServerBaseUrl(),
 				propertiesConfig.getDsfClientReadTimeoutLocal(), propertiesConfig.getDsfClientConnectTimeoutLocal(),
 				propertiesConfig.getDsfClientVerboseLocal(), trustStore, keyStore, keyStorePassword, getWebsocketUrl(),
-				trustStore, keyStore, keyStorePassword, propertiesConfig.proxyConfig(),
-				buildInfoReaderConfig.buildInfoReader().getUserAgentValue());
+				propertiesConfig.getWebsocketTimeConfig(), trustStore, keyStore, keyStorePassword,
+				propertiesConfig.proxyConfig(), buildInfoReaderConfig.buildInfoReader().getUserAgentValue());
 	}
 
 	private String getWebsocketUrl()

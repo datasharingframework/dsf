@@ -92,7 +92,8 @@ public class CompressionServiceImpl implements CompressionService
 		PipedInputStream pipedIn = new PipedInputStream(pipedOut, BUFFER_SIZE);
 
 		List<IOException> capturedExceptions = new ArrayList<>();
-		Thread worker = new Thread(() ->
+
+		Thread.ofPlatform().name("compressor-pipe-deamon").daemon().start(() ->
 		{
 			try (in; OutputStream out = compressor.withCompression(pipedOut))
 			{
@@ -106,8 +107,6 @@ public class CompressionServiceImpl implements CompressionService
 				capturedExceptions.add(e);
 			}
 		});
-		worker.setDaemon(true);
-		worker.start();
 
 		if (!capturedExceptions.isEmpty())
 		{

@@ -21,23 +21,19 @@ import java.util.function.Consumer;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 
-import org.springframework.beans.factory.InitializingBean;
-
 import dev.dsf.bpe.api.service.BpeMailService;
 
-public class MailServiceImpl implements MailService, InitializingBean
+public class MailServiceImpl implements MailService
 {
 	private final BpeMailService delegate;
 
+	/**
+	 * @param delegate
+	 *            not <code>null</code>
+	 */
 	public MailServiceImpl(BpeMailService delegate)
 	{
-		this.delegate = delegate;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(delegate, "delegate");
+		this.delegate = Objects.requireNonNull(delegate, "delegate");
 	}
 
 	@Override

@@ -60,8 +60,6 @@ public abstract class AbstractServiceJaxrs<S extends BasicService> extends Abstr
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		super.afterPropertiesSet();
-
 		setCurrentIdentityProvider(this::doGetCurrentIdentity);
 	}
 }

@@ -22,28 +22,24 @@ import java.util.Objects;
 import org.operaton.bpm.engine.impl.variable.serializer.PrimitiveValueSerializer;
 import org.operaton.bpm.engine.impl.variable.serializer.ValueFields;
 import org.operaton.bpm.engine.variable.impl.value.UntypedValueImpl;
-import org.springframework.beans.factory.InitializingBean;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.dsf.bpe.v1.variables.FhirResourcesListValues.FhirResourcesListValue;
 
 public class FhirResourcesListSerializer extends PrimitiveValueSerializer<FhirResourcesListValue>
-		implements InitializingBean
 {
 	private final ObjectMapper objectMapper;
 
+	/**
+	 * @param objectMapper
+	 *            not <code>null</code>
+	 */
 	public FhirResourcesListSerializer(ObjectMapper objectMapper)
 	{
 		super(FhirResourcesListValues.VALUE_TYPE);
 
-		this.objectMapper = objectMapper;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(objectMapper, "objectMapper");
+		this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper");
 	}
 
 	@Override

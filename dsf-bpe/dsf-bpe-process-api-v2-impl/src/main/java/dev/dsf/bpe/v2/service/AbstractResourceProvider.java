@@ -33,26 +33,24 @@ import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Resource;
-import org.springframework.beans.factory.InitializingBean;
 
 import dev.dsf.bpe.v2.client.dsf.DsfClient;
 
-public abstract class AbstractResourceProvider implements InitializingBean
+public abstract class AbstractResourceProvider
 {
 	protected final Supplier<DsfClient> localDsfClient;
 	protected final String localEndpointAddress;
 
+	/**
+	 * @param localDsfClient
+	 *            not <code>null</code>
+	 * @param localEndpointAddress
+	 *            not <code>null</code>
+	 */
 	public AbstractResourceProvider(Supplier<DsfClient> localDsfClient, String localEndpointAddress)
 	{
-		this.localDsfClient = localDsfClient;
-		this.localEndpointAddress = localEndpointAddress;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(localDsfClient, "localDsfClient");
-		Objects.requireNonNull(localEndpointAddress, "localEndpointAddress");
+		this.localDsfClient = Objects.requireNonNull(localDsfClient, "localDsfClient");
+		this.localEndpointAddress = Objects.requireNonNull(localEndpointAddress, "localEndpointAddress");
 	}
 
 	protected final String toSearchParameter(Identifier identifier)

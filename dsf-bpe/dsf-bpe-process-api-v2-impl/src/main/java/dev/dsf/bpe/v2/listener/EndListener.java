@@ -35,20 +35,20 @@ public class EndListener extends AbstractListener implements ExecutionListener
 
 	private final DsfClientProvider dsfClientProvider;
 
+	/**
+	 * @param serverBaseUrl
+	 *            not <code>null</code>
+	 * @param variablesFactory
+	 *            not <code>null</code>
+	 * @param dsfClientProvider
+	 *            not <code>null</code>
+	 */
 	public EndListener(String serverBaseUrl, Function<DelegateExecution, ListenerVariables> variablesFactory,
 			DsfClientProvider dsfClientProvider)
 	{
 		super(serverBaseUrl, variablesFactory);
 
-		this.dsfClientProvider = dsfClientProvider;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		super.afterPropertiesSet();
-
-		Objects.requireNonNull(dsfClientProvider, "dsfClientProvider");
+		this.dsfClientProvider = Objects.requireNonNull(dsfClientProvider, "dsfClientProvider");
 	}
 
 	@Override

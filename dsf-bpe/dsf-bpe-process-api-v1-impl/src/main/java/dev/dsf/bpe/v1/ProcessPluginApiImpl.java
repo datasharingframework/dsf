@@ -18,7 +18,6 @@ package dev.dsf.bpe.v1;
 import java.util.Objects;
 
 import org.operaton.bpm.engine.delegate.DelegateExecution;
-import org.springframework.beans.factory.InitializingBean;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -35,7 +34,7 @@ import dev.dsf.bpe.v1.variables.VariablesImpl;
 import dev.dsf.fhir.authorization.process.ProcessAuthorizationHelper;
 import dev.dsf.fhir.authorization.read.ReadAccessHelper;
 
-public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
+public class ProcessPluginApiImpl implements ProcessPluginApi
 {
 	private final ProxyConfig proxyConfig;
 	private final EndpointProvider endpointProvider;
@@ -49,6 +48,30 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 	private final ReadAccessHelper readAccessHelper;
 	private final TaskHelper taskHelper;
 
+	/**
+	 * @param proxyConfig
+	 *            not <code>null</code>
+	 * @param endpointProvider
+	 *            not <code>null</code>
+	 * @param fhirContext
+	 *            not <code>null</code>
+	 * @param fhirWebserviceClientProvider
+	 *            not <code>null</code>
+	 * @param mailService
+	 *            not <code>null</code>
+	 * @param objectMapper
+	 *            not <code>null</code>
+	 * @param organizationProvider
+	 *            not <code>null</code>
+	 * @param processAuthorizationHelper
+	 *            not <code>null</code>
+	 * @param questionnaireResponseHelper
+	 *            not <code>null</code>
+	 * @param readAccessHelper
+	 *            not <code>null</code>
+	 * @param taskHelper
+	 *            not <code>null</code>
+	 */
 	public ProcessPluginApiImpl(ProxyConfig proxyConfig, EndpointProvider endpointProvider, FhirContext fhirContext,
 			FhirWebserviceClientProvider fhirWebserviceClientProvider, MailService mailService,
 			ObjectMapper objectMapper, OrganizationProvider organizationProvider,
@@ -56,33 +79,19 @@ public class ProcessPluginApiImpl implements ProcessPluginApi, InitializingBean
 			QuestionnaireResponseHelper questionnaireResponseHelper, ReadAccessHelper readAccessHelper,
 			TaskHelper taskHelper)
 	{
-		this.proxyConfig = proxyConfig;
-		this.endpointProvider = endpointProvider;
-		this.fhirContext = fhirContext;
-		this.fhirWebserviceClientProvider = fhirWebserviceClientProvider;
-		this.mailService = mailService;
-		this.objectMapper = objectMapper;
-		this.organizationProvider = organizationProvider;
-		this.processAuthorizationHelper = processAuthorizationHelper;
+		this.proxyConfig = Objects.requireNonNull(proxyConfig, "proxyConfig");
+		this.endpointProvider = Objects.requireNonNull(endpointProvider, "endpointProvider");
+		this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext");
+		this.fhirWebserviceClientProvider = Objects.requireNonNull(fhirWebserviceClientProvider,
+				"fhirWebserviceClientProvider");
+		this.mailService = Objects.requireNonNull(mailService, "mailService");
+		this.objectMapper = Objects.requireNonNull(objectMapper, "objectMapper");
+		this.organizationProvider = Objects.requireNonNull(organizationProvider, "organizationProvider");
+		this.processAuthorizationHelper = Objects.requireNonNull(processAuthorizationHelper,
+				"processAuthorizationHelper");
 		this.questionnaireResponseHelper = questionnaireResponseHelper;
-		this.readAccessHelper = readAccessHelper;
-		this.taskHelper = taskHelper;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(proxyConfig, "proxyConfig");
-		Objects.requireNonNull(endpointProvider, "endpointProvider");
-		Objects.requireNonNull(fhirContext, "fhirContext");
-		Objects.requireNonNull(fhirWebserviceClientProvider, "fhirWebserviceClientProvider");
-		Objects.requireNonNull(mailService, "mailService");
-		Objects.requireNonNull(objectMapper, "objectMapper");
-		Objects.requireNonNull(organizationProvider, "organizationProvider");
-		Objects.requireNonNull(processAuthorizationHelper, "processAuthorizationHelper");
-		Objects.requireNonNull(questionnaireResponseHelper, "questionnaireResponseHelper");
-		Objects.requireNonNull(readAccessHelper, "readAccessHelper");
-		Objects.requireNonNull(taskHelper, "taskHelper");
+		this.readAccessHelper = Objects.requireNonNull(readAccessHelper, "readAccessHelper");
+		this.taskHelper = Objects.requireNonNull(taskHelper, "taskHelper");
 	}
 
 	@Override

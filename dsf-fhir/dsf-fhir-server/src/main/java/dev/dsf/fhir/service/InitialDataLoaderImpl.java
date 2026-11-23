@@ -22,9 +22,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Organization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
-import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.common.auth.conf.Identity;
 import dev.dsf.common.auth.conf.OrganizationIdentityImpl;
 import dev.dsf.fhir.authentication.FhirServerRoleImpl;
@@ -34,7 +32,7 @@ import dev.dsf.fhir.dao.command.CommandList;
 import dev.dsf.fhir.prefer.PreferHandlingType;
 import dev.dsf.fhir.prefer.PreferReturnType;
 
-public class InitialDataLoaderImpl implements InitialDataLoader, InitializingBean
+public class InitialDataLoaderImpl implements InitialDataLoader
 {
 	private static final Identity INITIAL_DATA_LOADER;
 	static
@@ -56,19 +54,14 @@ public class InitialDataLoaderImpl implements InitialDataLoader, InitializingBea
 	private static final Logger logger = LoggerFactory.getLogger(InitialDataLoaderImpl.class);
 
 	private final CommandFactory commandFactory;
-	private final FhirContext fhirContext;
 
-	public InitialDataLoaderImpl(CommandFactory commandFactory, FhirContext fhirContext)
+	/**
+	 * @param commandFactory
+	 *            not <code>null</code>
+	 */
+	public InitialDataLoaderImpl(CommandFactory commandFactory)
 	{
-		this.commandFactory = commandFactory;
-		this.fhirContext = fhirContext;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(commandFactory, "commandFactory");
-		Objects.requireNonNull(fhirContext, "fhirContext");
+		this.commandFactory = Objects.requireNonNull(commandFactory, "commandFactory");
 	}
 
 	@Override

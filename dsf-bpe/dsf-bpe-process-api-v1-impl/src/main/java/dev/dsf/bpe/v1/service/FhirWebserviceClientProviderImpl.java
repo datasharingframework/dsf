@@ -21,8 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import org.springframework.beans.factory.InitializingBean;
-
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.bpe.api.config.BpeProxyConfig;
 import dev.dsf.bpe.api.service.BuildInfoProvider;
@@ -30,7 +28,7 @@ import dev.dsf.fhir.client.FhirWebserviceClient;
 import dev.dsf.fhir.client.FhirWebserviceClientJersey;
 import dev.dsf.fhir.service.ReferenceCleaner;
 
-public class FhirWebserviceClientProviderImpl implements FhirWebserviceClientProvider, InitializingBean
+public class FhirWebserviceClientProviderImpl implements FhirWebserviceClientProvider
 {
 	private static final String USER_AGENT_VALUE = "DSF/";
 
@@ -55,47 +53,58 @@ public class FhirWebserviceClientProviderImpl implements FhirWebserviceClientPro
 	private final BpeProxyConfig proxyConfig;
 	private final BuildInfoProvider buildInfoProvider;
 
+	/**
+	 * @param fhirContext
+	 *            not <code>null</code>
+	 * @param referenceCleaner
+	 *            not <code>null</code>
+	 * @param baseUrlLocal
+	 *            not <code>null</code>
+	 * @param readTimeoutLocal
+	 *            not <code>null</code>, not negative, 0 represents infinity
+	 * @param connectTimeoutLocal
+	 *            not <code>null</code>, not negative, 0 represents infinity
+	 * @param logRequestsAndResponsesLocal
+	 * @param trustStore
+	 *            not <code>null</code>
+	 * @param keyStore
+	 *            not <code>null</code>
+	 * @param keyStorePassword
+	 *            not <code>null</code>
+	 * @param readTimeoutRemote
+	 *            not <code>null</code>, not negative, 0 represents infinity
+	 * @param connectTimeoutRemote
+	 *            not <code>null</code>, not negative, 0 represents infinity
+	 * @param logRequestsAndResponsesRemote
+	 * @param proxyConfig
+	 *            not <code>null</code>
+	 * @param buildInfoProvider
+	 *            not <code>null</code>
+	 */
 	public FhirWebserviceClientProviderImpl(FhirContext fhirContext, ReferenceCleaner referenceCleaner,
 			String baseUrlLocal, Duration readTimeoutLocal, Duration connectTimeoutLocal,
 			boolean logRequestsAndResponsesLocal, KeyStore trustStore, KeyStore keyStore, char[] keyStorePassword,
 			Duration readTimeoutRemote, Duration connectTimeoutRemote, boolean logRequestsAndResponsesRemote,
 			BpeProxyConfig proxyConfig, BuildInfoProvider buildInfoProvider)
 	{
-		this.fhirContext = fhirContext;
-		this.referenceCleaner = referenceCleaner;
+		this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext");
+		this.referenceCleaner = Objects.requireNonNull(referenceCleaner, "referenceCleaner");
 
-		this.baseUrlLocal = baseUrlLocal;
-		this.readTimeoutLocal = readTimeoutLocal;
-		this.connectTimeoutLocal = connectTimeoutLocal;
+		this.baseUrlLocal = Objects.requireNonNull(baseUrlLocal, "baseUrlLocal");
+		this.readTimeoutLocal = Objects.requireNonNull(readTimeoutLocal, "readTimeoutLocal");
+		this.connectTimeoutLocal = Objects.requireNonNull(connectTimeoutLocal, "connectTimeoutLocal");
 		this.logRequestsAndResponsesLocal = logRequestsAndResponsesLocal;
 
-		this.trustStore = trustStore;
-		this.keyStore = keyStore;
-		this.keyStorePassword = keyStorePassword;
+		this.trustStore = Objects.requireNonNull(trustStore, "trustStore");
+		this.keyStore = Objects.requireNonNull(keyStore, "keyStore");
+		this.keyStorePassword = Objects.requireNonNull(keyStorePassword, "keyStorePassword");
 
-		this.readTimeoutRemote = readTimeoutRemote;
-		this.connectTimeoutRemote = connectTimeoutRemote;
+		this.readTimeoutRemote = Objects.requireNonNull(readTimeoutRemote, "readTimeoutRemote");
+		this.connectTimeoutRemote = Objects.requireNonNull(connectTimeoutRemote, "connectTimeoutRemote");
 		this.logRequestsAndResponsesRemote = logRequestsAndResponsesRemote;
 
-		this.proxyConfig = proxyConfig;
-		this.buildInfoProvider = buildInfoProvider;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(fhirContext, "fhirContext");
-		Objects.requireNonNull(referenceCleaner, "referenceCleaner");
-		Objects.requireNonNull(baseUrlLocal, "baseUrlLocal");
-		Objects.requireNonNull(readTimeoutLocal, "readTimeoutLocal");
-		Objects.requireNonNull(connectTimeoutLocal, "connectTimeoutLocal");
-		Objects.requireNonNull(trustStore, "trustStore");
-		Objects.requireNonNull(keyStore, "keyStore");
-		Objects.requireNonNull(keyStorePassword, "keyStorePassword");
-		Objects.requireNonNull(readTimeoutRemote, "readTimeoutRemote");
-		Objects.requireNonNull(connectTimeoutRemote, "connectTimeoutRemote");
-		Objects.requireNonNull(proxyConfig, "proxyConfig");
-		Objects.requireNonNull(buildInfoProvider, "buildInfoReader");
+		this.proxyConfig = Objects.requireNonNull(proxyConfig, "proxyConfig");
+		this.buildInfoProvider = Objects.requireNonNull(buildInfoProvider, "buildInfoProvider");
 	}
 
 	public String getLocalBaseUrl()

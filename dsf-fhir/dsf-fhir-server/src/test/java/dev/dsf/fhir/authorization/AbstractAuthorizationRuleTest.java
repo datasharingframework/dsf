@@ -93,12 +93,6 @@ public abstract class AbstractAuthorizationRuleTest<R extends Resource>
 	}
 
 	@Test
-	public void afterPropertiesSetSucceedsWithAllDependencies() throws Exception
-	{
-		rule.afterPropertiesSet();
-	}
-
-	@Test
 	public void searchAllowedWhenIdentityHasSearchRole()
 	{
 		assertTrue(rule.reasonSearchAllowed(identity(true, true)).isPresent());

@@ -42,9 +42,6 @@ public class EventConfig
 	private DaoConfig daoConfig;
 
 	@Autowired
-	private HelperConfig helperConfig;
-
-	@Autowired
 	private FhirConfig fhirConfig;
 
 	@Autowired
@@ -106,8 +103,8 @@ public class EventConfig
 	@Bean
 	public WebSocketSubscriptionManager webSocketSubscriptionManager()
 	{
-		return new WebSocketSubscriptionManagerImpl(daoConfig.daoProvider(), helperConfig.exceptionHandler(),
-				matcherFactory(), fhirConfig.fhirContext(), authorizationConfig.authorizationRuleProvider());
+		return new WebSocketSubscriptionManagerImpl(daoConfig.daoProvider(), matcherFactory(), fhirConfig.fhirContext(),
+				authorizationConfig.authorizationRuleProvider());
 	}
 
 	@Bean

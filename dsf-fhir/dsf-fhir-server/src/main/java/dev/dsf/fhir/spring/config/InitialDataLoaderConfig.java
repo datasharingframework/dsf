@@ -60,7 +60,7 @@ public class InitialDataLoaderConfig
 	@Bean
 	public InitialDataLoader initialDataLoader()
 	{
-		return new InitialDataLoaderImpl(commandConfig.commandFactory(), fhirConfig.fhirContext());
+		return new InitialDataLoaderImpl(commandConfig.commandFactory());
 	}
 
 	@Order(HIGHEST_PRECEDENCE)

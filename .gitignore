@@ -86,6 +86,8 @@ dsf-docker-dev-setup-3dic-ttp/secrets/dic2.crt
 dsf-docker-dev-setup-3dic-ttp/secrets/dic2.key
 dsf-docker-dev-setup-3dic-ttp/secrets/dic3.crt
 dsf-docker-dev-setup-3dic-ttp/secrets/dic3.key
+dsf-docker-dev-setup-3dic-ttp/secrets/forward-proxy-tls.chain.crt
+dsf-docker-dev-setup-3dic-ttp/secrets/forward-proxy-tls.key.plain
 dsf-docker-dev-setup-3dic-ttp/secrets/issuing_ca.crt
 dsf-docker-dev-setup-3dic-ttp/secrets/keycloak.chain.crt
 dsf-docker-dev-setup-3dic-ttp/secrets/keycloak.key.plain

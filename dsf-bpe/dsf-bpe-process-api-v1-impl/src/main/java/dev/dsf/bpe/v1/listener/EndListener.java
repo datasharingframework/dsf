@@ -35,20 +35,21 @@ public class EndListener extends AbstractListener implements ExecutionListener
 
 	private final FhirWebserviceClientProvider fhirWebserviceClientProvider;
 
+	/**
+	 * @param serverBaseUrl
+	 *            not <code>null</code>
+	 * @param variablesFactory
+	 *            not <code>null</code>
+	 * @param fhirWebserviceClientProvider
+	 *            not <code>null</code>
+	 */
 	public EndListener(String serverBaseUrl, Function<DelegateExecution, ListenerVariables> variablesFactory,
 			FhirWebserviceClientProvider fhirWebserviceClientProvider)
 	{
 		super(serverBaseUrl, variablesFactory);
 
-		this.fhirWebserviceClientProvider = fhirWebserviceClientProvider;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		super.afterPropertiesSet();
-
-		Objects.requireNonNull(fhirWebserviceClientProvider, "fhirWebserviceClientProvider");
+		this.fhirWebserviceClientProvider = Objects.requireNonNull(fhirWebserviceClientProvider,
+				"fhirWebserviceClientProvider");
 	}
 
 	@Override

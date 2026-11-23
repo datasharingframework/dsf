@@ -15,32 +15,33 @@
  */
 package dev.dsf.bpe.subscription;
 
+import java.util.Objects;
+
+import org.hl7.fhir.r4.model.Subscription;
+
+import ca.uhn.fhir.rest.api.Constants;
+
 public enum EventType
 {
-	XML("application/fhir+xml"), JSON("application/fhir+json"), PING("ping");
+	XML, JSON, PING;
 
-	private final String value;
-
-	EventType(String value)
+	public static EventType fromSubscription(Subscription subscription)
 	{
-		this.value = value;
-	}
+		Objects.requireNonNull(subscription, "subscription");
+		if (!subscription.hasChannel())
+			throw new IllegalArgumentException("subscription has no channel");
 
-	public static EventType fromString(String value)
-	{
-		return switch (value.toLowerCase())
+		String payload = subscription.getChannel().getPayload();
+
+		if (payload == null)
+			return EventType.PING;
+
+		return switch (payload)
 		{
-			case "application/fhir+xml", "xml" -> XML;
-			case "application/fhir+json", "json" -> JSON;
-			case "ping" -> PING;
+			case Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW -> EventType.JSON;
+			case Constants.CT_FHIR_XML, Constants.CT_FHIR_XML_NEW -> EventType.XML;
 
-			default -> throw new IllegalArgumentException("EvenType for " + value + " not implemented");
+			default -> throw new RuntimeException("Unsupported subscription.payload " + payload);
 		};
-	}
-
-	@Override
-	public String toString()
-	{
-		return value;
 	}
 }

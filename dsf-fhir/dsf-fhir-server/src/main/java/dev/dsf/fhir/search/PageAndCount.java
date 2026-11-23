@@ -17,6 +17,7 @@ package dev.dsf.fhir.search;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class PageAndCount
 {
@@ -33,6 +34,13 @@ public class PageAndCount
 		return EXISTS;
 	}
 
+	/**
+	 * @param queryParameters
+	 *            not <code>null</code>
+	 * @param defaultPageCount
+	 *            <code>&gt;= 0</code>
+	 * @return
+	 */
 	public static PageAndCount from(Map<String, List<String>> queryParameters, int defaultPageCount)
 	{
 		Integer page = getFirstInt(queryParameters, SearchQuery.PARAMETER_PAGE);
@@ -43,6 +51,9 @@ public class PageAndCount
 
 	private static Integer getFirstInt(Map<String, List<String>> queryParameters, String key)
 	{
+		Objects.requireNonNull(queryParameters, "queryParameters");
+		Objects.requireNonNull(key, "key");
+
 		List<String> values = queryParameters.getOrDefault(key, List.of());
 		if (values.isEmpty())
 			return null;
@@ -75,12 +86,22 @@ public class PageAndCount
 		return new PageAndCount(page, count, count);
 	}
 
-
 	private final int page;
 	private final int count;
 
+	/**
+	 * @param page
+	 *            may be <code>null</code>
+	 * @param count
+	 *            may be <code>null</code>
+	 * @param defaultPageCount
+	 *            <code>&gt;= 0</code>
+	 */
 	private PageAndCount(Integer page, Integer count, int defaultPageCount)
 	{
+		if (defaultPageCount < 0)
+			throw new IllegalArgumentException("defaultPageCount < 0");
+
 		int effectivePage = page == null ? 1 : page < 0 ? 0 : page;
 		int effectiveCount = count == null ? defaultPageCount : count < 0 ? 0 : count;
 

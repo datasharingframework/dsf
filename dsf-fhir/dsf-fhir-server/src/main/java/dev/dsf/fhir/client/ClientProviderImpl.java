@@ -22,7 +22,6 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 
 import ca.uhn.fhir.context.FhirContext;
 import dev.dsf.common.buildinfo.BuildInfoReader;
@@ -31,7 +30,7 @@ import dev.dsf.fhir.dao.EndpointDao;
 import dev.dsf.fhir.help.ExceptionHandler;
 import dev.dsf.fhir.service.ReferenceCleaner;
 
-public class ClientProviderImpl implements ClientProvider, InitializingBean
+public class ClientProviderImpl implements ClientProvider
 {
 	private static final Logger logger = LoggerFactory.getLogger(ClientProviderImpl.class);
 	private static final String USER_AGENT_VALUE = "DSF/";
@@ -50,37 +49,53 @@ public class ClientProviderImpl implements ClientProvider, InitializingBean
 	private final ExceptionHandler exceptionHandler;
 	private final BuildInfoReader buildInfoReader;
 
+	/**
+	 * @param webserviceTrustStore
+	 *            not <code>null</code>
+	 * @param webserviceKeyStore
+	 *            not <code>null</code>
+	 * @param webserviceKeyStorePassword
+	 *            not <code>null</code>
+	 * @param remoteReadTimeout
+	 *            not <code>null</code>, not negative, 0 represents infinity
+	 * @param remoteConnectTimeout
+	 *            not <code>null</code>, not negative, 0 represents infinity
+	 * @param proxyConfig
+	 *            not <code>null</code>
+	 * @param logRequests
+	 * @param fhirContext
+	 *            not <code>null</code>
+	 * @param referenceCleaner
+	 *            not <code>null</code>
+	 * @param endpointDao
+	 *            not <code>null</code>
+	 * @param exceptionHandler
+	 *            not <code>null</code>
+	 * @param buildInfoReader
+	 *            not <code>null</code>
+	 */
 	public ClientProviderImpl(KeyStore webserviceTrustStore, KeyStore webserviceKeyStore,
 			char[] webserviceKeyStorePassword, Duration remoteReadTimeout, Duration remoteConnectTimeout,
 			ProxyConfig proxyConfig, boolean logRequests, FhirContext fhirContext, ReferenceCleaner referenceCleaner,
 			EndpointDao endpointDao, ExceptionHandler exceptionHandler, BuildInfoReader buildInfoReader)
 	{
-		this.webserviceTrustStore = webserviceTrustStore;
-		this.webserviceKeyStore = webserviceKeyStore;
-		this.webserviceKeyStorePassword = webserviceKeyStorePassword;
-		this.remoteReadTimeout = remoteReadTimeout;
-		this.remoteConnectTimeout = remoteConnectTimeout;
-		this.proxyConfig = proxyConfig;
+		this.webserviceTrustStore = Objects.requireNonNull(webserviceTrustStore, "webserviceTrustStore");
+		this.webserviceKeyStore = Objects.requireNonNull(webserviceKeyStore, "webserviceKeyStore");
+		this.webserviceKeyStorePassword = Objects.requireNonNull(webserviceKeyStorePassword,
+				"webserviceKeyStorePassword");
+		this.remoteReadTimeout = Objects.requireNonNull(remoteReadTimeout, "remoteReadTimeout");
+		if (remoteReadTimeout.isNegative())
+			throw new IllegalArgumentException("remoteReadTimeout negative");
+		this.remoteConnectTimeout = Objects.requireNonNull(remoteConnectTimeout, "remoteConnectTimeout");
+		if (remoteConnectTimeout.isNegative())
+			throw new IllegalArgumentException("remoteConnectTimeout negative");
+		this.proxyConfig = Objects.requireNonNull(proxyConfig, "proxyConfig");
 		this.logRequests = logRequests;
-		this.fhirContext = fhirContext;
-		this.referenceCleaner = referenceCleaner;
-		this.endpointDao = endpointDao;
-		this.exceptionHandler = exceptionHandler;
-		this.buildInfoReader = buildInfoReader;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(webserviceTrustStore, "webserviceTrustStore");
-		Objects.requireNonNull(webserviceKeyStore, "webserviceKeyStore");
-		Objects.requireNonNull(webserviceKeyStorePassword, "webserviceKeyStorePassword");
-		Objects.requireNonNull(proxyConfig, "proxyConfig");
-		Objects.requireNonNull(fhirContext, "fhirContext");
-		Objects.requireNonNull(referenceCleaner, "referenceCleaner");
-		Objects.requireNonNull(endpointDao, "endpointDao");
-		Objects.requireNonNull(exceptionHandler, "exceptionHandler");
-		Objects.requireNonNull(buildInfoReader, "buildInfoReader");
+		this.fhirContext = Objects.requireNonNull(fhirContext, "fhirContext");
+		this.referenceCleaner = Objects.requireNonNull(referenceCleaner, "referenceCleaner");
+		this.endpointDao = Objects.requireNonNull(endpointDao, "endpointDao");
+		this.exceptionHandler = Objects.requireNonNull(exceptionHandler, "exceptionHandler");
+		this.buildInfoReader = Objects.requireNonNull(buildInfoReader, "buildInfoReader");
 	}
 
 	@Override

@@ -15,13 +15,17 @@
  */
 package dev.dsf.bpe.subscription;
 
+import java.util.List;
+import java.util.Map;
+
 import org.hl7.fhir.r4.model.Resource;
 
 import dev.dsf.bpe.client.dsf.WebserviceClient;
 
 public interface SubscriptionHandlerFactory<R extends Resource>
 {
-	ExistingResourceLoader<R> createExistingResourceLoader(WebserviceClient client);
+	ExistingResourceLoader<R> createExistingResourceLoader(WebserviceClient client,
+			Map<String, List<String>> subscriptionCriteria);
 
 	EventResourceHandler<R> createEventResourceHandler();
 

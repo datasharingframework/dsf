@@ -67,15 +67,8 @@ public class BinaryDaoJdbc extends AbstractResourceDaoJdbc<Binary> implements Bi
 
 		this.selectUpdateUser = selectUpdateUser;
 
-		loUnlinker = Executors.newFixedThreadPool(1, r -> new Thread(r, "binaries-large-object-unlinker"));
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		super.afterPropertiesSet();
-
-		executeLargeObjectUnlink();
+		loUnlinker = Executors.newFixedThreadPool(1,
+				Thread.ofPlatform().name("binaries-large-object-unlinker").factory());
 	}
 
 	@Override

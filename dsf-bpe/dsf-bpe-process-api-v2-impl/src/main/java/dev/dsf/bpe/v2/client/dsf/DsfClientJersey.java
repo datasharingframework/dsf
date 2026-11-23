@@ -45,7 +45,6 @@ import java.util.stream.Stream;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.SslConfigurator;
 import org.glassfish.jersey.apache5.connector.Apache5ConnectorProvider;
 import org.glassfish.jersey.client.ClientConfig;
@@ -1406,7 +1405,7 @@ public class DsfClientJersey implements DsfClient
 		if (resourceType != null)
 			target = target.path(resourceType.getAnnotation(ResourceDef.class).name());
 
-		if (!StringUtils.isBlank(id))
+		if (id != null && !id.isBlank())
 			target = target.path(id);
 
 		if (page != Integer.MIN_VALUE)

@@ -47,11 +47,21 @@ public class BpmnProcessStateChangeServiceImpl implements BpmnProcessStateChange
 	private final Set<ProcessIdAndVersion> excluded = new HashSet<>();
 	private final Set<ProcessIdAndVersion> retired = new HashSet<>();
 
+	/**
+	 * @param repositoryService
+	 *            not <code>null</code>
+	 * @param processStateDao
+	 *            not <code>null</code>
+	 * @param excluded
+	 *            may be <code>null</code>
+	 * @param retired
+	 *            may be <code>null</code>
+	 */
 	public BpmnProcessStateChangeServiceImpl(RepositoryService repositoryService, ProcessStateDao processStateDao,
 			List<ProcessIdAndVersion> excluded, List<ProcessIdAndVersion> retired)
 	{
-		this.repositoryService = repositoryService;
-		this.processStateDao = processStateDao;
+		this.repositoryService = Objects.requireNonNull(repositoryService, "repositoryService");
+		this.processStateDao = Objects.requireNonNull(processStateDao, "processStateDao");
 
 		if (excluded != null)
 			this.excluded.addAll(excluded);
@@ -62,9 +72,6 @@ public class BpmnProcessStateChangeServiceImpl implements BpmnProcessStateChange
 	@Override
 	public void afterPropertiesSet() throws Exception
 	{
-		Objects.requireNonNull(repositoryService, "repositoryService");
-		Objects.requireNonNull(processStateDao, "processStateDao");
-
 		logger.info("Excluded processes: {}", excluded);
 		logger.info("Retired processes: {}", retired);
 	}

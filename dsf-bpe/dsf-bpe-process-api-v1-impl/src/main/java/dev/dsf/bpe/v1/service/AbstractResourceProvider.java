@@ -30,24 +30,22 @@ import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Resource;
-import org.springframework.beans.factory.InitializingBean;
 
-public abstract class AbstractResourceProvider implements InitializingBean
+public abstract class AbstractResourceProvider
 {
 	protected final FhirWebserviceClientProvider clientProvider;
 	protected final String localEndpointAddress;
 
+	/**
+	 * @param clientProvider
+	 *            not <code>null</code>
+	 * @param localEndpointAddress
+	 *            not <code>null</code>
+	 */
 	public AbstractResourceProvider(FhirWebserviceClientProvider clientProvider, String localEndpointAddress)
 	{
-		this.clientProvider = clientProvider;
-		this.localEndpointAddress = localEndpointAddress;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception
-	{
-		Objects.requireNonNull(clientProvider, "clientProvider");
-		Objects.requireNonNull(localEndpointAddress, "localEndpointAddress");
+		this.clientProvider = Objects.requireNonNull(clientProvider, "clientProvider");
+		this.localEndpointAddress = Objects.requireNonNull(localEndpointAddress, "localEndpointAddress");
 	}
 
 	protected final String toSearchParameter(Identifier identifier)
