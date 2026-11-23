@@ -80,7 +80,7 @@ updates:
         patterns:
           - "*"
     ignore:
-      - dependency-name: "azul/zulu-openjdk"
+      - dependency-name: "library/azul-zulu"
         versions:
           - ">= 26"
 
