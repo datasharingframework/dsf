@@ -40,7 +40,7 @@
 
 		<slf4j.version>2.0.20</slf4j.version>
 		<log4j.version>2.26.1</log4j.version>
-		<jetty.version>12.1.14</jetty.version>
+		<jetty.version>12.1.15</jetty.version>
 		<spring.version>7.0.9</spring.version>
 		<!-- operaton 2.1.5 not compatible with jackson 2.22.4 -->
 		<jackson.version>2.21.8</jackson.version>
@@ -49,7 +49,7 @@
 		<hapi.fhir.version.v2>8.4.2</hapi.fhir.version.v2>
 		<hapi.fhir.org.hl7.version.v2>6.5.27</hapi.fhir.org.hl7.version.v2>
 		<hapi.fhir.version>8.4.2</hapi.fhir.version>
-		<bouncycastle.version>1.86</bouncycastle.version>
+		<bouncycastle.version>1.87</bouncycastle.version>
 		<crypto-utils.version.v1>3.8.0</crypto-utils.version.v1>
 		<crypto-utils.version.v2>5.2.1</crypto-utils.version.v2>
 		<crypto-utils.version>6.2.0</crypto-utils.version>
@@ -396,7 +396,7 @@
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>33.7.2-jre</version>
+				<version>33.8.0-jre</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
